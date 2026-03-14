@@ -6,9 +6,14 @@ interface Props {
   messages: ChatMessage[];
   isLoading: boolean;
   onSend: (msg: string) => void;
+  voiceState: 'idle' | 'listening' | 'processing';
+  voiceSupported: boolean;
+  onVoiceStart: () => void;
+  onVoiceStop: () => void;
+  isVoiceActive: boolean;
 }
 
-const ChatPanel = ({ messages, isLoading, onSend }: Props) => {
+const ChatPanel = ({ messages, isLoading, onSend, voiceState, voiceSupported, onVoiceStart, onVoiceStop, isVoiceActive }: Props) => {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -27,6 +32,32 @@ const ChatPanel = ({ messages, isLoading, onSend }: Props) => {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Voice status bar */}
+      {voiceSupported && (
+        <div className={`px-4 py-2 text-[0.65rem] font-mono flex items-center gap-2 border-b border-border transition-all ${
+          voiceState === 'listening' ? 'bg-destructive/10 text-destructive' :
+          voiceState === 'processing' ? 'bg-primary/10 text-primary' :
+          isVoiceActive ? 'bg-accent/10 text-accent' : 'bg-card text-muted-foreground'
+        }`}>
+          <span className={`w-2 h-2 rounded-full ${
+            voiceState === 'listening' ? 'bg-destructive animate-pulse' :
+            voiceState === 'processing' ? 'bg-primary animate-pulse' :
+            isVoiceActive ? 'bg-accent animate-[blink_1.5s_infinite]' : 'bg-muted-foreground/40'
+          }`} />
+          {voiceState === 'listening' ? '🎤 Sto ascoltando...' :
+           voiceState === 'processing' ? '🧠 Elaboro...' :
+           isVoiceActive ? '👂 "Ehi Nova" per attivare' : 'Microfono disattivato'}
+          <button
+            onClick={isVoiceActive ? onVoiceStop : onVoiceStart}
+            className={`ml-auto px-2 py-0.5 rounded-full text-[0.6rem] border transition-all ${
+              isVoiceActive ? 'border-destructive/40 text-destructive hover:bg-destructive/10' : 'border-accent/40 text-accent hover:bg-accent/10'
+            }`}
+          >
+            {isVoiceActive ? 'Disattiva' : 'Attiva'}
+          </button>
+        </div>
+      )}
+
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 scrollbar-thin">
         {messages.map(msg => (
           <div key={msg.id} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`} style={{ animation: 'msg-in 0.3s ease' }}>
