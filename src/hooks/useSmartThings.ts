@@ -43,32 +43,40 @@ export function useSmartThings() {
       const data = await invoke({ action: 'list' });
       const items: any[] = data.items || [];
       
-      // Fetch status for each device in parallel
-      const mapped = await Promise.all(
-        items.map(async (d) => {
-          const type = categorizeDevice(d);
-          let on = false;
-          let status: Record<string, any> = {};
-          try {
-            const st = await invoke({ action: 'status', deviceId: d.deviceId });
-            status = st;
-            const switchState = st?.components?.main?.switch?.switch?.value;
-            on = switchState === 'on';
-          } catch { /* ignore status error */ }
-          return {
-            deviceId: d.deviceId,
-            name: d.name,
-            label: d.label || d.name,
-            type,
-            icon: deviceIcon(type),
-            on,
-            status,
-          } as SmartThingsDevice;
-        })
-      );
+      // Filter relevant devices first
+      const relevant = items.filter(d => {
+        const type = categorizeDevice(d);
+        return type === 'tv' || type === 'washer';
+      });
 
-      // Filter only TV and washer, or show all if user wants
-      setDevices(mapped.filter(d => d.type === 'tv' || d.type === 'washer'));
+      // Fetch status sequentially with delay to avoid rate limits
+      const mapped: SmartThingsDevice[] = [];
+      for (const d of relevant) {
+        const type = categorizeDevice(d);
+        let on = false;
+        let status: Record<string, any> = {};
+        try {
+          const st = await invoke({ action: 'status', deviceId: d.deviceId });
+          status = st;
+          const switchState = st?.components?.main?.switch?.switch?.value;
+          on = switchState === 'on';
+        } catch { /* ignore status error */ }
+        mapped.push({
+          deviceId: d.deviceId,
+          name: d.name,
+          label: d.label || d.name,
+          type,
+          icon: deviceIcon(type),
+          on,
+          status,
+        });
+        // Wait 1.5s between status calls to respect rate limits
+        if (relevant.indexOf(d) < relevant.length - 1) {
+          await new Promise(r => setTimeout(r, 1500));
+        }
+      }
+
+      setDevices(mapped);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Errore SmartThings');
     } finally {
