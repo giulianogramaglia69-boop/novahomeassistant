@@ -4,6 +4,7 @@ import { useChat } from '@/hooks/useChat';
 import { useDevices } from '@/hooks/useDevices';
 import { useReminders } from '@/hooks/useReminders';
 import { useWeather } from '@/hooks/useWeather';
+import { useSmartThings } from '@/hooks/useSmartThings';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import ChatPanel from '@/components/nova/ChatPanel';
@@ -18,6 +19,7 @@ const Index = () => {
   const devices = useDevices();
   const reminders = useReminders();
   const weather = useWeather();
+  const smart = useSmartThings();
 
   return (
     <div className="flex flex-col h-dvh relative z-[1]">
@@ -35,6 +37,11 @@ const Index = () => {
             onToggle={devices.toggle}
             onValueChange={devices.setValue}
             onScene={devices.applyScene}
+            smartDevices={smart.devices}
+            smartLoading={smart.loading}
+            smartError={smart.error}
+            onSmartToggle={smart.toggleDevice}
+            onSmartFetch={smart.fetchDevices}
           />
         )}
         {tab === 'meteo' && (
