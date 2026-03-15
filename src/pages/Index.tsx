@@ -73,7 +73,7 @@ const Index = () => {
     handleVoiceCommand(text);
   });
 
-  const voice = useVoiceWake(handleVoiceCommand);
+  
 
   const startVoice = useCallback(() => {
     setVoiceActive(true);
