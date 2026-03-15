@@ -63,10 +63,15 @@ const Index = () => {
 
   // Voice wake word handler
   const handleVoiceCommand = useCallback((text: string) => {
-    // Switch to chat tab and send the voice command
     setTab('chat');
     sendWithContext(text);
   }, [sendWithContext]);
+
+  // Audio ducking: lower radio when voice is active
+  const voice = useVoiceWake((text: string) => {
+    radio.unduck();
+    handleVoiceCommand(text);
+  });
 
   const voice = useVoiceWake(handleVoiceCommand);
 
