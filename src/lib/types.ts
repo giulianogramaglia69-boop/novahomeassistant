@@ -23,7 +23,15 @@ export interface ChatMessage {
   timestamp: string;
 }
 
-export type TabId = 'chat' | 'home' | 'meteo' | 'reminders' | 'settings';
+export type TabId = 'chat' | 'home' | 'radio' | 'meteo' | 'reminders' | 'settings';
+
+export interface RadioStation {
+  id: string;
+  name: string;
+  icon: string;
+  streams: string[]; // fallback URLs
+  color: string; // HSL accent
+}
 
 export interface WeatherData {
   temperature: number;
