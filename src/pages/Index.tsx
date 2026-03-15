@@ -119,6 +119,16 @@ const Index = () => {
             onSmartFetch={smart.fetchDevices}
           />
         )}
+        {tab === 'radio' && (
+          <RadioPanel
+            stations={radio.stations}
+            playing={radio.playing}
+            loading={radio.loading}
+            volume={radio.volume}
+            onToggle={radio.toggle}
+            onVolumeChange={radio.changeVolume}
+          />
+        )}
         {tab === 'meteo' && (
           <MeteoPanel weather={weather.weather} loading={weather.loading} />
         )}
