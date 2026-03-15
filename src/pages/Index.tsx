@@ -77,13 +77,15 @@ const Index = () => {
 
   const startVoice = useCallback(() => {
     setVoiceActive(true);
+    radio.duck();
     voice.startListening();
-  }, [voice]);
+  }, [voice, radio]);
 
   const stopVoice = useCallback(() => {
     setVoiceActive(false);
+    radio.unduck();
     voice.stopListening();
-  }, [voice]);
+  }, [voice, radio]);
 
   return (
     <div className="flex flex-col h-dvh relative z-[1]">
