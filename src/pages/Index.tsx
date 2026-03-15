@@ -23,6 +23,7 @@ const Index = () => {
   const reminders = useReminders();
   const weather = useWeather();
   const smart = useSmartThings();
+  const radio = useRadio();
   const [voiceActive, setVoiceActive] = useState(false);
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
