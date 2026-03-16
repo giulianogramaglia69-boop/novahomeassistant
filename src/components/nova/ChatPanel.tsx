@@ -11,9 +11,11 @@ interface Props {
   onVoiceStart: () => void;
   onVoiceStop: () => void;
   isVoiceActive: boolean;
+  voiceError?: string | null;
+  wakeMode?: 'none' | 'chat' | 'command';
 }
 
-const ChatPanel = ({ messages, isLoading, onSend, voiceState, voiceSupported, onVoiceStart, onVoiceStop, isVoiceActive }: Props) => {
+const ChatPanel = ({ messages, isLoading, onSend, voiceState, voiceSupported, onVoiceStart, onVoiceStop, isVoiceActive, voiceError, wakeMode }: Props) => {
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -30,26 +32,37 @@ const ChatPanel = ({ messages, isLoading, onSend, voiceState, voiceSupported, on
     setInput('');
   };
 
+  const getVoiceLabel = () => {
+    if (voiceError) return `⚠️ ${voiceError}`;
+    if (voiceState === 'listening' && wakeMode === 'chat') return '🎤 Modalità Chat AI...';
+    if (voiceState === 'listening' && wakeMode === 'command') return '🏠 Modalità Comandi Casa...';
+    if (voiceState === 'listening') return '🎤 Sto ascoltando...';
+    if (voiceState === 'processing') return '🧠 Elaboro...';
+    if (isVoiceActive) return '👂 "Ehi Nova" = Chat AI · "Ok Nova" = Comandi';
+    return 'Microfono disattivato';
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Voice status bar */}
       {voiceSupported && (
         <div className={`px-4 py-2 text-[0.65rem] font-mono flex items-center gap-2 border-b border-border transition-all ${
-          voiceState === 'listening' ? 'bg-destructive/10 text-destructive' :
+          voiceError ? 'bg-destructive/10 text-destructive' :
+          voiceState === 'listening' && wakeMode === 'chat' ? 'bg-primary/10 text-primary' :
+          voiceState === 'listening' && wakeMode === 'command' ? 'bg-accent/10 text-accent' :
           voiceState === 'processing' ? 'bg-primary/10 text-primary' :
           isVoiceActive ? 'bg-accent/10 text-accent' : 'bg-card text-muted-foreground'
         }`}>
           <span className={`w-2 h-2 rounded-full ${
+            voiceError ? 'bg-destructive' :
             voiceState === 'listening' ? 'bg-destructive animate-pulse' :
             voiceState === 'processing' ? 'bg-primary animate-pulse' :
             isVoiceActive ? 'bg-accent animate-[blink_1.5s_infinite]' : 'bg-muted-foreground/40'
           }`} />
-          {voiceState === 'listening' ? '🎤 Sto ascoltando...' :
-           voiceState === 'processing' ? '🧠 Elaboro...' :
-           isVoiceActive ? '👂 "Ehi Nova" per attivare' : 'Microfono disattivato'}
+          <span className="flex-1 truncate">{getVoiceLabel()}</span>
           <button
             onClick={isVoiceActive ? onVoiceStop : onVoiceStart}
-            className={`ml-auto px-2 py-0.5 rounded-full text-[0.6rem] border transition-all ${
+            className={`ml-auto px-2 py-0.5 rounded-full text-[0.6rem] border transition-all shrink-0 ${
               isVoiceActive ? 'border-destructive/40 text-destructive hover:bg-destructive/10' : 'border-accent/40 text-accent hover:bg-accent/10'
             }`}
           >
