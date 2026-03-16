@@ -17,8 +17,8 @@ export const RADIO_STATIONS: RadioStation[] = [
     name: 'RTL 102.5',
     icon: '📻',
     streams: [
-      'https://streamingv2.shoutcast.com/rtl1025',
-      'https://dd.rtl.it/content/pub/rtl1025.mp3',
+      'https://corsproxy.io/?http://shoutcast.rtl.it:3010/stream/1/',
+      'https://corsproxy.io/?http://shoutcast.rtl.it:3020/stream/1/',
     ],
     color: '210 80% 55%',
   },
@@ -27,8 +27,8 @@ export const RADIO_STATIONS: RadioStation[] = [
     name: 'Radio Deejay',
     icon: '🎧',
     streams: [
-      'https://streamcdnb10-4556349f1e22.msvdn.net/radiodeejay/radiodeejay/play1.mp3',
-      'https://4c4b867c89244861ac216426883d1ad0.msvdn.net/radiodeejay/radiodeejay/chunklist.m3u8',
+      'https://corsproxy.io/?http://icecast.unitedradio.it/RadioDeejay.mp3',
+      'https://corsproxy.io/?http://streamcdnb10-4556349f1e22.msvdn.net/radiodeejay/radio/stream',
     ],
     color: '45 90% 55%',
   },
@@ -37,8 +37,8 @@ export const RADIO_STATIONS: RadioStation[] = [
     name: 'Radio Zeta',
     icon: '⚡',
     streams: [
-      'https://streamcdnf2-4556349f1e22.msvdn.net/live/radiozeta/radiozeta/chunklist.m3u8',
-      'https://streamcdnf2-4556349f1e22.msvdn.net/live/radiozeta/radiozeta/play1.mp3',
+      'https://corsproxy.io/?http://shoutcast.rtl.it:3030/stream/1/',
+      'https://corsproxy.io/?http://streamcdnf2-4556349f1e22.msvdn.net/live/radiozeta/radio/stream',
     ],
     color: '280 70% 60%',
   },
@@ -48,6 +48,7 @@ export const RADIO_STATIONS: RadioStation[] = [
     icon: '🎵',
     streams: [
       'https://sr13.streams.ovh/stream/rete94',
+      'https://corsproxy.io/?http://onair.rete94.it:8000/stream',
     ],
     color: '168 100% 45%',
   },
