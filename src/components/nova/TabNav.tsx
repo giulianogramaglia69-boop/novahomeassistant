@@ -1,11 +1,12 @@
 import { TabId } from '@/lib/types';
 
 const TABS: { id: TabId; icon: string; label: string }[] = [
+  { id: 'dashboard', icon: '🏡', label: 'HOME' },
   { id: 'chat', icon: '💬', label: 'CHAT' },
   { id: 'home', icon: '🏠', label: 'CASA' },
   { id: 'radio', icon: '📻', label: 'RADIO' },
   { id: 'meteo', icon: '🌤', label: 'METEO' },
-  { id: 'reminders', icon: '📋', label: 'NOTE' },
+  { id: 'reminders', icon: '📝', label: 'NOTE' },
   { id: 'settings', icon: '⚙️', label: '' },
 ];
 

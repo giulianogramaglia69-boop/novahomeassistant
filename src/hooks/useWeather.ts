@@ -41,7 +41,7 @@ export function useWeather() {
       },
       () => {
         // Default to Milan
-        const c = { lat: 45.4642, lon: 9.1900 };
+        const c = { lat: 37.3115, lon: 13.5765 };
         setCoords(c);
         localStorage.setItem('nova-coords', JSON.stringify(c));
       }
