@@ -18,8 +18,10 @@ import MeteoPanel from '@/components/nova/MeteoPanel';
 import NotesPanel from '@/components/nova/NotesPanel';
 import RemindersPanel from '@/components/nova/RemindersPanel';
 import SettingsPanel from '@/components/nova/SettingsPanel';
+import PinLock from '@/components/nova/PinLock';
 
 const Index = () => {
+  const [unlocked, setUnlocked] = useState(false);
   const [tab, setTab] = useState<TabId>('dashboard');
   const chat = useChat();
   const devices = useDevices();
@@ -28,7 +30,6 @@ const Index = () => {
   const weather = useWeather();
   const smart = useSmartThings();
   const radio = useRadio();
-  const [voiceActive, setVoiceActive] = useState(false);
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
     for (const action of actions) {
@@ -65,56 +66,17 @@ const Index = () => {
     handleToolActions(actions);
   }, [chat, weather.weather, reminders.reminders, handleToolActions]);
 
-  // Voice: chat command handler
-  const handleVoiceChatCommand = useCallback((text: string) => {
+  // Voice: sends result to chat
+  const handleVoiceResult = useCallback((text: string) => {
     setTab('chat');
-    radio.unduck();
     sendWithContext(text);
-  }, [sendWithContext, radio]);
+  }, [sendWithContext]);
 
-  // Voice: home command handler (direct, no AI)
-  const handleVoiceHomeCommand = useCallback((command: string) => {
-    radio.unduck();
-    if (command === 'tv_on' || command === 'tv_off') {
-      const tvDevice = smart.devices.find(d => d.type === 'tv');
-      if (tvDevice) smart.toggleDevice(tvDevice.deviceId);
-    } else if (command === 'lights_on' || command === 'lights_off') {
-      const lightDevices = devices.devices.filter(d => d.type === 'light');
-      const turnOn = command === 'lights_on';
-      lightDevices.forEach(d => { if (d.on !== turnOn) devices.toggle(d.id); });
-    } else if (command === 'ac_on' || command === 'ac_off') {
-      const acDevices = devices.devices.filter(d => d.type === 'ac');
-      const turnOn = command === 'ac_on';
-      acDevices.forEach(d => { if (d.on !== turnOn) devices.toggle(d.id); });
-    } else if (command === 'all_off') {
-      devices.devices.forEach(d => { if (d.on) devices.toggle(d.id); });
-      smart.devices.forEach(d => { if (d.on) smart.toggleDevice(d.deviceId); });
-      radio.stop();
-    } else if (command.startsWith('radio_play:')) {
-      const stationName = command.replace('radio_play:', '').toLowerCase();
-      const station = RADIO_STATIONS.find(s => s.name.toLowerCase().includes(stationName));
-      if (station) radio.toggle(station.id);
-    } else if (command === 'radio_stop') {
-      radio.stop();
-    }
-  }, [smart, devices, radio]);
+  const voice = useVoiceWake(handleVoiceResult);
 
-  const voice = useVoiceWake({
-    onChatCommand: handleVoiceChatCommand,
-    onHomeCommand: handleVoiceHomeCommand,
-  });
-
-  const startVoice = useCallback(() => {
-    setVoiceActive(true);
-    radio.duck();
-    voice.startListening();
-  }, [voice, radio]);
-
-  const stopVoice = useCallback(() => {
-    setVoiceActive(false);
-    radio.unduck();
-    voice.stopListening();
-  }, [voice, radio]);
+  if (!unlocked) {
+    return <PinLock onUnlock={() => setUnlocked(true)} />;
+  }
 
   return (
     <div className="flex flex-col h-dvh relative z-[1]">
@@ -144,12 +106,9 @@ const Index = () => {
             isLoading={chat.isLoading}
             onSend={sendWithContext}
             voiceState={voice.state}
-            voiceSupported={voice.supported}
-            onVoiceStart={startVoice}
-            onVoiceStop={stopVoice}
-            isVoiceActive={voiceActive}
-            voiceError={voice.error}
-            wakeMode={voice.wakeMode}
+            voiceStatusText={voice.statusText}
+            onVoiceStart={voice.startListening}
+            onVoiceStop={voice.stopListening}
           />
         )}
         {tab === 'home' && (
@@ -191,6 +150,21 @@ const Index = () => {
           <SettingsPanel onClearChat={chat.clearChat} onDetectLocation={weather.detectLocation} />
         )}
       </main>
+
+      {/* Voice status bar */}
+      {voice.statusText && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-2 pointer-events-none">
+          <div className={`rounded-xl px-4 py-2.5 text-xs font-mono text-center backdrop-blur-lg border transition-all ${
+            voice.state === 'listening' ? 'bg-primary/15 border-primary/30 text-primary' :
+            voice.state === 'processing' ? 'bg-accent/15 border-accent/30 text-accent' :
+            voice.state === 'error' ? 'bg-destructive/15 border-destructive/30 text-destructive' :
+            'bg-card/90 border-border text-muted-foreground'
+          }`}>
+            {voice.state === 'listening' && <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse mr-2" />}
+            {voice.statusText}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
