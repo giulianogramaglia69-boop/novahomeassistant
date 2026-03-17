@@ -52,7 +52,7 @@ const DashboardPanel = ({
   return (
     <div className="flex-1 overflow-y-auto flex flex-col gap-4 scrollbar-thin">
       <GreetingClock />
-      <div className="flex flex-col gap-4 px-4 pb-4">
+      <DashboardSection title="Chat AI" icon="💬" onMore={() => onNavigate('chat')}>
         <div className="flex flex-col gap-2 mb-2">
           {lastMessages.map(msg => (
             <div key={msg.id} className={`text-[0.72rem] leading-snug px-2.5 py-1.5 rounded-[10px] ${
