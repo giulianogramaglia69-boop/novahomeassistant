@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChatMessage, Note, TabId } from '@/lib/types';
+import GreetingClock from './GreetingClock';
 import { SmartThingsDevice } from '@/hooks/useSmartThings';
 import { RadioStation } from '@/lib/types';
 
