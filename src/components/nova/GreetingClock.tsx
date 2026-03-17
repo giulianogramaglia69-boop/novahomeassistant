@@ -1,0 +1,32 @@
+import { useState, useEffect } from 'react';
+
+const DAYS = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+const MONTHS = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+
+const pad = (n: number) => n.toString().padStart(2, '0');
+
+const GreetingClock = () => {
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const dateStr = `${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+
+  return (
+    <div className="px-4 pt-4 pb-2">
+      <div className="bg-gradient-to-br from-primary/10 to-accent/5 border border-border rounded-2xl p-4">
+        <p className="font-syne font-bold text-foreground text-base">Ciao Giuliano 👋</p>
+        <div className="flex items-baseline gap-2 mt-1">
+          <span className="font-mono text-2xl font-bold text-primary tabular-nums">{timeStr}</span>
+        </div>
+        <p className="text-muted-foreground text-xs mt-0.5 font-mono">{dateStr}</p>
+      </div>
+    </div>
+  );
+};
+
+export default GreetingClock;
