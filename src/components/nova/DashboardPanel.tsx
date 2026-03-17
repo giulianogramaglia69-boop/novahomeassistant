@@ -50,7 +50,8 @@ const DashboardPanel = ({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 scrollbar-thin">
+    <div className="flex-1 overflow-y-auto flex flex-col gap-4 scrollbar-thin">
+      <GreetingClock />
       {/* Chat AI section */}
       <DashboardSection title="Chat AI" icon="💬" onMore={() => onNavigate('chat')}>
         <div className="flex flex-col gap-2 mb-2">
