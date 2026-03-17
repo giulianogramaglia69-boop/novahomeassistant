@@ -17,40 +17,18 @@ export const RADIO_STATIONS: RadioStation[] = [
     name: 'RTL 102.5',
     icon: '📻',
     streams: [
-      'https://corsproxy.io/?http://shoutcast.rtl.it:3010/stream/1/',
-      'https://corsproxy.io/?http://shoutcast.rtl.it:3020/stream/1/',
+      'https://streamingv2.shoutcast.com/rtl1025',
     ],
     color: '210 80% 55%',
-  },
-  {
-    id: 'deejay',
-    name: 'Radio Deejay',
-    icon: '🎧',
-    streams: [
-      'https://corsproxy.io/?http://icecast.unitedradio.it/RadioDeejay.mp3',
-      'https://corsproxy.io/?http://streamcdnb10-4556349f1e22.msvdn.net/radiodeejay/radio/stream',
-    ],
-    color: '45 90% 55%',
   },
   {
     id: 'radiozeta',
     name: 'Radio Zeta',
     icon: '⚡',
     streams: [
-      'https://corsproxy.io/?http://shoutcast.rtl.it:3030/stream/1/',
-      'https://corsproxy.io/?http://streamcdnf2-4556349f1e22.msvdn.net/live/radiozeta/radio/stream',
+      'https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S9346184/XEx1LqlYbNic/playlist.m3u8',
     ],
     color: '280 70% 60%',
-  },
-  {
-    id: 'rete94',
-    name: 'Rete 94',
-    icon: '🎵',
-    streams: [
-      'https://sr13.streams.ovh/stream/rete94',
-      'https://corsproxy.io/?http://onair.rete94.it:8000/stream',
-    ],
-    color: '168 100% 45%',
   },
 ];
 
@@ -59,9 +37,7 @@ export function useRadio() {
   const [volume, setVolume] = useState(0.8);
   const [loading, setLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const duckVolumeRef = useRef(false);
 
-  // Clean up on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -72,10 +48,9 @@ export function useRadio() {
     };
   }, []);
 
-  // Sync volume
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = duckVolumeRef.current ? volume * 0.2 : volume;
+      audioRef.current.volume = volume;
     }
   }, [volume]);
 
@@ -100,7 +75,6 @@ export function useRadio() {
     audio.crossOrigin = 'anonymous';
     audioRef.current = audio;
 
-    // Try each stream URL as fallback
     for (const url of station.streams) {
       try {
         audio.src = url;
@@ -110,12 +84,10 @@ export function useRadio() {
         setLoading(false);
         return;
       } catch {
-        // Try next stream
         continue;
       }
     }
 
-    // All streams failed
     setLoading(false);
     console.error(`All streams failed for ${station.name}`);
   }, [stop, volume]);
@@ -131,24 +103,9 @@ export function useRadio() {
   const changeVolume = useCallback((v: number) => {
     setVolume(v);
     if (audioRef.current) {
-      audioRef.current.volume = duckVolumeRef.current ? v * 0.2 : v;
+      audioRef.current.volume = v;
     }
   }, []);
 
-  // Audio ducking for voice
-  const duck = useCallback(() => {
-    duckVolumeRef.current = true;
-    if (audioRef.current) {
-      audioRef.current.volume = volume * 0.2;
-    }
-  }, [volume]);
-
-  const unduck = useCallback(() => {
-    duckVolumeRef.current = false;
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
-  }, [volume]);
-
-  return { playing, loading, volume, toggle, stop, changeVolume, duck, unduck, stations: RADIO_STATIONS };
+  return { playing, loading, volume, toggle, stop, changeVolume, stations: RADIO_STATIONS };
 }
