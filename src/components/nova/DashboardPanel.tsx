@@ -164,6 +164,7 @@ const DashboardPanel = ({
           </button>
         </div>
       </DashboardSection>
+      </div>
     </div>
   );
 };
