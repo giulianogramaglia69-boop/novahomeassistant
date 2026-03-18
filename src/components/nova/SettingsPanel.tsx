@@ -9,7 +9,7 @@ const SettingsPanel = ({ onClearChat, onDetectLocation }: Props) => (
 
     <SettingsRow
       label="AI Gateway"
-      sub="Powered by Lovable AI"
+      sub="Powered by AcquaAI"
       action={<span className="text-accent text-[0.65rem]">Attivo ✓</span>}
     />
 
