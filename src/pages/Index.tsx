@@ -153,6 +153,16 @@ const Index = () => {
             onRemove={notes.remove}
           />
         )}
+        {tab === 'timer' && (
+          <TimerPanel
+            timers={timers.timers}
+            onAdd={timers.add}
+            onStart={timers.start}
+            onPause={timers.pause}
+            onReset={timers.reset}
+            onRemove={timers.remove}
+          />
+        )}
         {tab === 'settings' && (
           <SettingsPanel onClearChat={chat.clearChat} onDetectLocation={weather.detectLocation} />
         )}
