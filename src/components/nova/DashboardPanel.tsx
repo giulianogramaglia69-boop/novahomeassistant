@@ -3,26 +3,24 @@ import { ChatMessage, Note, TabId } from '@/lib/types';
 import GreetingClock from './GreetingClock';
 import { SmartThingsDevice } from '@/hooks/useSmartThings';
 import { RadioStation } from '@/lib/types';
+import { Timer } from '@/hooks/useTimers';
 
 interface Props {
-  // Chat
   messages: ChatMessage[];
   isLoading: boolean;
   onSend: (msg: string) => void;
-  // Devices
   smartDevices: SmartThingsDevice[];
   smartLoading: boolean;
   onSmartToggle: (id: string) => void;
-  // Radio
   stations: RadioStation[];
   playing: string | null;
   onRadioToggle: (id: string) => void;
-  // Notes
   notes: Note[];
   onAddNote: (text: string) => void;
   onRemoveNote: (id: string) => void;
-  // Navigation
   onNavigate: (tab: TabId) => void;
+  timers: Timer[];
+  onTimerNavigate: () => void;
 }
 
 const DashboardPanel = ({
