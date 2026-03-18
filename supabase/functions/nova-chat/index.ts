@@ -184,7 +184,10 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
     const ST_TOKEN = Deno.env.get("SMARTTHINGS_TOKEN") || "";
 
-    const systemPrompt = `Sei NOVA, un assistente domestico intelligente. Rispondi sempre in italiano in modo conciso e amichevole. Hai accesso a questi strumenti:
+    const notesContext = context?.notes?.length ? `\n\nNote dell'utente:\n${context.notes.map((n: any) => `- ${n.text} (${n.timestamp})`).join('\n')}` : '';
+    const timersContext = context?.timers?.length ? `\n\nTimer attivi:\n${context.timers.map((t: any) => `- ${t.label}: ${Math.floor(t.remainingSeconds/60)}m ${t.remainingSeconds%60}s ${t.running ? '(in corso)' : t.done ? '(completato)' : '(in pausa)'}`).join('\n')}` : '';
+
+    const systemPrompt = `Sei NOVA, un assistente domestico intelligente creato da Giuliano Gramaglia, powered by AcquaAI. Rispondi sempre in italiano in modo conciso e amichevole. Hai accesso a questi strumenti:
 
 1. **Controllo dispositivi SmartThings**: Puoi accendere/spegnere la TV Samsung e la Lavatrice Samsung, cambiare canale, volume e sorgente della TV, e controllare lo stato di entrambi.
 2. **Meteo**: Puoi consultare le informazioni meteo attuali e le previsioni.
@@ -192,7 +195,7 @@ serve(async (req) => {
 
 Quando l'utente chiede qualcosa relativo ai dispositivi, meteo o promemoria, USA SEMPRE i tool disponibili. Non inventare informazioni, usa i tool.
 Usa un tono caldo e professionale. Formatta le risposte con markdown quando utile.
-Rispondi in modo breve e diretto, specialmente per i comandi vocali.`;
+Rispondi in modo breve e diretto, specialmente per i comandi vocali.${notesContext}${timersContext}`;
 
     let currentMessages = [
       { role: "system", content: systemPrompt },

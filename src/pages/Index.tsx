@@ -8,6 +8,7 @@ import { useWeather } from '@/hooks/useWeather';
 import { useSmartThings } from '@/hooks/useSmartThings';
 import { useVoiceWake } from '@/hooks/useVoiceWake';
 import { useRadio, RADIO_STATIONS } from '@/hooks/useRadio';
+import { useTimers } from '@/hooks/useTimers';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -17,6 +18,7 @@ import RadioPanel from '@/components/nova/RadioPanel';
 import MeteoPanel from '@/components/nova/MeteoPanel';
 import NotesPanel from '@/components/nova/NotesPanel';
 import RemindersPanel from '@/components/nova/RemindersPanel';
+import TimerPanel from '@/components/nova/TimerPanel';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
 
@@ -30,6 +32,7 @@ const Index = () => {
   const weather = useWeather();
   const smart = useSmartThings();
   const radio = useRadio();
+  const timers = useTimers();
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
     for (const action of actions) {
@@ -62,9 +65,11 @@ const Index = () => {
     const actions = await chat.sendMessage(input, {
       weather: weather.weather,
       reminders: reminders.reminders,
+      notes: notes.notes,
+      timers: timers.timers,
     });
     handleToolActions(actions);
-  }, [chat, weather.weather, reminders.reminders, handleToolActions]);
+  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, handleToolActions]);
 
   // Voice: sends result to chat
   const handleVoiceResult = useCallback((text: string) => {
@@ -98,6 +103,8 @@ const Index = () => {
             onAddNote={notes.add}
             onRemoveNote={notes.remove}
             onNavigate={setTab}
+            timers={timers.timers}
+            onTimerNavigate={() => setTab('timer')}
           />
         )}
         {tab === 'chat' && (
@@ -144,6 +151,16 @@ const Index = () => {
             notes={notes.notes}
             onAdd={notes.add}
             onRemove={notes.remove}
+          />
+        )}
+        {tab === 'timer' && (
+          <TimerPanel
+            timers={timers.timers}
+            onAdd={timers.add}
+            onStart={timers.start}
+            onPause={timers.pause}
+            onReset={timers.reset}
+            onRemove={timers.remove}
           />
         )}
         {tab === 'settings' && (

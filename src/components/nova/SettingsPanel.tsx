@@ -9,7 +9,7 @@ const SettingsPanel = ({ onClearChat, onDetectLocation }: Props) => (
 
     <SettingsRow
       label="AI Gateway"
-      sub="Powered by Lovable AI"
+      sub="Powered by AcquaAI"
       action={<span className="text-accent text-[0.65rem]">Attivo ✓</span>}
     />
 
@@ -34,8 +34,8 @@ const SettingsPanel = ({ onClearChat, onDetectLocation }: Props) => (
     />
 
     <div className="mt-auto pt-6 text-center text-[0.55rem] text-muted-foreground leading-relaxed space-y-1">
-      <p>NOVA v1.0 · Powered by Lovable AI</p>
-      <p>Nessun dato inviato a server terzi</p>
+      <p>NOVA v1.0 · Made by Giuliano Gramaglia</p>
+      <p>Powered by AcquaAI</p>
     </div>
   </div>
 );
