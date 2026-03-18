@@ -103,6 +103,8 @@ const Index = () => {
             onAddNote={notes.add}
             onRemoveNote={notes.remove}
             onNavigate={setTab}
+            timers={timers.timers}
+            onTimerNavigate={() => setTab('timer')}
           />
         )}
         {tab === 'chat' && (
