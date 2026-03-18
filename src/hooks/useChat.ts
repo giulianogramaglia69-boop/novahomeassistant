@@ -1,10 +1,13 @@
 import { useState, useCallback } from 'react';
-import { ChatMessage, WeatherData, Reminder } from '@/lib/types';
+import { ChatMessage, WeatherData, Reminder, Note } from '@/lib/types';
+import { Timer } from '@/hooks/useTimers';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ChatContext {
   weather: WeatherData | null;
   reminders: Reminder[];
+  notes?: Note[];
+  timers?: Timer[];
 }
 
 export interface ChatToolAction {
