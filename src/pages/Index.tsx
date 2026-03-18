@@ -8,6 +8,7 @@ import { useWeather } from '@/hooks/useWeather';
 import { useSmartThings } from '@/hooks/useSmartThings';
 import { useVoiceWake } from '@/hooks/useVoiceWake';
 import { useRadio, RADIO_STATIONS } from '@/hooks/useRadio';
+import { useTimers } from '@/hooks/useTimers';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -17,6 +18,7 @@ import RadioPanel from '@/components/nova/RadioPanel';
 import MeteoPanel from '@/components/nova/MeteoPanel';
 import NotesPanel from '@/components/nova/NotesPanel';
 import RemindersPanel from '@/components/nova/RemindersPanel';
+import TimerPanel from '@/components/nova/TimerPanel';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
 
