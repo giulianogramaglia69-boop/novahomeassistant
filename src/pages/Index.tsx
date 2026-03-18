@@ -65,9 +65,11 @@ const Index = () => {
     const actions = await chat.sendMessage(input, {
       weather: weather.weather,
       reminders: reminders.reminders,
+      notes: notes.notes,
+      timers: timers.timers,
     });
     handleToolActions(actions);
-  }, [chat, weather.weather, reminders.reminders, handleToolActions]);
+  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, handleToolActions]);
 
   // Voice: sends result to chat
   const handleVoiceResult = useCallback((text: string) => {
