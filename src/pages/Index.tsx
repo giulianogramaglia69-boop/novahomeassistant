@@ -32,6 +32,7 @@ const Index = () => {
   const weather = useWeather();
   const smart = useSmartThings();
   const radio = useRadio();
+  const timers = useTimers();
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
     for (const action of actions) {
