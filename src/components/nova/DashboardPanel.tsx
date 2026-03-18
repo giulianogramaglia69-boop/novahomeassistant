@@ -163,6 +163,29 @@ const DashboardPanel = ({
           </button>
         </div>
       </DashboardSection>
+
+      {/* Timer section */}
+      <DashboardSection title="Timer" icon="⏱️" onMore={onTimerNavigate}>
+        {timers.length === 0 ? (
+          <div className="text-[0.65rem] text-muted-foreground">Nessun timer attivo</div>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            {timers.slice(0, 3).map(t => {
+              const m = Math.floor(t.remainingSeconds / 60);
+              const s = t.remainingSeconds % 60;
+              return (
+                <div key={t.id} className="flex items-center justify-between text-[0.72rem]">
+                  <span className="font-syne font-semibold">{t.label}</span>
+                  <span className={`font-mono font-bold ${t.done ? 'text-accent' : t.running ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {m.toString().padStart(2, '0')}:{s.toString().padStart(2, '0')}
+                    {t.done && ' ✓'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </DashboardSection>
       </div>
     </div>
   );
