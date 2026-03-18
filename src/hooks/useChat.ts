@@ -49,6 +49,8 @@ export function useChat() {
           context: {
             weather: context?.weather || null,
             reminders: context?.reminders || [],
+            notes: context?.notes || [],
+            timers: context?.timers || [],
           },
         },
       });

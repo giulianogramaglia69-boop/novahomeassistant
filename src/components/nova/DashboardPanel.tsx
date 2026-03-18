@@ -29,6 +29,7 @@ const DashboardPanel = ({
   stations, playing, onRadioToggle,
   notes, onAddNote, onRemoveNote,
   onNavigate,
+  timers, onTimerNavigate,
 }: Props) => {
   const [chatInput, setChatInput] = useState('');
   const [noteInput, setNoteInput] = useState('');
