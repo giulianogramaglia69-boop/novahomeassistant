@@ -10,6 +10,7 @@ import { useVoiceWake } from '@/hooks/useVoiceWake';
 import { useRadio, RADIO_STATIONS } from '@/hooks/useRadio';
 import { useTimers } from '@/hooks/useTimers';
 import { useCalendar } from '@/hooks/useCalendar';
+import { useAmbientSounds } from '@/hooks/useAmbientSounds';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
