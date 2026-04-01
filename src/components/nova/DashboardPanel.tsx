@@ -226,6 +226,17 @@ const DashboardPanel = ({
             <p className="text-[0.6rem] text-muted-foreground text-center">Nessun timer</p>
           )}
         </BentoCard>
+
+        {/* Ambiente - small */}
+        <BentoCard className="col-span-2" headerTitle="Ambiente" headerIcon="🎵" onMore={() => onNavigate('ambiente')}>
+          <div className="flex gap-2">
+            {['🌧️ Pioggia', '🌊 Oceano', '🌿 Natura'].map(s => (
+              <div key={s} className="flex-1 text-center py-2 rounded-xl bg-secondary/50 border border-border text-[0.6rem] text-muted-foreground font-syne font-semibold">
+                {s}
+              </div>
+            ))}
+          </div>
+        </BentoCard>
       </div>
     </div>
   );

@@ -22,6 +22,7 @@ import NotesPanel from '@/components/nova/NotesPanel';
 import RemindersPanel from '@/components/nova/RemindersPanel';
 import TimerPanel from '@/components/nova/TimerPanel';
 import CalendarPanel from '@/components/nova/CalendarPanel';
+import AmbientePanel from '@/components/nova/AmbientePanel';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
 
