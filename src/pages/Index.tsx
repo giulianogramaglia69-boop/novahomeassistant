@@ -10,6 +10,7 @@ import { useVoiceWake } from '@/hooks/useVoiceWake';
 import { useRadio, RADIO_STATIONS } from '@/hooks/useRadio';
 import { useTimers } from '@/hooks/useTimers';
 import { useCalendar } from '@/hooks/useCalendar';
+import { useAmbientSounds } from '@/hooks/useAmbientSounds';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -21,6 +22,7 @@ import NotesPanel from '@/components/nova/NotesPanel';
 import RemindersPanel from '@/components/nova/RemindersPanel';
 import TimerPanel from '@/components/nova/TimerPanel';
 import CalendarPanel from '@/components/nova/CalendarPanel';
+import AmbientePanel from '@/components/nova/AmbientePanel';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
 
@@ -36,6 +38,7 @@ const Index = () => {
   const radio = useRadio();
   const timers = useTimers();
   const calendar = useCalendar();
+  const ambient = useAmbientSounds();
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
     for (const action of actions) {
@@ -179,6 +182,15 @@ const Index = () => {
             onUpdate={calendar.updateEvent}
             onRemove={calendar.removeEvent}
             getEventsForDate={calendar.getEventsForDate}
+          />
+        )}
+        {tab === 'ambiente' && (
+          <AmbientePanel
+            sounds={ambient.sounds}
+            playing={ambient.playing}
+            volume={ambient.volume}
+            onToggle={ambient.toggle}
+            onVolumeChange={ambient.changeVolume}
           />
         )}
         {tab === 'settings' && (
