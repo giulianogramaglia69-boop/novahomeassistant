@@ -5,7 +5,7 @@ const MONTHS = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'L
 
 const pad = (n: number) => n.toString().padStart(2, '0');
 
-const GreetingClock = () => {
+const GreetingClock = ({ compact = false }: { compact?: boolean }) => {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
