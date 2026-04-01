@@ -9,6 +9,7 @@ import { useSmartThings } from '@/hooks/useSmartThings';
 import { useVoiceWake } from '@/hooks/useVoiceWake';
 import { useRadio, RADIO_STATIONS } from '@/hooks/useRadio';
 import { useTimers } from '@/hooks/useTimers';
+import { useCalendar } from '@/hooks/useCalendar';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -19,6 +20,7 @@ import MeteoPanel from '@/components/nova/MeteoPanel';
 import NotesPanel from '@/components/nova/NotesPanel';
 import RemindersPanel from '@/components/nova/RemindersPanel';
 import TimerPanel from '@/components/nova/TimerPanel';
+import CalendarPanel from '@/components/nova/CalendarPanel';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
 
@@ -33,6 +35,7 @@ const Index = () => {
   const smart = useSmartThings();
   const radio = useRadio();
   const timers = useTimers();
+  const calendar = useCalendar();
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
     for (const action of actions) {
@@ -71,7 +74,6 @@ const Index = () => {
     handleToolActions(actions);
   }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, handleToolActions]);
 
-  // Voice: sends result to chat
   const handleVoiceResult = useCallback((text: string) => {
     setTab('chat');
     sendWithContext(text);
@@ -105,6 +107,13 @@ const Index = () => {
             onNavigate={setTab}
             timers={timers.timers}
             onTimerNavigate={() => setTab('timer')}
+            onTimerStart={timers.start}
+            onTimerPause={timers.pause}
+            weather={weather.weather}
+            upcomingEvents={calendar.getUpcomingEvents(3)}
+            voiceState={voice.state}
+            onVoiceStart={voice.startListening}
+            onVoiceStop={voice.stopListening}
           />
         )}
         {tab === 'chat' && (
@@ -163,12 +172,20 @@ const Index = () => {
             onRemove={timers.remove}
           />
         )}
+        {tab === 'calendar' && (
+          <CalendarPanel
+            events={calendar.events}
+            onAdd={calendar.addEvent}
+            onUpdate={calendar.updateEvent}
+            onRemove={calendar.removeEvent}
+            getEventsForDate={calendar.getEventsForDate}
+          />
+        )}
         {tab === 'settings' && (
           <SettingsPanel onClearChat={chat.clearChat} onDetectLocation={weather.detectLocation} />
         )}
       </main>
 
-      {/* Voice status bar */}
       {voice.statusText && (
         <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-2 pointer-events-none">
           <div className={`rounded-xl px-4 py-2.5 text-xs font-mono text-center backdrop-blur-lg border transition-all ${

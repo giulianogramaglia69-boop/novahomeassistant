@@ -16,6 +16,16 @@ const GreetingClock = ({ compact = false }: { compact?: boolean }) => {
   const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   const dateStr = `${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
 
+  if (compact) {
+    return (
+      <div>
+        <p className="font-syne font-bold text-foreground text-[0.8rem]">Ciao Giuliano 👋</p>
+        <span className="font-mono text-xl font-bold text-primary tabular-nums">{timeStr}</span>
+        <p className="text-muted-foreground text-[0.55rem] mt-0.5 font-mono">{dateStr}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="px-4 pt-4 pb-2">
       <div className="bg-gradient-to-br from-primary/10 to-accent/5 border border-border rounded-2xl p-4">

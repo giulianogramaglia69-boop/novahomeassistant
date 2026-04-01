@@ -8,6 +8,7 @@ const TABS: { id: TabId; icon: string; label: string }[] = [
   { id: 'meteo', icon: '🌤', label: 'METEO' },
   { id: 'reminders', icon: '📝', label: 'NOTE' },
   { id: 'timer', icon: '⏱️', label: 'TIMER' },
+  { id: 'calendar', icon: '📅', label: 'CALENDAR' },
   { id: 'settings', icon: '⚙️', label: '' },
 ];
 
