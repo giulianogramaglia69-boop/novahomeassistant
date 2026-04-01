@@ -184,6 +184,15 @@ const Index = () => {
             getEventsForDate={calendar.getEventsForDate}
           />
         )}
+        {tab === 'ambiente' && (
+          <AmbientePanel
+            sounds={ambient.sounds}
+            playing={ambient.playing}
+            volume={ambient.volume}
+            onToggle={ambient.toggle}
+            onVolumeChange={ambient.changeVolume}
+          />
+        )}
         {tab === 'settings' && (
           <SettingsPanel onClearChat={chat.clearChat} onDetectLocation={weather.detectLocation} />
         )}
