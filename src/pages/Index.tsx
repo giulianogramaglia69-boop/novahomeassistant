@@ -120,6 +120,8 @@ const Index = () => {
             voiceState={voice.state}
             onVoiceStart={voice.startListening}
             onVoiceStop={voice.stopListening}
+            newsItems={news.items}
+            newsLoading={news.loading}
           />
         )}
         {tab === 'chat' && (
