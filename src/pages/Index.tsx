@@ -198,6 +198,9 @@ const Index = () => {
             onVolumeChange={ambient.changeVolume}
           />
         )}
+        {tab === 'news' && (
+          <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />
+        )}
         {tab === 'settings' && (
           <SettingsPanel onClearChat={chat.clearChat} onDetectLocation={weather.detectLocation} />
         )}
