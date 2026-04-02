@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,35 +24,38 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const projectRef = supabaseUrl.replace("https://", "").replace(".supabase.co", "");
 
-    // Use Supabase Management API to update the secret
-    const res = await fetch(
-      `https://api.supabase.com/v1/projects/${projectRef}/secrets`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${serviceRoleKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify([
-          { name: "SMARTTHINGS_TOKEN", value: token.trim() },
-        ]),
-      },
-    );
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      db: { schema: "vault" },
+    });
 
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("Failed to update secret:", res.status, text);
-      // Fallback: save to env directly won't persist, but let's try the vault approach
+    // Delete existing smartthings_token secret if any
+    const { data: existing } = await supabase
+      .from("secrets")
+      .select("id")
+      .eq("name", "smartthings_token")
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from("secrets").delete().eq("id", existing.id);
+    }
+
+    // Insert new secret
+    const { error } = await supabase.from("secrets").insert({
+      name: "smartthings_token",
+      secret: token.trim(),
+    });
+
+    if (error) {
+      console.error("Vault insert error:", error);
       return new Response(
-        JSON.stringify({ error: `Errore aggiornamento secret: ${res.status}` }),
+        JSON.stringify({ error: "Errore salvataggio token nel vault" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
     return new Response(
-      JSON.stringify({ success: true, message: "SMARTTHINGS_TOKEN aggiornato nel backend" }),
+      JSON.stringify({ success: true, message: "Token SmartThings aggiornato nel backend" }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
