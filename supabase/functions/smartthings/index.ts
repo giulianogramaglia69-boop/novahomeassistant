@@ -58,24 +58,29 @@ async function smartThingsRequest(
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  // Try env secret first, then DB fallback
-  let rawToken = Deno.env.get("SMARTTHINGS_TOKEN");
-  
-  if (!rawToken) {
-    try {
-      const sb = createClient(
-        Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      );
-      const { data } = await sb
-        .from("app_settings")
-        .select("value")
-        .eq("key", "smartthings_token")
-        .maybeSingle();
-      if (data?.value) rawToken = data.value;
-    } catch (e) {
-      console.error("DB read error:", e);
+  // Prefer updated DB token, then fallback to env secret
+  let rawToken: string | undefined;
+
+  try {
+    const sb = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const { data } = await sb
+      .from("app_settings")
+      .select("value")
+      .eq("key", "smartthings_token")
+      .maybeSingle();
+
+    if (data?.value) {
+      rawToken = data.value;
     }
+  } catch (e) {
+    console.error("DB read error:", e);
+  }
+
+  if (!rawToken) {
+    rawToken = Deno.env.get("SMARTTHINGS_TOKEN");
   }
 
   const token = rawToken?.trim().replace(/^Bearer\s+/i, "");
