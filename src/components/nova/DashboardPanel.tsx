@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChatMessage, Note, TabId, WeatherData } from '@/lib/types';
 import { SmartThingsDevice } from '@/hooks/useSmartThings';
 import { RadioStation } from '@/lib/types';
 import { Timer } from '@/hooks/useTimers';
 import { CalendarEvent } from '@/hooks/useCalendar';
+import { NewsItem } from '@/hooks/useNews';
 import GreetingClock from './GreetingClock';
 
 interface Props {
