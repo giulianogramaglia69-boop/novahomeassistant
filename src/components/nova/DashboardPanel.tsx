@@ -46,6 +46,16 @@ const DashboardPanel = ({
   newsItems, newsLoading,
 }: Props) => {
   const [noteInput, setNoteInput] = useState('');
+  const [newsIndex, setNewsIndex] = useState(0);
+
+  // Auto-rotate news every 5s
+  useEffect(() => {
+    if (newsItems.length <= 1) return;
+    const interval = setInterval(() => {
+      setNewsIndex(prev => (prev + 1) % newsItems.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [newsItems.length]);
 
   const handleAddNote = () => {
     if (!noteInput.trim()) return;
