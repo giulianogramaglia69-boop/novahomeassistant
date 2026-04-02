@@ -22,34 +22,23 @@ serve(async (req) => {
       );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey, {
-      db: { schema: "vault" },
-    });
-
-    // Delete existing smartthings_token secret if any
-    const { data: existing } = await supabase
-      .from("secrets")
-      .select("id")
-      .eq("name", "smartthings_token")
-      .maybeSingle();
-
-    if (existing) {
-      await supabase.from("secrets").delete().eq("id", existing.id);
-    }
-
-    // Insert new secret
-    const { error } = await supabase.from("secrets").insert({
-      name: "smartthings_token",
-      secret: token.trim(),
-    });
+    // Upsert the token in app_settings
+    const { error } = await supabase
+      .from("app_settings")
+      .upsert(
+        { key: "smartthings_token", value: token.trim(), updated_at: new Date().toISOString() },
+        { onConflict: "key" },
+      );
 
     if (error) {
-      console.error("Vault insert error:", error);
+      console.error("DB upsert error:", error);
       return new Response(
-        JSON.stringify({ error: "Errore salvataggio token nel vault" }),
+        JSON.stringify({ error: "Errore salvataggio token" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
