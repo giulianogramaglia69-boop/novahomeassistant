@@ -43,6 +43,7 @@ const DashboardPanel = ({
   weather,
   upcomingEvents,
   voiceState, onVoiceStart, onVoiceStop,
+  newsItems, newsLoading,
 }: Props) => {
   const [noteInput, setNoteInput] = useState('');
 
