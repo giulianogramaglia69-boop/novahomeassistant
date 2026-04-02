@@ -30,6 +30,8 @@ interface Props {
   voiceState: string;
   onVoiceStart: () => void;
   onVoiceStop: () => void;
+  newsItems: NewsItem[];
+  newsLoading: boolean;
 }
 
 const DashboardPanel = ({
