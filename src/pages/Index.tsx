@@ -11,6 +11,7 @@ import { useRadio, RADIO_STATIONS } from '@/hooks/useRadio';
 import { useTimers } from '@/hooks/useTimers';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useAmbientSounds } from '@/hooks/useAmbientSounds';
+import { useNews } from '@/hooks/useNews';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -23,6 +24,7 @@ import RemindersPanel from '@/components/nova/RemindersPanel';
 import TimerPanel from '@/components/nova/TimerPanel';
 import CalendarPanel from '@/components/nova/CalendarPanel';
 import AmbientePanel from '@/components/nova/AmbientePanel';
+import NewsPanel from '@/components/nova/NewsPanel';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
 
@@ -39,6 +41,7 @@ const Index = () => {
   const timers = useTimers();
   const calendar = useCalendar();
   const ambient = useAmbientSounds();
+  const news = useNews();
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
     for (const action of actions) {
@@ -117,6 +120,8 @@ const Index = () => {
             voiceState={voice.state}
             onVoiceStart={voice.startListening}
             onVoiceStop={voice.stopListening}
+            newsItems={news.items}
+            newsLoading={news.loading}
           />
         )}
         {tab === 'chat' && (
@@ -192,6 +197,9 @@ const Index = () => {
             onToggle={ambient.toggle}
             onVolumeChange={ambient.changeVolume}
           />
+        )}
+        {tab === 'news' && (
+          <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />
         )}
         {tab === 'settings' && (
           <SettingsPanel onClearChat={chat.clearChat} onDetectLocation={weather.detectLocation} />

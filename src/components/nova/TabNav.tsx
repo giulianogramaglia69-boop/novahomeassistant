@@ -10,6 +10,7 @@ const TABS: { id: TabId; icon: string; label: string }[] = [
   { id: 'timer', icon: '⏱️', label: 'TIMER' },
   { id: 'calendar', icon: '📅', label: 'CALENDAR' },
   { id: 'ambiente', icon: '🎵', label: 'AMBIENTE' },
+  { id: 'news', icon: '📰', label: 'NEWS' },
   { id: 'settings', icon: '⚙️', label: '' },
 ];
 
