@@ -18,16 +18,16 @@ const SettingsPanel = ({ onClearChat, onDetectLocation }: Props) => {
     setSaving(true);
     try {
       localStorage.setItem(ST_KEY, stToken.trim());
-      // Update the edge function secret via a call
-      const { error } = await supabase.functions.invoke('smartthings', {
-        body: { action: 'list' },
+      const { data, error } = await supabase.functions.invoke('update-smartthings-token', {
+        body: { token: stToken.trim() },
       });
-      toast({
-        title: 'Token salvato',
-        description: error ? 'Token salvato localmente. Aggiorna il secret nel backend per renderlo attivo.' : 'SmartThings token aggiornato.',
-      });
+      if (error) {
+        toast({ title: 'Token salvato localmente', description: 'Errore aggiornamento backend. Riprova.' });
+      } else {
+        toast({ title: 'Token aggiornato ✓', description: 'Il token SmartThings è stato aggiornato nel backend.' });
+      }
     } catch {
-      toast({ title: 'Token salvato localmente', description: 'Aggiorna SMARTTHINGS_TOKEN nel backend.' });
+      toast({ title: 'Errore', description: 'Impossibile aggiornare il token nel backend.' });
     } finally {
       setSaving(false);
     }
