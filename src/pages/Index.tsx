@@ -41,6 +41,7 @@ const Index = () => {
   const timers = useTimers();
   const calendar = useCalendar();
   const ambient = useAmbientSounds();
+  const news = useNews();
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
     for (const action of actions) {
