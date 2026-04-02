@@ -58,7 +58,27 @@ async function smartThingsRequest(
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const rawToken = Deno.env.get("SMARTTHINGS_TOKEN");
+  // Try env secret first, then vault fallback
+  let rawToken = Deno.env.get("SMARTTHINGS_TOKEN");
+  
+  if (!rawToken) {
+    try {
+      const sb = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        { db: { schema: "vault" } },
+      );
+      const { data } = await sb
+        .from("decrypted_secrets")
+        .select("decrypted_secret")
+        .eq("name", "smartthings_token")
+        .maybeSingle();
+      if (data?.decrypted_secret) rawToken = data.decrypted_secret;
+    } catch (e) {
+      console.error("Vault read error:", e);
+    }
+  }
+
   const token = rawToken?.trim().replace(/^Bearer\s+/i, "");
 
   if (!token) {
