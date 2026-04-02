@@ -67,6 +67,38 @@ const DashboardPanel = ({
 
   return (
     <div className="flex-1 overflow-y-auto scrollbar-thin px-3 pb-4 pt-3">
+      {/* News Carousel Bar */}
+      {newsItems.length > 0 && (
+        <a
+          href={newsItems[newsIndex]?.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => { e.preventDefault(); onNavigate('news' as TabId); }}
+          className="block mb-3 bg-card/80 border border-border rounded-2xl px-4 py-3 transition-all hover:border-primary/30 active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[0.55rem] font-syne font-bold tracking-[0.15em] uppercase text-primary">📰 NEWS</span>
+            {newsItems[newsIndex]?.source && (
+              <span className="text-[0.5rem] text-muted-foreground font-mono">· {newsItems[newsIndex].source}</span>
+            )}
+            <div className="ml-auto flex gap-1">
+              {newsItems.slice(0, Math.min(5, newsItems.length)).map((_, i) => (
+                <span key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === newsIndex % Math.min(5, newsItems.length) ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+              ))}
+            </div>
+          </div>
+          <p className="text-[0.72rem] font-semibold leading-snug text-foreground line-clamp-2 transition-all">
+            {newsItems[newsIndex]?.title}
+          </p>
+        </a>
+      )}
+      {newsLoading && newsItems.length === 0 && (
+        <div className="mb-3 bg-card/80 border border-border rounded-2xl px-4 py-3 animate-pulse">
+          <div className="h-2 bg-secondary rounded w-16 mb-2" />
+          <div className="h-3 bg-secondary rounded w-3/4" />
+        </div>
+      )}
+
       {/* Bento Grid */}
       <div className="grid grid-cols-2 gap-3">
         {/* Clock Card - large left */}
