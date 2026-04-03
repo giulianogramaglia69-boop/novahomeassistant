@@ -50,27 +50,41 @@ const tools = [
   },
 ];
 
-// Device IDs - these are fetched dynamically
-const DEVICE_MAP: Record<string, { nameMatch: string }> = {
-  tv: { nameMatch: "tv" },
-  lavatrice: { nameMatch: "washer" },
-};
-
-async function findDeviceId(token: string, type: string): Promise<string | null> {
-  const res = await fetch(`${ST_BASE}/devices`, {
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  const items = data.items || [];
-  const match = items.find((d: any) => {
-    const cats = d.components?.flatMap((c: any) => c.categories?.map((cat: any) => cat.name.toLowerCase()) || []) || [];
-    const name = (d.label || d.name || '').toLowerCase();
-    if (type === 'tv') return cats.includes('television') || cats.includes('tv') || name.includes('tv');
-    if (type === 'lavatrice') return cats.includes('washer') || name.includes('washer') || name.includes('lavat');
+// Find device ID from context first, then fallback to API
+function findDeviceIdFromContext(context: any, type: string): string | null {
+  const devices = context?.smartDevices || [];
+  const match = devices.find((d: any) => {
+    if (type === 'tv') return d.type === 'tv';
+    if (type === 'lavatrice') return d.type === 'washer';
     return false;
   });
   return match?.deviceId || null;
+}
+
+async function findDeviceId(token: string, type: string, context: any): Promise<string | null> {
+  // Try context first (already fetched by client)
+  const fromContext = findDeviceIdFromContext(context, type);
+  if (fromContext) return fromContext;
+
+  // Fallback to API call
+  try {
+    const res = await fetch(`${ST_BASE}/devices`, {
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const items = data.items || [];
+    const match = items.find((d: any) => {
+      const cats = d.components?.flatMap((c: any) => c.categories?.map((cat: any) => cat.name.toLowerCase()) || []) || [];
+      const name = (d.label || d.name || '').toLowerCase();
+      if (type === 'tv') return cats.includes('television') || cats.includes('tv') || name.includes('tv');
+      if (type === 'lavatrice') return cats.includes('washer') || name.includes('washer') || name.includes('lavat');
+      return false;
+    });
+    return match?.deviceId || null;
+  } catch {
+    return null;
+  }
 }
 
 async function getDeviceStatus(token: string, deviceId: string) {
@@ -94,8 +108,8 @@ async function sendDeviceCommand(token: string, deviceId: string, capability: st
 
 async function executeToolCall(toolName: string, args: any, stToken: string, context: any): Promise<string> {
   if (toolName === "control_device") {
-    const deviceId = await findDeviceId(stToken, args.device);
-    if (!deviceId) return `Dispositivo "${args.device}" non trovato su SmartThings.`;
+    const deviceId = await findDeviceId(stToken, args.device, context);
+    if (!deviceId) return `Dispositivo "${args.device}" non trovato. Assicurati che sia collegato e visibile nella pagina Casa.`;
 
     switch (args.action) {
       case "on":
