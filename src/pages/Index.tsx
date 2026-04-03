@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { TabId } from '@/lib/types';
 import { useChat, ChatToolAction } from '@/hooks/useChat';
 import { useDevices } from '@/hooks/useDevices';
@@ -12,6 +12,7 @@ import { useTimers } from '@/hooks/useTimers';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useAmbientSounds } from '@/hooks/useAmbientSounds';
 import { useNews } from '@/hooks/useNews';
+import { useTTS } from '@/hooks/useTTS';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -42,6 +43,19 @@ const Index = () => {
   const calendar = useCalendar();
   const ambient = useAmbientSounds();
   const news = useNews();
+  const tts = useTTS();
+  const prevMsgCount = useRef(chat.messages.length);
+
+  // Auto-speak new assistant messages
+  useEffect(() => {
+    if (chat.messages.length > prevMsgCount.current) {
+      const lastMsg = chat.messages[chat.messages.length - 1];
+      if (lastMsg?.role === 'assistant' && lastMsg.id !== 'welcome') {
+        tts.speak(lastMsg.content);
+      }
+    }
+    prevMsgCount.current = chat.messages.length;
+  }, [chat.messages, tts]);
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
     for (const action of actions) {
@@ -94,7 +108,7 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-dvh relative z-[1]">
-      <NovaHeader />
+      <NovaHeader ttsEnabled={tts.enabled} ttsSpeaking={tts.speaking} onTtsToggle={tts.toggle} onTtsStop={tts.stop} />
       <TabNav active={tab} onChange={setTab} />
       <main className="flex-1 overflow-hidden flex flex-col">
         {tab === 'dashboard' && (
