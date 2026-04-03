@@ -212,7 +212,7 @@ serve(async (req) => {
 
 Quando l'utente chiede qualcosa relativo ai dispositivi, meteo o promemoria, USA SEMPRE i tool disponibili. Non inventare informazioni, usa i tool.
 Usa un tono caldo e professionale. Formatta le risposte con markdown quando utile.
-Rispondi in modo breve e diretto, specialmente per i comandi vocali.${notesContext}${timersContext}`;
+Rispondi in modo breve e diretto, specialmente per i comandi vocali.${notesContext}${timersContext}${devicesContext}`;
 
     let currentMessages = [
       { role: "system", content: systemPrompt },
