@@ -202,6 +202,7 @@ serve(async (req) => {
 
     const notesContext = context?.notes?.length ? `\n\nNote dell'utente:\n${context.notes.map((n: any) => `- ${n.text} (${n.timestamp})`).join('\n')}` : '';
     const timersContext = context?.timers?.length ? `\n\nTimer attivi:\n${context.timers.map((t: any) => `- ${t.label}: ${Math.floor(t.remainingSeconds/60)}m ${t.remainingSeconds%60}s ${t.running ? '(in corso)' : t.done ? '(completato)' : '(in pausa)'}`).join('\n')}` : '';
+    const devicesContext = context?.smartDevices?.length ? `\n\nDispositivi SmartThings collegati:\n${context.smartDevices.map((d: any) => `- ${d.label} (${d.type}) - ${d.on ? 'Acceso' : 'Spento'}`).join('\n')}` : '';
 
     const systemPrompt = `Sei NOVA, un assistente domestico intelligente creato da Giuliano Gramaglia, powered by AcquaAI. Rispondi sempre in italiano in modo conciso e amichevole. Hai accesso a questi strumenti:
 
