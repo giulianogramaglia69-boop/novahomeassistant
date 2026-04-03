@@ -108,8 +108,8 @@ async function sendDeviceCommand(token: string, deviceId: string, capability: st
 
 async function executeToolCall(toolName: string, args: any, stToken: string, context: any): Promise<string> {
   if (toolName === "control_device") {
-    const deviceId = await findDeviceId(stToken, args.device);
-    if (!deviceId) return `Dispositivo "${args.device}" non trovato su SmartThings.`;
+    const deviceId = await findDeviceId(stToken, args.device, context);
+    if (!deviceId) return `Dispositivo "${args.device}" non trovato. Assicurati che sia collegato e visibile nella pagina Casa.`;
 
     switch (args.action) {
       case "on":
