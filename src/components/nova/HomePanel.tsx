@@ -99,6 +99,12 @@ const HomePanel = ({
           ))}
         </div>
       )}
+
+      {/* TV Remote */}
+      {smartDevices.filter(d => d.type === 'tv').map(tv => (
+        <TvRemote key={tv.deviceId} deviceId={tv.deviceId} isOn={tv.on} onCommand={onSmartCommand} />
+      ))}
+
       {!smartLoading && smartDevices.length === 0 && !smartError && (
         <div className="text-[0.65rem] text-muted-foreground">Nessun dispositivo SmartThings trovato</div>
       )}

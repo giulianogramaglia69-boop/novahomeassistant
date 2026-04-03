@@ -149,6 +149,7 @@ const Index = () => {
             smartError={smart.error}
             onSmartToggle={smart.toggleDevice}
             onSmartFetch={smart.fetchDevices}
+            onSmartCommand={smart.sendCommand}
           />
         )}
         {tab === 'radio' && (
