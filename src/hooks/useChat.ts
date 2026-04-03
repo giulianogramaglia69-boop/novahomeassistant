@@ -52,6 +52,7 @@ export function useChat() {
             reminders: context?.reminders || [],
             notes: context?.notes || [],
             timers: context?.timers || [],
+            smartDevices: context?.smartDevices || [],
           },
         },
       });

@@ -79,7 +79,7 @@ const Index = () => {
       smartDevices: smart.devices.map(d => ({ deviceId: d.deviceId, label: d.label, type: d.type, on: d.on })),
     });
     handleToolActions(actions);
-  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, handleToolActions]);
+  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, handleToolActions]);
 
   const handleVoiceResult = useCallback((text: string) => {
     setTab('chat');
