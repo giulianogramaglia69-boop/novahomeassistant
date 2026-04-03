@@ -43,6 +43,19 @@ const Index = () => {
   const calendar = useCalendar();
   const ambient = useAmbientSounds();
   const news = useNews();
+  const tts = useTTS();
+  const prevMsgCount = useRef(chat.messages.length);
+
+  // Auto-speak new assistant messages
+  useEffect(() => {
+    if (chat.messages.length > prevMsgCount.current) {
+      const lastMsg = chat.messages[chat.messages.length - 1];
+      if (lastMsg?.role === 'assistant' && lastMsg.id !== 'welcome') {
+        tts.speak(lastMsg.content);
+      }
+    }
+    prevMsgCount.current = chat.messages.length;
+  }, [chat.messages, tts]);
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
     for (const action of actions) {
