@@ -16,6 +16,7 @@ interface Props {
   smartError: string | null;
   onSmartToggle: (deviceId: string) => void;
   onSmartFetch: () => void;
+  onSmartCommand: (deviceId: string, capability: string, command: string, args?: any[]) => void;
 }
 
 const TYPE_GLOW: Record<string, string> = {
