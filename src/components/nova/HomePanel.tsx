@@ -34,7 +34,7 @@ const SMART_GLOW: Record<string, string> = {
 
 const HomePanel = ({
   devices, devicesOn, totalWattage, onToggle, onValueChange, onScene,
-  smartDevices, smartLoading, smartError, onSmartToggle, onSmartFetch,
+  smartDevices, smartLoading, smartError, onSmartToggle, onSmartFetch, onSmartCommand,
 }: Props) => {
   useEffect(() => {
     onSmartFetch();
