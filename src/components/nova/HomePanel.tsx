@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Device } from '@/lib/types';
 import { SCENES } from '@/lib/devices';
 import { SmartThingsDevice } from '@/hooks/useSmartThings';
+import TvRemote from './TvRemote';
 
 interface Props {
   devices: Device[];
