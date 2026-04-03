@@ -182,10 +182,27 @@ serve(async (req) => {
     const { messages, context } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-    const ST_TOKEN = Deno.env.get("SMARTTHINGS_TOKEN") || "";
+
+    // Read SmartThings token from DB first, then fallback to env
+    let ST_TOKEN = "";
+    try {
+      const sbUrl = Deno.env.get("SUPABASE_URL") || "";
+      const sbKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+      if (sbUrl && sbKey) {
+        const dbRes = await fetch(`${sbUrl}/rest/v1/app_settings?key=eq.smartthings_token&select=value`, {
+          headers: { apikey: sbKey, Authorization: `Bearer ${sbKey}` },
+        });
+        if (dbRes.ok) {
+          const rows = await dbRes.json();
+          if (rows?.[0]?.value) ST_TOKEN = rows[0].value;
+        }
+      }
+    } catch { /* ignore */ }
+    if (!ST_TOKEN) ST_TOKEN = Deno.env.get("SMARTTHINGS_TOKEN") || "";
 
     const notesContext = context?.notes?.length ? `\n\nNote dell'utente:\n${context.notes.map((n: any) => `- ${n.text} (${n.timestamp})`).join('\n')}` : '';
     const timersContext = context?.timers?.length ? `\n\nTimer attivi:\n${context.timers.map((t: any) => `- ${t.label}: ${Math.floor(t.remainingSeconds/60)}m ${t.remainingSeconds%60}s ${t.running ? '(in corso)' : t.done ? '(completato)' : '(in pausa)'}`).join('\n')}` : '';
+    const devicesContext = context?.smartDevices?.length ? `\n\nDispositivi SmartThings collegati:\n${context.smartDevices.map((d: any) => `- ${d.label} (${d.type}) - ${d.on ? 'Acceso' : 'Spento'}`).join('\n')}` : '';
 
     const systemPrompt = `Sei NOVA, un assistente domestico intelligente creato da Giuliano Gramaglia, powered by AcquaAI. Rispondi sempre in italiano in modo conciso e amichevole. Hai accesso a questi strumenti:
 
@@ -195,7 +212,7 @@ serve(async (req) => {
 
 Quando l'utente chiede qualcosa relativo ai dispositivi, meteo o promemoria, USA SEMPRE i tool disponibili. Non inventare informazioni, usa i tool.
 Usa un tono caldo e professionale. Formatta le risposte con markdown quando utile.
-Rispondi in modo breve e diretto, specialmente per i comandi vocali.${notesContext}${timersContext}`;
+Rispondi in modo breve e diretto, specialmente per i comandi vocali.${notesContext}${timersContext}${devicesContext}`;
 
     let currentMessages = [
       { role: "system", content: systemPrompt },

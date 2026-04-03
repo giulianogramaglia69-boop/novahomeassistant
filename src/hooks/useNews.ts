@@ -30,7 +30,7 @@ export function useNews() {
   useEffect(() => {
     fetchNews();
     // Refresh every 10 minutes
-    const interval = setInterval(fetchNews, 10 * 60 * 1000);
+    const interval = setInterval(fetchNews, 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, [fetchNews]);
 

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Device } from '@/lib/types';
 import { SCENES } from '@/lib/devices';
 import { SmartThingsDevice } from '@/hooks/useSmartThings';
+import TvRemote from './TvRemote';
 
 interface Props {
   devices: Device[];
@@ -15,6 +16,7 @@ interface Props {
   smartError: string | null;
   onSmartToggle: (deviceId: string) => void;
   onSmartFetch: () => void;
+  onSmartCommand: (deviceId: string, capability: string, command: string, args?: any[]) => void;
 }
 
 const TYPE_GLOW: Record<string, string> = {
@@ -32,7 +34,7 @@ const SMART_GLOW: Record<string, string> = {
 
 const HomePanel = ({
   devices, devicesOn, totalWattage, onToggle, onValueChange, onScene,
-  smartDevices, smartLoading, smartError, onSmartToggle, onSmartFetch,
+  smartDevices, smartLoading, smartError, onSmartToggle, onSmartFetch, onSmartCommand,
 }: Props) => {
   useEffect(() => {
     onSmartFetch();
@@ -97,6 +99,12 @@ const HomePanel = ({
           ))}
         </div>
       )}
+
+      {/* TV Remote */}
+      {smartDevices.filter(d => d.type === 'tv').map(tv => (
+        <TvRemote key={tv.deviceId} deviceId={tv.deviceId} isOn={tv.on} onCommand={onSmartCommand} />
+      ))}
+
       {!smartLoading && smartDevices.length === 0 && !smartError && (
         <div className="text-[0.65rem] text-muted-foreground">Nessun dispositivo SmartThings trovato</div>
       )}

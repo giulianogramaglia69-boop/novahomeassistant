@@ -76,9 +76,10 @@ const Index = () => {
       reminders: reminders.reminders,
       notes: notes.notes,
       timers: timers.timers,
+      smartDevices: smart.devices.map(d => ({ deviceId: d.deviceId, label: d.label, type: d.type, on: d.on })),
     });
     handleToolActions(actions);
-  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, handleToolActions]);
+  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, handleToolActions]);
 
   const handleVoiceResult = useCallback((text: string) => {
     setTab('chat');
@@ -148,6 +149,7 @@ const Index = () => {
             smartError={smart.error}
             onSmartToggle={smart.toggleDevice}
             onSmartFetch={smart.fetchDevices}
+            onSmartCommand={smart.sendCommand}
           />
         )}
         {tab === 'radio' && (

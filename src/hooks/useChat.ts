@@ -8,6 +8,7 @@ export interface ChatContext {
   reminders: Reminder[];
   notes?: Note[];
   timers?: Timer[];
+  smartDevices?: { deviceId: string; label: string; type: string; on: boolean }[];
 }
 
 export interface ChatToolAction {
@@ -51,6 +52,7 @@ export function useChat() {
             reminders: context?.reminders || [],
             notes: context?.notes || [],
             timers: context?.timers || [],
+            smartDevices: context?.smartDevices || [],
           },
         },
       });
