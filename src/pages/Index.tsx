@@ -12,6 +12,7 @@ import { useTimers } from '@/hooks/useTimers';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useAmbientSounds } from '@/hooks/useAmbientSounds';
 import { useNews } from '@/hooks/useNews';
+import { useTTS } from '@/hooks/useTTS';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
