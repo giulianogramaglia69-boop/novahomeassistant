@@ -1,15 +1,27 @@
 import { useState, useRef, useEffect } from 'react';
+import { Profile, ProfileName } from '@/lib/types';
 
-const CORRECT_PIN = '050891';
+const PINS: Record<string, ProfileName[]> = {
+  '050891': ['Giuliano', 'Simone', 'Ilenia'],
+  '000589': ['Admin'],
+};
+
+const PROFILES: Profile[] = [
+  { name: 'Giuliano', emoji: '👨‍💻' },
+  { name: 'Simone', emoji: '🧑' },
+  { name: 'Ilenia', emoji: '👩' },
+  { name: 'Admin', emoji: '🔧' },
+];
 
 interface Props {
-  onUnlock: () => void;
+  onUnlock: (profile: Profile) => void;
 }
 
 const PinLock = ({ onUnlock }: Props) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
+  const [availableProfiles, setAvailableProfiles] = useState<Profile[] | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -18,8 +30,14 @@ const PinLock = ({ onUnlock }: Props) => {
 
   useEffect(() => {
     if (pin.length === 6) {
-      if (pin === CORRECT_PIN) {
-        onUnlock();
+      const allowedNames = PINS[pin];
+      if (allowedNames) {
+        const profiles = PROFILES.filter(p => allowedNames.includes(p.name));
+        if (profiles.length === 1) {
+          onUnlock(profiles[0]);
+        } else {
+          setAvailableProfiles(profiles);
+        }
       } else {
         setError(true);
         setShake(true);
@@ -42,9 +60,43 @@ const PinLock = ({ onUnlock }: Props) => {
     setError(false);
   };
 
+  if (availableProfiles) {
+    return (
+      <div className="flex flex-col items-center justify-center h-dvh bg-background select-none">
+        <div
+          className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-6"
+          style={{ animation: 'pulse-orb 3s ease-in-out infinite' }}
+        >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <h1 className="font-syne font-extrabold text-xl tracking-[0.15em] text-foreground mb-1">NOVA</h1>
+        <p className="text-muted-foreground text-xs mb-8">Seleziona il tuo profilo</p>
+        <div className="flex flex-col gap-3 w-[260px]">
+          {availableProfiles.map(profile => (
+            <button
+              key={profile.name}
+              onClick={() => onUnlock(profile)}
+              className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-card border border-border text-foreground font-syne font-bold text-sm tracking-wide transition-all hover:bg-secondary hover:border-primary/40 active:scale-[0.97]"
+            >
+              <span className="text-2xl">{profile.emoji}</span>
+              <span>{profile.name}</span>
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => { setPin(''); setAvailableProfiles(null); }}
+          className="mt-6 text-muted-foreground text-xs hover:text-foreground transition-colors"
+        >
+          ← Torna al PIN
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-center h-dvh bg-background select-none">
-      {/* Logo */}
       <div
         className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-6"
         style={{ animation: 'pulse-orb 3s ease-in-out infinite' }}
@@ -57,7 +109,6 @@ const PinLock = ({ onUnlock }: Props) => {
       <h1 className="font-syne font-extrabold text-xl tracking-[0.15em] text-foreground mb-1">NOVA</h1>
       <p className="text-muted-foreground text-xs mb-8">Inserisci il PIN per accedere</p>
 
-      {/* PIN dots */}
       <div className={`flex gap-3 mb-8 ${shake ? 'animate-shake' : ''}`}>
         {Array.from({ length: 6 }).map((_, i) => (
           <div
@@ -73,7 +124,6 @@ const PinLock = ({ onUnlock }: Props) => {
         ))}
       </div>
 
-      {/* Hidden input for keyboard */}
       <input
         ref={inputRef}
         type="tel"
@@ -89,7 +139,6 @@ const PinLock = ({ onUnlock }: Props) => {
         autoFocus
       />
 
-      {/* Numpad */}
       <div className="grid grid-cols-3 gap-3 w-[260px]">
         {['1','2','3','4','5','6','7','8','9','','0','⌫'].map((key) => (
           <button

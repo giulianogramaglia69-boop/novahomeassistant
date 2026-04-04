@@ -25,6 +25,13 @@ export interface ChatMessage {
 
 export type TabId = 'dashboard' | 'chat' | 'home' | 'radio' | 'meteo' | 'reminders' | 'timer' | 'calendar' | 'ambiente' | 'news' | 'settings';
 
+export type ProfileName = 'Giuliano' | 'Simone' | 'Ilenia' | 'Admin';
+
+export interface Profile {
+  name: ProfileName;
+  emoji: string;
+}
+
 export interface Note {
   id: string;
   text: string;
