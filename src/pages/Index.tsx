@@ -103,8 +103,15 @@ const Index = () => {
 
   const voice = useVoiceWake(handleVoiceResult);
 
-  if (!unlocked) {
-    return <PinLock onUnlock={() => setUnlocked(true)} />;
+  const handleLogout = useCallback(() => {
+    setUnlocked(false);
+    setProfile(null);
+    setTab('dashboard');
+    tts.stop();
+  }, [tts]);
+
+  if (!unlocked || !profile) {
+    return <PinLock onUnlock={(p) => { setProfile(p); setUnlocked(true); }} />;
   }
 
   return (
