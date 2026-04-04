@@ -46,7 +46,23 @@ const Index = () => {
   const ambient = useAmbientSounds();
   const news = useNews();
   const tts = useTTS();
+  const notif = useNotifications();
   const prevMsgCount = useRef(chat.messages.length);
+
+  // Notification checks
+  useEffect(() => {
+    notif.checkTimers(timers.timers);
+  }, [timers.timers, notif.checkTimers]);
+
+  useEffect(() => {
+    const iv = setInterval(() => notif.checkCalendar(calendar.events), 60_000);
+    notif.checkCalendar(calendar.events);
+    return () => clearInterval(iv);
+  }, [calendar.events, notif.checkCalendar]);
+
+  useEffect(() => {
+    notif.checkWeather(weather.weather);
+  }, [weather.weather, notif.checkWeather]);
 
   // Auto-speak new assistant messages
   useEffect(() => {
