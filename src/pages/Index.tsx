@@ -31,6 +31,7 @@ import PinLock from '@/components/nova/PinLock';
 
 const Index = () => {
   const [unlocked, setUnlocked] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [tab, setTab] = useState<TabId>('dashboard');
   const chat = useChat();
   const devices = useDevices();
