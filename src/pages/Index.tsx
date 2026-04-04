@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { TabId } from '@/lib/types';
+import { TabId, Profile } from '@/lib/types';
 import { useChat, ChatToolAction } from '@/hooks/useChat';
 import { useDevices } from '@/hooks/useDevices';
 import { useReminders } from '@/hooks/useReminders';

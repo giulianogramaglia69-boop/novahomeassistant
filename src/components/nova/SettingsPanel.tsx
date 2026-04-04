@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { Profile } from '@/lib/types';
 
 interface Props {
   onClearChat: () => void;
   onDetectLocation: () => void;
+  profile: Profile;
+  onLogout: () => void;
 }
 
 const ST_KEY = 'nova_smartthings_token';
 
-const SettingsPanel = ({ onClearChat, onDetectLocation }: Props) => {
+const SettingsPanel = ({ onClearChat, onDetectLocation, profile, onLogout }: Props) => {
   const [stToken, setStToken] = useState(() => localStorage.getItem(ST_KEY) || '');
   const [saving, setSaving] = useState(false);
 
@@ -36,6 +39,20 @@ const SettingsPanel = ({ onClearChat, onDetectLocation }: Props) => {
   return (
     <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 scrollbar-thin">
       <div className="font-syne text-[0.65rem] font-bold tracking-[0.2em] text-muted-foreground uppercase mb-1">Impostazioni</div>
+
+      {/* Profilo attivo */}
+      <div className="flex items-center justify-between bg-card border border-border rounded-[12px] px-3.5 py-3">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{profile.emoji}</span>
+          <div>
+            <div className="text-[0.75rem] font-bold">{profile.name}</div>
+            <div className="text-[0.6rem] text-muted-foreground mt-0.5">Profilo attivo</div>
+          </div>
+        </div>
+        <button onClick={onLogout} className="px-3 py-1.5 border border-destructive/30 rounded-lg bg-destructive/10 text-destructive font-mono text-[0.65rem] cursor-pointer transition-all hover:bg-destructive/20 active:scale-95">
+          Logout
+        </button>
+      </div>
 
       <SettingsRow
         label="AI Gateway"
