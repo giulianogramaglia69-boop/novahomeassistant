@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { TabId } from '@/lib/types';
+import { TabId, Profile } from '@/lib/types';
 import { useChat, ChatToolAction } from '@/hooks/useChat';
 import { useDevices } from '@/hooks/useDevices';
 import { useReminders } from '@/hooks/useReminders';
@@ -31,6 +31,7 @@ import PinLock from '@/components/nova/PinLock';
 
 const Index = () => {
   const [unlocked, setUnlocked] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [tab, setTab] = useState<TabId>('dashboard');
   const chat = useChat();
   const devices = useDevices();
@@ -102,13 +103,20 @@ const Index = () => {
 
   const voice = useVoiceWake(handleVoiceResult);
 
-  if (!unlocked) {
-    return <PinLock onUnlock={() => setUnlocked(true)} />;
+  const handleLogout = useCallback(() => {
+    setUnlocked(false);
+    setProfile(null);
+    setTab('dashboard');
+    tts.stop();
+  }, [tts]);
+
+  if (!unlocked || !profile) {
+    return <PinLock onUnlock={(p) => { setProfile(p); setUnlocked(true); }} />;
   }
 
   return (
     <div className="flex flex-col h-dvh relative z-[1]">
-      <NovaHeader ttsEnabled={tts.enabled} ttsSpeaking={tts.speaking} onTtsToggle={tts.toggle} onTtsStop={tts.stop} />
+      <NovaHeader ttsEnabled={tts.enabled} ttsSpeaking={tts.speaking} onTtsToggle={tts.toggle} onTtsStop={tts.stop} profile={profile} />
       <TabNav active={tab} onChange={setTab} />
       <main className="flex-1 overflow-hidden flex flex-col">
         {tab === 'dashboard' && (
@@ -218,7 +226,7 @@ const Index = () => {
           <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />
         )}
         {tab === 'settings' && (
-          <SettingsPanel onClearChat={chat.clearChat} onDetectLocation={weather.detectLocation} />
+          <SettingsPanel onClearChat={chat.clearChat} onDetectLocation={weather.detectLocation} profile={profile} onLogout={handleLogout} />
         )}
       </main>
 

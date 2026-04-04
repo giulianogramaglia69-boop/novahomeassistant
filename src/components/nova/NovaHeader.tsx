@@ -1,11 +1,14 @@
+import { Profile } from '@/lib/types';
+
 interface Props {
   ttsEnabled: boolean;
   ttsSpeaking: boolean;
   onTtsToggle: () => void;
   onTtsStop: () => void;
+  profile: Profile;
 }
 
-const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop }: Props) => (
+const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop, profile }: Props) => (
   <header className="relative z-10 flex items-center justify-between px-5 pt-[18px] pb-[14px] border-b border-border bg-background/80 backdrop-blur-[20px] shrink-0">
     <div className="flex items-center gap-2.5">
       <div
@@ -24,6 +27,7 @@ const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop }: Props) 
       </div>
     </div>
     <div className="flex gap-2 items-center">
+      <span className="text-[0.6rem] text-muted-foreground font-mono mr-1">{profile.emoji} {profile.name}</span>
       {ttsSpeaking && (
         <button
           onClick={onTtsStop}
