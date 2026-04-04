@@ -13,6 +13,7 @@ import { useCalendar } from '@/hooks/useCalendar';
 import { useAmbientSounds } from '@/hooks/useAmbientSounds';
 import { useNews } from '@/hooks/useNews';
 import { useTTS } from '@/hooks/useTTS';
+import { useNotifications } from '@/hooks/useNotifications';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -45,7 +46,23 @@ const Index = () => {
   const ambient = useAmbientSounds();
   const news = useNews();
   const tts = useTTS();
+  const notif = useNotifications();
   const prevMsgCount = useRef(chat.messages.length);
+
+  // Notification checks
+  useEffect(() => {
+    notif.checkTimers(timers.timers);
+  }, [timers.timers, notif.checkTimers]);
+
+  useEffect(() => {
+    const iv = setInterval(() => notif.checkCalendar(calendar.events), 60_000);
+    notif.checkCalendar(calendar.events);
+    return () => clearInterval(iv);
+  }, [calendar.events, notif.checkCalendar]);
+
+  useEffect(() => {
+    notif.checkWeather(weather.weather);
+  }, [weather.weather, notif.checkWeather]);
 
   // Auto-speak new assistant messages
   useEffect(() => {
@@ -226,7 +243,16 @@ const Index = () => {
           <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />
         )}
         {tab === 'settings' && (
-          <SettingsPanel onClearChat={chat.clearChat} onDetectLocation={weather.detectLocation} profile={profile} onLogout={handleLogout} />
+          <SettingsPanel
+            onClearChat={chat.clearChat}
+            onDetectLocation={weather.detectLocation}
+            profile={profile}
+            onLogout={handleLogout}
+            notifSettings={notif.settings}
+            onNotifSettingChange={notif.updateSetting}
+            ttsEnabled={tts.enabled}
+            onTtsToggle={tts.toggle}
+          />
         )}
       </main>
 
