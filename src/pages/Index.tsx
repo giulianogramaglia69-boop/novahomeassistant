@@ -116,7 +116,7 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-dvh relative z-[1]">
-      <NovaHeader ttsEnabled={tts.enabled} ttsSpeaking={tts.speaking} onTtsToggle={tts.toggle} onTtsStop={tts.stop} />
+      <NovaHeader ttsEnabled={tts.enabled} ttsSpeaking={tts.speaking} onTtsToggle={tts.toggle} onTtsStop={tts.stop} profile={profile} />
       <TabNav active={tab} onChange={setTab} />
       <main className="flex-1 overflow-hidden flex flex-col">
         {tab === 'dashboard' && (
