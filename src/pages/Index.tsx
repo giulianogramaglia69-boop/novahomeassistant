@@ -243,7 +243,16 @@ const Index = () => {
           <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />
         )}
         {tab === 'settings' && (
-          <SettingsPanel onClearChat={chat.clearChat} onDetectLocation={weather.detectLocation} profile={profile} onLogout={handleLogout} />
+          <SettingsPanel
+            onClearChat={chat.clearChat}
+            onDetectLocation={weather.detectLocation}
+            profile={profile}
+            onLogout={handleLogout}
+            notifSettings={notif.settings}
+            onNotifSettingChange={notif.updateSetting}
+            ttsEnabled={tts.enabled}
+            onTtsToggle={tts.toggle}
+          />
         )}
       </main>
 
