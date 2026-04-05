@@ -25,5 +25,9 @@ export function useNotes() {
     setNotes(prev => prev.filter(n => n.id !== id));
   }, []);
 
-  return { notes, add, remove };
+  const edit = useCallback((id: string, text: string) => {
+    setNotes(prev => prev.map(n => n.id === id ? { ...n, text } : n));
+  }, []);
+
+  return { notes, add, remove, edit };
 }
