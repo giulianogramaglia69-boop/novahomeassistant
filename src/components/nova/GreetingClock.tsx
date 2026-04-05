@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
+import { Profile } from '@/lib/types';
 
 const DAYS = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
 const MONTHS = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
 
 const pad = (n: number) => n.toString().padStart(2, '0');
 
-const GreetingClock = ({ compact = false }: { compact?: boolean }) => {
+const getDisplayName = (profile?: Profile | null) => {
+  if (!profile) return 'Giuliano';
+  if (profile.name === 'Admin') return 'Giuliano';
+  return profile.name;
+};
+
+const GreetingClock = ({ compact = false, profile }: { compact?: boolean; profile?: Profile | null }) => {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -15,11 +22,12 @@ const GreetingClock = ({ compact = false }: { compact?: boolean }) => {
 
   const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   const dateStr = `${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+  const name = getDisplayName(profile);
 
   if (compact) {
     return (
       <div>
-        <p className="font-syne font-bold text-foreground text-[0.8rem]">Ciao Giuliano 👋</p>
+        <p className="font-syne font-bold text-foreground text-[0.8rem]">Ciao {name} 👋</p>
         <span className="font-mono text-xl font-bold text-primary tabular-nums">{timeStr}</span>
         <p className="text-muted-foreground text-[0.55rem] mt-0.5 font-mono">{dateStr}</p>
       </div>
@@ -29,7 +37,7 @@ const GreetingClock = ({ compact = false }: { compact?: boolean }) => {
   return (
     <div className="px-4 pt-4 pb-2">
       <div className="bg-gradient-to-br from-primary/10 to-accent/5 border border-border rounded-2xl p-4">
-        <p className="font-syne font-bold text-foreground text-base">Ciao Giuliano 👋</p>
+        <p className="font-syne font-bold text-foreground text-base">Ciao {name} 👋</p>
         <div className="flex items-baseline gap-2 mt-1">
           <span className="font-mono text-2xl font-bold text-primary tabular-nums">{timeStr}</span>
         </div>
