@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChatMessage, Note, TabId, WeatherData } from '@/lib/types';
+import { ChatMessage, Note, TabId, WeatherData, Profile } from '@/lib/types';
 import { SmartThingsDevice } from '@/hooks/useSmartThings';
 import { RadioStation } from '@/lib/types';
 import { Timer } from '@/hooks/useTimers';
@@ -32,6 +32,7 @@ interface Props {
   onVoiceStop: () => void;
   newsItems: NewsItem[];
   newsLoading: boolean;
+  profile: Profile;
 }
 
 const DashboardPanel = ({
@@ -44,6 +45,7 @@ const DashboardPanel = ({
   upcomingEvents,
   voiceState, onVoiceStart, onVoiceStop,
   newsItems, newsLoading,
+  profile,
 }: Props) => {
   const [noteInput, setNoteInput] = useState('');
   const [newsIndex, setNewsIndex] = useState(0);
@@ -103,7 +105,7 @@ const DashboardPanel = ({
       <div className="grid grid-cols-2 gap-3">
         {/* Clock Card - large left */}
         <BentoCard className="col-span-1 row-span-1">
-          <GreetingClock compact />
+          <GreetingClock compact profile={profile} />
         </BentoCard>
 
         {/* Weather Card - medium right */}

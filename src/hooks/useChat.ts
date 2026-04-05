@@ -9,6 +9,9 @@ export interface ChatContext {
   notes?: Note[];
   timers?: Timer[];
   smartDevices?: { deviceId: string; label: string; type: string; on: boolean }[];
+  calendarEvents?: any[];
+  ambientPlaying?: string | null;
+  profileName?: string;
 }
 
 export interface ChatToolAction {
