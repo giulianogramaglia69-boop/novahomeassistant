@@ -109,9 +109,12 @@ const Index = () => {
       notes: notes.notes,
       timers: timers.timers,
       smartDevices: smart.devices.map(d => ({ deviceId: d.deviceId, label: d.label, type: d.type, on: d.on })),
+      calendarEvents: calendar.getUpcomingEvents(10),
+      ambientPlaying: ambient.playing,
+      profileName: profile?.name || 'Giuliano',
     });
     handleToolActions(actions);
-  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, handleToolActions]);
+  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions]);
 
   const handleVoiceResult = useCallback((text: string) => {
     setTab('chat');
@@ -162,6 +165,7 @@ const Index = () => {
             onVoiceStop={voice.stopListening}
             newsItems={news.items}
             newsLoading={news.loading}
+            profile={profile}
           />
         )}
         {tab === 'chat' && (
@@ -209,6 +213,7 @@ const Index = () => {
             notes={notes.notes}
             onAdd={notes.add}
             onRemove={notes.remove}
+            onEdit={notes.edit}
           />
         )}
         {tab === 'timer' && (
