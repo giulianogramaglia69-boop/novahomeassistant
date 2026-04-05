@@ -217,8 +217,14 @@ serve(async (req) => {
     const notesContext = context?.notes?.length ? `\n\nNote dell'utente:\n${context.notes.map((n: any) => `- ${n.text} (${n.timestamp})`).join('\n')}` : '';
     const timersContext = context?.timers?.length ? `\n\nTimer attivi:\n${context.timers.map((t: any) => `- ${t.label}: ${Math.floor(t.remainingSeconds/60)}m ${t.remainingSeconds%60}s ${t.running ? '(in corso)' : t.done ? '(completato)' : '(in pausa)'}`).join('\n')}` : '';
     const devicesContext = context?.smartDevices?.length ? `\n\nDispositivi SmartThings collegati:\n${context.smartDevices.map((d: any) => `- ${d.label} (${d.type}) - ${d.on ? 'Acceso' : 'Spento'}`).join('\n')}` : '';
+    const calendarContext = context?.calendarEvents?.length ? `\n\nEventi calendario prossimi 7 giorni:\n${context.calendarEvents.map((e: any) => `- ${e.title} il ${e.date} dalle ${e.startTime} alle ${e.endTime}${e.description ? ' — ' + e.description : ''}`).join('\n')}` : '';
+    const ambientContext = context?.ambientPlaying ? `\n\nSuono ambientale in riproduzione: ${context.ambientPlaying}` : '';
+    const profileName = context?.profileName || 'Giuliano';
+    const nowStr = new Date().toLocaleString('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'full', timeStyle: 'short' });
 
-    const systemPrompt = `Sei NOVA, un assistente domestico intelligente creato da Giuliano Gramaglia, powered by AcquaAI. Rispondi sempre in italiano in modo conciso e amichevole. Hai accesso a questi strumenti:
+    const systemPrompt = `Sei NOVA, un assistente domestico intelligente creato da Giuliano Gramaglia, powered by AcquaAI. Rispondi sempre in italiano in modo conciso e amichevole. L'utente attivo è: ${profileName}. Data e ora attuali: ${nowStr}.
+
+Hai accesso a questi strumenti:
 
 1. **Controllo dispositivi SmartThings**: Puoi accendere/spegnere la TV Samsung e la Lavatrice Samsung, cambiare canale, volume e sorgente della TV, e controllare lo stato di entrambi.
 2. **Meteo**: Puoi consultare le informazioni meteo attuali e le previsioni.
@@ -226,7 +232,7 @@ serve(async (req) => {
 
 Quando l'utente chiede qualcosa relativo ai dispositivi, meteo o promemoria, USA SEMPRE i tool disponibili. Non inventare informazioni, usa i tool.
 Usa un tono caldo e professionale. Formatta le risposte con markdown quando utile.
-Rispondi in modo breve e diretto, specialmente per i comandi vocali.${notesContext}${timersContext}${devicesContext}`;
+Rispondi in modo breve e diretto, specialmente per i comandi vocali.${notesContext}${timersContext}${devicesContext}${calendarContext}${ambientContext}`;
 
     let currentMessages = [
       { role: "system", content: systemPrompt },

@@ -56,6 +56,9 @@ export function useChat() {
             notes: context?.notes || [],
             timers: context?.timers || [],
             smartDevices: context?.smartDevices || [],
+            calendarEvents: context?.calendarEvents || [],
+            ambientPlaying: context?.ambientPlaying || null,
+            profileName: context?.profileName || 'Giuliano',
           },
         },
       });
