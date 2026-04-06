@@ -12,6 +12,7 @@ export interface ChatContext {
   calendarEvents?: any[];
   ambientPlaying?: string | null;
   profileName?: string;
+  notifications?: any[];
 }
 
 export interface ChatToolAction {
