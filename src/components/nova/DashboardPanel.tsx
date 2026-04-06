@@ -267,27 +267,36 @@ const DashboardPanel = ({
 
         {/* Row 6: News full width */}
         {newsItems.length > 0 && (
-          <BentoCard className="col-span-2 min-h-[80px]" headerTitle="News" headerIcon="📰" onMore={() => onNavigate('news')}>
-            <div className="flex flex-col gap-0.5">
-              {newsItems[newsIndex]?.source && (
-                <span className="text-[0.5rem] text-muted-foreground font-mono">{newsItems[newsIndex].source}</span>
-              )}
-              <p className="text-[0.72rem] font-semibold leading-snug text-foreground line-clamp-2">
-                {newsItems[newsIndex]?.title}
-              </p>
-              <div className="flex gap-1 mt-1">
+          <BentoCard className="col-span-2 min-h-[90px] overflow-hidden" headerTitle="News" headerIcon="📰" onMore={() => onNavigate('news')}>
+            <div className="relative">
+              <div key={newsIndex} className="flex flex-col gap-1" style={{ animation: 'newsSlide 0.4s ease-out' }}>
+                <div className="flex items-center gap-2">
+                  {newsItems[newsIndex]?.source && (
+                    <span className="text-[0.5rem] text-muted-foreground font-mono bg-secondary/80 px-1.5 py-0.5 rounded">{newsItems[newsIndex].source}</span>
+                  )}
+                  <span className="text-[0.45rem] text-muted-foreground font-mono">
+                    {newsItems[newsIndex]?.pubDate && new Date(newsItems[newsIndex].pubDate).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                <p className="text-[0.75rem] font-semibold leading-snug text-foreground line-clamp-2">
+                  {newsItems[newsIndex]?.title}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 mt-2">
                 {newsItems.slice(0, Math.min(5, newsItems.length)).map((_, i) => (
-                  <span key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === newsIndex % Math.min(5, newsItems.length) ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                  <span key={i} className={`h-1 rounded-full transition-all duration-300 ${i === newsIndex % Math.min(5, newsItems.length) ? 'bg-primary w-4' : 'bg-muted-foreground/30 w-1.5'}`} />
                 ))}
+                <span className="ml-auto text-[0.45rem] text-muted-foreground font-mono">{(newsIndex % newsItems.length) + 1}/{newsItems.length}</span>
               </div>
             </div>
           </BentoCard>
         )}
         {newsLoading && newsItems.length === 0 && (
-          <BentoCard className="col-span-2 min-h-[80px]">
+          <BentoCard className="col-span-2 min-h-[90px]">
             <div className="animate-pulse">
               <div className="h-2 bg-secondary rounded w-16 mb-2" />
-              <div className="h-3 bg-secondary rounded w-3/4" />
+              <div className="h-3 bg-secondary rounded w-3/4 mb-1.5" />
+              <div className="h-3 bg-secondary rounded w-1/2" />
             </div>
           </BentoCard>
         )}
