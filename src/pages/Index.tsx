@@ -166,6 +166,9 @@ const Index = () => {
             newsItems={news.items}
             newsLoading={news.loading}
             profile={profile}
+            ambientSounds={ambient.sounds}
+            ambientPlaying={ambient.playing}
+            onAmbientToggle={ambient.toggle}
           />
         )}
         {tab === 'chat' && (
