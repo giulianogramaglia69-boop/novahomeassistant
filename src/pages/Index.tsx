@@ -7,7 +7,7 @@ import { useNotes } from '@/hooks/useNotes';
 import { useWeather } from '@/hooks/useWeather';
 import { useSmartThings } from '@/hooks/useSmartThings';
 import { useVoiceWake } from '@/hooks/useVoiceWake';
-import { useRadio, RADIO_STATIONS } from '@/hooks/useRadio';
+import { useRadio } from '@/hooks/useRadio';
 import { useTimers } from '@/hooks/useTimers';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useAmbientSounds } from '@/hooks/useAmbientSounds';
@@ -36,20 +36,20 @@ const Index = () => {
   const [tab, setTab] = useState<TabId>('dashboard');
   const chat = useChat();
   const devices = useDevices();
-  const reminders = useReminders();
-  const notes = useNotes();
+  const pName = profile?.name;
+  const reminders = useReminders(pName);
+  const notes = useNotes(pName);
   const weather = useWeather();
   const smart = useSmartThings();
   const radio = useRadio();
   const timers = useTimers();
-  const calendar = useCalendar();
+  const calendar = useCalendar(pName);
   const ambient = useAmbientSounds();
   const news = useNews();
   const tts = useTTS();
-  const notif = useNotifications();
+  const notif = useNotifications(pName);
   const prevMsgCount = useRef(chat.messages.length);
 
-  // Notification checks
   useEffect(() => {
     notif.checkTimers(timers.timers);
   }, [timers.timers, notif.checkTimers]);
@@ -64,7 +64,6 @@ const Index = () => {
     notif.checkWeather(weather.weather);
   }, [weather.weather, notif.checkWeather]);
 
-  // Auto-speak new assistant messages
   useEffect(() => {
     if (chat.messages.length > prevMsgCount.current) {
       const lastMsg = chat.messages[chat.messages.length - 1];
@@ -112,9 +111,10 @@ const Index = () => {
       calendarEvents: calendar.getUpcomingEvents(10),
       ambientPlaying: ambient.playing,
       profileName: profile?.name || 'Giuliano',
+      notifications: notif.notifications.slice(0, 10),
     });
     handleToolActions(actions);
-  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions]);
+  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications]);
 
   const handleVoiceResult = useCallback((text: string) => {
     setTab('chat');
@@ -136,7 +136,17 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-dvh relative z-[1]">
-      <NovaHeader ttsEnabled={tts.enabled} ttsSpeaking={tts.speaking} onTtsToggle={tts.toggle} onTtsStop={tts.stop} profile={profile} />
+      <NovaHeader
+        ttsEnabled={tts.enabled}
+        ttsSpeaking={tts.speaking}
+        onTtsToggle={tts.toggle}
+        onTtsStop={tts.stop}
+        profile={profile}
+        notifications={notif.notifications}
+        unreadCount={notif.unreadCount}
+        onMarkRead={notif.markRead}
+        onClearNotifications={notif.clearAll}
+      />
       <TabNav active={tab} onChange={setTab} />
       <main className="flex-1 overflow-hidden flex flex-col">
         {tab === 'dashboard' && (

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { CalendarEvent } from '@/hooks/useCalendar';
 import { Timer } from '@/hooks/useTimers';
 import { WeatherData } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface NovaNotification {
   id: string;
@@ -35,7 +36,7 @@ function sendBrowserNotif(title: string, body: string) {
   }
 }
 
-export function useNotifications() {
+export function useNotifications(profileName?: string) {
   const [settings, setSettings] = useState<NotifSettings>(getSettings);
   const [notifications, setNotifications] = useState<NovaNotification[]>([]);
   const notifiedTimers = useRef<Set<string>>(new Set());
@@ -46,7 +47,26 @@ export function useNotifications() {
     localStorage.setItem(LS_KEY, JSON.stringify(settings));
   }, [settings]);
 
-  // Request permission on mount
+  // Load from DB
+  useEffect(() => {
+    if (!profileName) return;
+    const load = async () => {
+      const { data } = await supabase
+        .from('nova_notifications')
+        .select('*')
+        .eq('profile_name', profileName)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (data) {
+        setNotifications(data.map(r => ({
+          id: r.id, type: r.type as any, title: r.title,
+          body: r.body, timestamp: r.created_at, read: r.read,
+        })));
+      }
+    };
+    load();
+  }, [profileName]);
+
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
@@ -57,24 +77,34 @@ export function useNotifications() {
     setSettings(prev => ({ ...prev, [key]: val }));
   }, []);
 
-  const addNotification = useCallback((n: Omit<NovaNotification, 'id' | 'timestamp' | 'read'>) => {
+  const addNotification = useCallback(async (n: Omit<NovaNotification, 'id' | 'timestamp' | 'read'>) => {
+    const id = crypto.randomUUID();
     const notif: NovaNotification = {
-      ...n,
-      id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
-      read: false,
+      ...n, id, timestamp: new Date().toISOString(), read: false,
     };
     setNotifications(prev => [notif, ...prev].slice(0, 50));
     sendBrowserNotif(n.title, n.body);
-  }, []);
+    if (profileName) {
+      await supabase.from('nova_notifications').insert({
+        id, profile_name: profileName, type: n.type, title: n.title, body: n.body, read: false,
+      });
+    }
+  }, [profileName]);
 
-  const markRead = useCallback((id: string) => {
+  const markRead = useCallback(async (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-  }, []);
+    if (profileName) {
+      await supabase.from('nova_notifications').update({ read: true }).eq('id', id);
+    }
+  }, [profileName]);
 
-  const clearAll = useCallback(() => setNotifications([]), []);
+  const clearAll = useCallback(async () => {
+    setNotifications([]);
+    if (profileName) {
+      await supabase.from('nova_notifications').delete().eq('profile_name', profileName);
+    }
+  }, [profileName]);
 
-  // Check timers
   const checkTimers = useCallback((timers: Timer[]) => {
     if (!settings.timer) return;
     timers.forEach(t => {
@@ -85,13 +115,11 @@ export function useNotifications() {
     });
   }, [settings.timer, addNotification]);
 
-  // Check upcoming calendar events (within 15 min)
   const checkCalendar = useCallback((events: CalendarEvent[]) => {
     if (!settings.calendar) return;
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     const nowMin = now.getHours() * 60 + now.getMinutes();
-
     events.forEach(ev => {
       if (ev.date !== today) return;
       const [h, m] = ev.startTime.split(':').map(Number);
@@ -100,26 +128,21 @@ export function useNotifications() {
       if (diff >= 0 && diff <= 15 && !notifiedEvents.current.has(ev.id)) {
         notifiedEvents.current.add(ev.id);
         addNotification({
-          type: 'calendar',
-          title: '📅 Evento imminente',
+          type: 'calendar', title: '📅 Evento imminente',
           body: `"${ev.title}" tra ${diff} minuti (${ev.startTime})`,
         });
       }
     });
   }, [settings.calendar, addNotification]);
 
-  // Check severe weather
-  const SEVERE_CODES = new Set([65, 75, 82, 95, 96, 99]);
   const checkWeather = useCallback((weather: WeatherData | null) => {
     if (!settings.weather || !weather) return;
-    // Extract weather code from description matching
     const desc = weather.description;
     const isSevere = ['intensa', 'Temporale', 'grandine', 'forte'].some(w => desc.includes(w));
     if (isSevere && lastWeatherAlert.current !== desc) {
       lastWeatherAlert.current = desc;
       addNotification({
-        type: 'weather',
-        title: '⚠️ Meteo avverso',
+        type: 'weather', title: '⚠️ Meteo avverso',
         body: `${weather.icon} ${desc} — ${weather.temperature}°C a ${weather.city}`,
       });
     }
@@ -128,15 +151,7 @@ export function useNotifications() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return {
-    settings,
-    updateSetting,
-    notifications,
-    unreadCount,
-    addNotification,
-    markRead,
-    clearAll,
-    checkTimers,
-    checkCalendar,
-    checkWeather,
+    settings, updateSetting, notifications, unreadCount,
+    addNotification, markRead, clearAll, checkTimers, checkCalendar, checkWeather,
   };
 }

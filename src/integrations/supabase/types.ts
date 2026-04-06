@@ -32,6 +32,117 @@ export type Database = {
         }
         Relationships: []
       }
+      nova_calendar_events: {
+        Row: {
+          created_at: string
+          date: string
+          description: string | null
+          end_time: string
+          id: string
+          profile_name: string
+          start_time: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          description?: string | null
+          end_time: string
+          id?: string
+          profile_name: string
+          start_time: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          description?: string | null
+          end_time?: string
+          id?: string
+          profile_name?: string
+          start_time?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      nova_notes: {
+        Row: {
+          created_at: string
+          id: string
+          profile_name: string
+          text: string
+          timestamp: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_name: string
+          text: string
+          timestamp: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_name?: string
+          text?: string
+          timestamp?: string
+        }
+        Relationships: []
+      }
+      nova_notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          profile_name: string
+          read: boolean
+          title: string
+          type: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          profile_name: string
+          read?: boolean
+          title: string
+          type: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          profile_name?: string
+          read?: boolean
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      nova_reminders: {
+        Row: {
+          created_at: string
+          done: boolean
+          id: string
+          profile_name: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          profile_name: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          id?: string
+          profile_name?: string
+          text?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
