@@ -219,6 +219,7 @@ serve(async (req) => {
     const devicesContext = context?.smartDevices?.length ? `\n\nDispositivi SmartThings collegati:\n${context.smartDevices.map((d: any) => `- ${d.label} (${d.type}) - ${d.on ? 'Acceso' : 'Spento'}`).join('\n')}` : '';
     const calendarContext = context?.calendarEvents?.length ? `\n\nEventi calendario prossimi 7 giorni:\n${context.calendarEvents.map((e: any) => `- ${e.title} il ${e.date} dalle ${e.startTime} alle ${e.endTime}${e.description ? ' — ' + e.description : ''}`).join('\n')}` : '';
     const ambientContext = context?.ambientPlaying ? `\n\nSuono ambientale in riproduzione: ${context.ambientPlaying}` : '';
+    const notifContext = context?.notifications?.length ? `\n\nUltime notifiche:\n${context.notifications.map((n: any) => `- [${n.type}] ${n.title}: ${n.body} (${n.read ? 'letta' : 'non letta'})`).join('\n')}` : '';
     const profileName = context?.profileName || 'Giuliano';
     const nowStr = new Date().toLocaleString('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'full', timeStyle: 'short' });
 
@@ -230,9 +231,11 @@ Hai accesso a questi strumenti:
 2. **Meteo**: Puoi consultare le informazioni meteo attuali e le previsioni.
 3. **Promemoria**: Puoi aggiungere, elencare, completare e rimuovere promemoria.
 
+Hai accesso completo ai dati dell'utente: note, eventi del calendario, timer, dispositivi, notifiche recenti e suoni ambientali. Usa queste informazioni per rispondere in modo contestuale e proattivo.
+
 Quando l'utente chiede qualcosa relativo ai dispositivi, meteo o promemoria, USA SEMPRE i tool disponibili. Non inventare informazioni, usa i tool.
 Usa un tono caldo e professionale. Formatta le risposte con markdown quando utile.
-Rispondi in modo breve e diretto, specialmente per i comandi vocali.${notesContext}${timersContext}${devicesContext}${calendarContext}${ambientContext}`;
+Rispondi in modo breve e diretto, specialmente per i comandi vocali.${notesContext}${timersContext}${devicesContext}${calendarContext}${ambientContext}${notifContext}`;
 
     let currentMessages = [
       { role: "system", content: systemPrompt },

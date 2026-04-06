@@ -60,6 +60,7 @@ export function useChat() {
             calendarEvents: context?.calendarEvents || [],
             ambientPlaying: context?.ambientPlaying || null,
             profileName: context?.profileName || 'Giuliano',
+            notifications: context?.notifications || [],
           },
         },
       });
