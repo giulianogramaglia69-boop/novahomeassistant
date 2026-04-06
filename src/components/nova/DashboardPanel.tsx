@@ -5,6 +5,7 @@ import { RadioStation } from '@/lib/types';
 import { Timer } from '@/hooks/useTimers';
 import { CalendarEvent } from '@/hooks/useCalendar';
 import { NewsItem } from '@/hooks/useNews';
+import { AmbientSound } from '@/hooks/useAmbientSounds';
 import GreetingClock from './GreetingClock';
 
 interface Props {
@@ -33,6 +34,9 @@ interface Props {
   newsItems: NewsItem[];
   newsLoading: boolean;
   profile: Profile;
+  ambientSounds: AmbientSound[];
+  ambientPlaying: string | null;
+  onAmbientToggle: (id: string) => void;
 }
 
 const DashboardPanel = ({
@@ -46,11 +50,11 @@ const DashboardPanel = ({
   voiceState, onVoiceStart, onVoiceStop,
   newsItems, newsLoading,
   profile,
+  ambientSounds, ambientPlaying, onAmbientToggle,
 }: Props) => {
   const [noteInput, setNoteInput] = useState('');
   const [newsIndex, setNewsIndex] = useState(0);
 
-  // Auto-rotate news every 5s
   useEffect(() => {
     if (newsItems.length <= 1) return;
     const interval = setInterval(() => {
@@ -69,47 +73,14 @@ const DashboardPanel = ({
 
   return (
     <div className="flex-1 overflow-y-auto scrollbar-thin px-3 pb-4 pt-3">
-      {/* News Carousel Bar */}
-      {newsItems.length > 0 && (
-        <a
-          href={newsItems[newsIndex]?.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => { e.preventDefault(); onNavigate('news' as TabId); }}
-          className="block mb-3 bg-card/80 border border-border rounded-2xl px-4 py-3 transition-all hover:border-primary/30 active:scale-[0.99]"
-        >
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[0.55rem] font-syne font-bold tracking-[0.15em] uppercase text-primary">📰 NEWS</span>
-            {newsItems[newsIndex]?.source && (
-              <span className="text-[0.5rem] text-muted-foreground font-mono">· {newsItems[newsIndex].source}</span>
-            )}
-            <div className="ml-auto flex gap-1">
-              {newsItems.slice(0, Math.min(5, newsItems.length)).map((_, i) => (
-                <span key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === newsIndex % Math.min(5, newsItems.length) ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
-              ))}
-            </div>
-          </div>
-          <p className="text-[0.72rem] font-semibold leading-snug text-foreground line-clamp-2 transition-all">
-            {newsItems[newsIndex]?.title}
-          </p>
-        </a>
-      )}
-      {newsLoading && newsItems.length === 0 && (
-        <div className="mb-3 bg-card/80 border border-border rounded-2xl px-4 py-3 animate-pulse">
-          <div className="h-2 bg-secondary rounded w-16 mb-2" />
-          <div className="h-3 bg-secondary rounded w-3/4" />
-        </div>
-      )}
-
-      {/* Bento Grid */}
       <div className="grid grid-cols-2 gap-3">
-        {/* Clock Card - large left */}
-        <BentoCard className="col-span-1 row-span-1">
+
+        {/* Row 1: Greeting + Weather */}
+        <BentoCard className="col-span-1 min-h-[120px]">
           <GreetingClock compact profile={profile} />
         </BentoCard>
 
-        {/* Weather Card - medium right */}
-        <BentoCard className="col-span-1" onClick={() => onNavigate('meteo')}>
+        <BentoCard className="col-span-1 min-h-[120px]" onClick={() => onNavigate('meteo')}>
           {weather ? (
             <div className="flex flex-col items-center justify-center h-full gap-1">
               <span className="text-3xl">{weather.icon}</span>
@@ -124,8 +95,8 @@ const DashboardPanel = ({
           )}
         </BentoCard>
 
-        {/* SmartThings - large horizontal */}
-        <BentoCard className="col-span-2" headerTitle="Dispositivi" headerIcon="🏠" onMore={() => onNavigate('home')}>
+        {/* Row 2: SmartThings full width */}
+        <BentoCard className="col-span-2 min-h-[100px]" headerTitle="Dispositivi" headerIcon="🏠" onMore={() => onNavigate('home')}>
           {smartLoading ? (
             <div className="text-[0.65rem] text-muted-foreground animate-pulse">Caricamento...</div>
           ) : smartDevices.length === 0 ? (
@@ -151,8 +122,8 @@ const DashboardPanel = ({
           )}
         </BentoCard>
 
-        {/* Calendar Events - medium vertical */}
-        <BentoCard className="col-span-1" headerTitle="Prossimi eventi" headerIcon="📅" onMore={() => onNavigate('calendar')}>
+        {/* Row 3: Events + Radio */}
+        <BentoCard className="col-span-1 min-h-[120px]" headerTitle="Prossimi eventi" headerIcon="📅" onMore={() => onNavigate('calendar')}>
           {upcomingEvents.length === 0 ? (
             <p className="text-[0.6rem] text-muted-foreground">Nessun evento</p>
           ) : (
@@ -167,8 +138,7 @@ const DashboardPanel = ({
           )}
         </BentoCard>
 
-        {/* Radio - medium */}
-        <BentoCard className="col-span-1" headerTitle="Radio" headerIcon="📻" onMore={() => onNavigate('radio')}>
+        <BentoCard className="col-span-1 min-h-[120px]" headerTitle="Radio" headerIcon="📻" onMore={() => onNavigate('radio')}>
           <div className="flex flex-col gap-1.5">
             {stations.map(s => {
               const isPlaying = playing === s.id;
@@ -200,8 +170,8 @@ const DashboardPanel = ({
           </div>
         </BentoCard>
 
-        {/* Mic button - small */}
-        <BentoCard className="col-span-1 flex items-center justify-center">
+        {/* Row 4: Mic + Notes */}
+        <BentoCard className="col-span-1 min-h-[120px] flex items-center justify-center">
           <button
             onClick={voiceState === 'listening' ? onVoiceStop : onVoiceStart}
             className={`w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 ${
@@ -222,8 +192,7 @@ const DashboardPanel = ({
           </span>
         </BentoCard>
 
-        {/* Notes - large */}
-        <BentoCard className="col-span-1" headerTitle="Note" headerIcon="📝" onMore={() => onNavigate('reminders')}>
+        <BentoCard className="col-span-1 min-h-[120px]" headerTitle="Note" headerIcon="📝" onMore={() => onNavigate('reminders')}>
           <div className="flex flex-col gap-1 mb-2">
             {notes.length === 0 ? (
               <p className="text-[0.6rem] text-muted-foreground">Nessuna nota</p>
@@ -246,8 +215,8 @@ const DashboardPanel = ({
           </div>
         </BentoCard>
 
-        {/* Timer - small */}
-        <BentoCard className="col-span-1" headerTitle="Timer" headerIcon="⏱️" onMore={onTimerNavigate}>
+        {/* Row 5: Timer + Ambient */}
+        <BentoCard className="col-span-1 min-h-[120px]" headerTitle="Timer" headerIcon="⏱️" onMore={onTimerNavigate}>
           {activeTimer ? (() => {
             const m = Math.floor(activeTimer.remainingSeconds / 60);
             const s = activeTimer.remainingSeconds % 60;
@@ -275,16 +244,53 @@ const DashboardPanel = ({
           )}
         </BentoCard>
 
-        {/* Ambiente - small */}
-        <BentoCard className="col-span-2" headerTitle="Ambiente" headerIcon="🎵" onMore={() => onNavigate('ambiente')}>
-          <div className="flex gap-2">
-            {['🌧️ Pioggia', '🌊 Oceano', '🌿 Natura'].map(s => (
-              <div key={s} className="flex-1 text-center py-2 rounded-xl bg-secondary/50 border border-border text-[0.6rem] text-muted-foreground font-syne font-semibold">
-                {s}
-              </div>
-            ))}
+        <BentoCard className="col-span-1 min-h-[120px]" headerTitle="Ambiente" headerIcon="🎵" onMore={() => onNavigate('ambiente')}>
+          <div className="flex flex-col gap-1.5">
+            {ambientSounds.map(s => {
+              const isActive = ambientPlaying === s.id;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => onAmbientToggle(s.id)}
+                  className={`flex items-center gap-2 px-2.5 py-2 rounded-xl border text-[0.65rem] transition-all active:scale-[0.97] ${
+                    isActive ? 'border-primary/30 bg-primary/10 text-foreground' : 'border-border bg-secondary/50 text-muted-foreground'
+                  }`}
+                >
+                  <span>{s.icon}</span>
+                  <span className="font-syne font-semibold text-[0.6rem] flex-1 text-left">{s.name}</span>
+                  {isActive && <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
+                </button>
+              );
+            })}
           </div>
         </BentoCard>
+
+        {/* Row 6: News full width */}
+        {newsItems.length > 0 && (
+          <BentoCard className="col-span-2 min-h-[80px]" headerTitle="News" headerIcon="📰" onMore={() => onNavigate('news')}>
+            <div className="flex flex-col gap-0.5">
+              {newsItems[newsIndex]?.source && (
+                <span className="text-[0.5rem] text-muted-foreground font-mono">{newsItems[newsIndex].source}</span>
+              )}
+              <p className="text-[0.72rem] font-semibold leading-snug text-foreground line-clamp-2">
+                {newsItems[newsIndex]?.title}
+              </p>
+              <div className="flex gap-1 mt-1">
+                {newsItems.slice(0, Math.min(5, newsItems.length)).map((_, i) => (
+                  <span key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === newsIndex % Math.min(5, newsItems.length) ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                ))}
+              </div>
+            </div>
+          </BentoCard>
+        )}
+        {newsLoading && newsItems.length === 0 && (
+          <BentoCard className="col-span-2 min-h-[80px]">
+            <div className="animate-pulse">
+              <div className="h-2 bg-secondary rounded w-16 mb-2" />
+              <div className="h-3 bg-secondary rounded w-3/4" />
+            </div>
+          </BentoCard>
+        )}
       </div>
     </div>
   );
