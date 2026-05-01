@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const WebPanel = () => {
   const [url, setUrl] = useState('https://glowsearch.lovable.app');
@@ -15,6 +15,18 @@ const WebPanel = () => {
     setUrl(u);
     setInput(u);
   };
+
+  useEffect(() => {
+    const h = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (typeof detail === 'string') {
+        setUrl(detail);
+        setInput(detail);
+      }
+    };
+    window.addEventListener('nova-web-go', h);
+    return () => window.removeEventListener('nova-web-go', h);
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-background">
