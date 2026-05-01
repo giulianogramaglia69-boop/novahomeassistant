@@ -16,7 +16,9 @@ export interface ChatContext {
 }
 
 export interface ChatToolAction {
-  type: 'add_reminder' | 'complete_reminder' | 'remove_reminder' | 'refresh_devices';
+  type: 'add_reminder' | 'complete_reminder' | 'remove_reminder' | 'refresh_devices'
+    | 'navigate' | 'web_search' | 'start_timer' | 'play_radio' | 'play_ambient'
+    | 'add_event' | 'add_note';
   payload?: string;
 }
 
@@ -72,12 +74,20 @@ export function useChat() {
 
       // Process tool actions
       for (const ta of toolActions) {
-        if (ta.startsWith('TOOL_ACTION:ADD_REMINDER:')) {
-          actions.push({ type: 'add_reminder', payload: ta.replace('TOOL_ACTION:ADD_REMINDER:', '') });
-        } else if (ta.startsWith('TOOL_ACTION:COMPLETE_REMINDER:')) {
-          actions.push({ type: 'complete_reminder', payload: ta.replace('TOOL_ACTION:COMPLETE_REMINDER:', '') });
-        } else if (ta.startsWith('TOOL_ACTION:REMOVE_REMINDER:')) {
-          actions.push({ type: 'remove_reminder', payload: ta.replace('TOOL_ACTION:REMOVE_REMINDER:', '') });
+        const m = ta.match(/^TOOL_ACTION:([A-Z_]+):(.*)$/s);
+        if (!m) continue;
+        const [, kind, payload] = m;
+        switch (kind) {
+          case 'ADD_REMINDER': actions.push({ type: 'add_reminder', payload }); break;
+          case 'COMPLETE_REMINDER': actions.push({ type: 'complete_reminder', payload }); break;
+          case 'REMOVE_REMINDER': actions.push({ type: 'remove_reminder', payload }); break;
+          case 'NAVIGATE': actions.push({ type: 'navigate', payload }); break;
+          case 'WEB_SEARCH': actions.push({ type: 'web_search', payload }); break;
+          case 'START_TIMER': actions.push({ type: 'start_timer', payload }); break;
+          case 'PLAY_RADIO': actions.push({ type: 'play_radio', payload }); break;
+          case 'PLAY_AMBIENT': actions.push({ type: 'play_ambient', payload }); break;
+          case 'ADD_EVENT': actions.push({ type: 'add_event', payload }); break;
+          case 'ADD_NOTE': actions.push({ type: 'add_note', payload }); break;
         }
       }
 
