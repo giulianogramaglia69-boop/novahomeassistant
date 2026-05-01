@@ -310,6 +310,7 @@ const Index = () => {
         {tab === 'news' && (
           <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />
         )}
+        {tab === 'web' && <WebPanel />}
         {tab === 'settings' && (
           <SettingsPanel
             onClearChat={chat.clearChat}
