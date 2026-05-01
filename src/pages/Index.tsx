@@ -360,6 +360,14 @@ const Index = () => {
           </div>
         </div>
       )}
+
+      {idle && (
+        <Screensaver
+          weather={weather.weather}
+          events={calendar.getUpcomingEvents(5)}
+          onDismiss={() => setIdle(false)}
+        />
+      )}
     </div>
   );
 };
