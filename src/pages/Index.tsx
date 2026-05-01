@@ -27,6 +27,7 @@ import TimerPanel from '@/components/nova/TimerPanel';
 import CalendarPanel from '@/components/nova/CalendarPanel';
 import AmbientePanel from '@/components/nova/AmbientePanel';
 import NewsPanel from '@/components/nova/NewsPanel';
+import WebPanel from '@/components/nova/WebPanel';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
 
@@ -97,9 +98,58 @@ const Index = () => {
         case 'refresh_devices':
           smart.fetchDevices();
           break;
+        case 'navigate':
+          if (action.payload) setTab(action.payload as TabId);
+          break;
+        case 'web_search':
+          if (action.payload) {
+            const q = encodeURIComponent(action.payload);
+            window.dispatchEvent(new CustomEvent('nova-web-go', { detail: `https://glowsearch.lovable.app/?q=${q}` }));
+            setTab('web');
+          }
+          break;
+        case 'start_timer':
+          try {
+            const p = JSON.parse(action.payload || '{}');
+            const minutes = Math.max(1, Math.round((p.seconds || 60) / 60));
+            const id = timers.add(p.label || 'Timer AI', minutes);
+            timers.start(id);
+          } catch { /* ignore */ }
+          break;
+        case 'play_radio':
+          try {
+            const p = JSON.parse(action.payload || '{}');
+            if (p.action === 'stop') { radio.stop(); break; }
+            const name = (p.station || '').toLowerCase();
+            const station = radio.stations.find(s =>
+              s.name.toLowerCase().includes(name) || s.id.toLowerCase().includes(name)
+            ) || radio.stations[0];
+            if (station) radio.toggle(station.id);
+          } catch { /* ignore */ }
+          break;
+        case 'play_ambient':
+          try {
+            const p = JSON.parse(action.payload || '{}');
+            if (p.action === 'stop') { ambient.stop?.(); break; }
+            const name = (p.sound || '').toLowerCase();
+            const s = ambient.sounds.find(x => x.name.toLowerCase().includes(name) || x.id.toLowerCase().includes(name));
+            if (s) ambient.toggle(s.id);
+          } catch { /* ignore */ }
+          break;
+        case 'add_event':
+          try {
+            const p = JSON.parse(action.payload || '{}');
+            if (p.title && p.date && p.startTime && p.endTime) {
+              calendar.addEvent({ title: p.title, date: p.date, startTime: p.startTime, endTime: p.endTime, description: p.description });
+            }
+          } catch { /* ignore */ }
+          break;
+        case 'add_note':
+          if (action.payload) notes.add(action.payload);
+          break;
       }
     }
-  }, [reminders, smart]);
+  }, [reminders, smart, timers, radio, ambient, calendar, notes]);
 
   const sendWithContext = useCallback(async (input: string) => {
     const actions = await chat.sendMessage(input, {
