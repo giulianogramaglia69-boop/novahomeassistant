@@ -30,6 +30,9 @@ import NewsPanel from '@/components/nova/NewsPanel';
 import WebPanel from '@/components/nova/WebPanel';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
+import Screensaver from '@/components/nova/Screensaver';
+
+const IDLE_MS = 5 * 60 * 1000;
 
 const Index = () => {
   const [unlocked, setUnlocked] = useState(false);
@@ -172,6 +175,25 @@ const Index = () => {
   }, [sendWithContext]);
 
   const voice = useVoiceWake(handleVoiceResult);
+
+  // Idle screensaver
+  const [idle, setIdle] = useState(false);
+  const idleTimer = useRef<number | null>(null);
+  useEffect(() => {
+    if (!unlocked) return;
+    const reset = () => {
+      setIdle(false);
+      if (idleTimer.current) window.clearTimeout(idleTimer.current);
+      idleTimer.current = window.setTimeout(() => setIdle(true), IDLE_MS);
+    };
+    const events: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel'];
+    events.forEach(ev => window.addEventListener(ev, reset, { passive: true }));
+    reset();
+    return () => {
+      events.forEach(ev => window.removeEventListener(ev, reset));
+      if (idleTimer.current) window.clearTimeout(idleTimer.current);
+    };
+  }, [unlocked]);
 
   const handleLogout = useCallback(() => {
     setUnlocked(false);
@@ -337,6 +359,14 @@ const Index = () => {
             {voice.statusText}
           </div>
         </div>
+      )}
+
+      {idle && (
+        <Screensaver
+          weather={weather.weather}
+          events={calendar.getUpcomingEvents(5)}
+          onDismiss={() => setIdle(false)}
+        />
       )}
     </div>
   );
