@@ -24,12 +24,13 @@ export function useDevices() {
 
   const applyScene = useCallback((sceneId: string) => {
     const scene = SCENES.find(s => s.id === sceneId);
-    if (!scene) return;
+    if (!scene) return undefined;
     setDevices(prev => prev.map(d => {
-      const override = (scene.devices as Record<string, any>)[d.id];
+      const override = scene.devices[d.id];
       if (!override) return d;
       return { ...d, ...override };
     }));
+    return scene;
   }, []);
 
   const devicesOn = devices.filter(d => d.on).length;
