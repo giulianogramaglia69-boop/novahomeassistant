@@ -359,6 +359,13 @@ const Index = () => {
           <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />
         )}
         {tab === 'web' && <WebPanel />}
+        {tab === 'messages' && (
+          <MessagesPanel profile={profile} messages={msgs.messages} onSend={msgs.send} onMarkRead={msgs.markRead} />
+        )}
+        {tab === 'shopping' && (
+          <ShoppingPanel items={shopping.items} onAdd={shopping.add} onToggle={shopping.toggle} onRemove={shopping.remove} onClearDone={shopping.clearDone} />
+        )}
+        {tab === 'traffic' && <TrafficPanel />}
         {tab === 'settings' && (
           <SettingsPanel
             onClearChat={chat.clearChat}
@@ -369,6 +376,8 @@ const Index = () => {
             onNotifSettingChange={notif.updateSetting}
             ttsEnabled={tts.enabled}
             onTtsToggle={tts.toggle}
+            memoryItems={memory.items}
+            onForgetMemory={memory.forget}
           />
         )}
       </main>
