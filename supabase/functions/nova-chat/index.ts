@@ -151,6 +151,37 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "remember",
+      description: "Salva un fatto/preferenza dell'utente nella memoria a lungo termine (es. allergie, gusti, abitudini, indirizzi). Usa key concise (es. 'allergia', 'pizza_preferita', 'orario_sveglia').",
+      parameters: {
+        type: "object",
+        properties: {
+          key: { type: "string", description: "etichetta breve" },
+          value: { type: "string", description: "valore/dettaglio" },
+        },
+        required: ["key", "value"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_shopping",
+      description: "Aggiungi articolo alla lista della spesa condivisa.",
+      parameters: {
+        type: "object",
+        properties: {
+          item: { type: "string" },
+          qty: { type: "string" },
+          category: { type: "string", enum: ["Frutta/Verdura","Carne/Pesce","Latticini","Pane/Pasta","Bevande","Surgelati","Igiene","Casa","Altro"] },
+        },
+        required: ["item"],
+      },
+    },
+  },
 ];
 
 function findDeviceIdFromContext(context: any, type: string): string | null {
