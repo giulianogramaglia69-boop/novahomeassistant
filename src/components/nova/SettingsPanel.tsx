@@ -122,12 +122,57 @@ const SettingsPanel = ({
         } />
       </Section>
 
+      {/* ─── TEMA ─── */}
+      <div>
+        <div className="font-syne text-[0.6rem] font-bold tracking-[0.18em] text-muted-foreground uppercase mb-2">🎨 Tema</div>
+        <div className="grid grid-cols-2 gap-2">
+          {THEMES.map(t => (
+            <button key={t.id} onClick={() => setTheme(t.id as ThemeId)}
+              className={`p-3 rounded-2xl border text-left transition-all ${
+                theme === t.id ? 'bg-primary/15 border-primary/50' : 'bg-card border-border'
+              }`}>
+              <div className="text-xl">{t.emoji}</div>
+              <div className="text-[0.7rem] font-bold text-foreground mt-1">{t.name}</div>
+              <div className="text-[0.55rem] text-muted-foreground">{t.sub}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* ─── AI ─── */}
       <Section title="🤖 Intelligenza Artificiale">
         <ActionRow label="AI Gateway" sub="Powered by AcquaAI" action={
           <span className="text-accent text-[0.65rem] font-semibold">Attivo ✓</span>
         } />
       </Section>
+
+      {/* ─── MEMORIA AI ─── */}
+      <div>
+        <div className="font-syne text-[0.6rem] font-bold tracking-[0.18em] text-muted-foreground uppercase mb-2">
+          🧠 Memoria a lungo termine ({memoryItems.length})
+        </div>
+        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+          {memoryItems.length === 0 ? (
+            <div className="px-4 py-6 text-center text-[0.65rem] text-muted-foreground">
+              L'AI imparerà preferenze e fatti su di te col tempo.
+            </div>
+          ) : (
+            <div className="divide-y divide-border max-h-60 overflow-y-auto scrollbar-thin">
+              {memoryItems.map(m => (
+                <div key={m.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[0.7rem] font-bold text-primary truncate">{m.key}</div>
+                    <div className="text-[0.65rem] text-foreground truncate">{m.value}</div>
+                  </div>
+                  <button onClick={() => onForgetMemory(m.id)}
+                    className="text-destructive/70 hover:text-destructive text-sm shrink-0">✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
 
       {/* ─── DISPOSITIVI (solo Admin) ─── */}
       {isAdmin && (
