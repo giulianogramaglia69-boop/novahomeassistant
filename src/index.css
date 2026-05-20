@@ -5,39 +5,101 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  :root, :root[data-theme="scifi"] {
     --background: 220 45% 4%;
     --foreground: 216 60% 95%;
-
     --card: 220 40% 8%;
     --card-foreground: 216 60% 95%;
-
     --popover: 220 40% 8%;
     --popover-foreground: 216 60% 95%;
-
     --primary: 215 100% 61%;
     --primary-foreground: 0 0% 100%;
-
     --secondary: 220 35% 12%;
     --secondary-foreground: 216 60% 95%;
-
     --muted: 220 30% 15%;
     --muted-foreground: 215 30% 54%;
-
     --accent: 168 100% 45%;
     --accent-foreground: 220 45% 4%;
-
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 215 60% 70% / 0.12;
     --input: 215 60% 70% / 0.12;
     --ring: 215 100% 61%;
-
     --radius: 0.75rem;
-
     --surface2: 220 38% 13%;
     --nova-glow: 215 100% 61% / 0.15;
+  }
+
+  :root[data-theme="sunset"] {
+    --background: 20 35% 6%;
+    --foreground: 30 60% 95%;
+    --card: 20 30% 10%;
+    --card-foreground: 30 60% 95%;
+    --popover: 20 30% 10%;
+    --popover-foreground: 30 60% 95%;
+    --primary: 18 90% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 20 25% 14%;
+    --secondary-foreground: 30 60% 95%;
+    --muted: 20 20% 18%;
+    --muted-foreground: 25 25% 60%;
+    --accent: 38 95% 55%;
+    --accent-foreground: 20 35% 6%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 25 60% 60% / 0.15;
+    --input: 25 60% 60% / 0.15;
+    --ring: 18 90% 58%;
+    --surface2: 20 28% 15%;
+    --nova-glow: 18 90% 58% / 0.18;
+  }
+
+  :root[data-theme="minimal"] {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 0 0% 12%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 94%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 210 100% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 0% / 0.1;
+    --input: 0 0% 0% / 0.1;
+    --ring: 0 0% 12%;
+    --surface2: 0 0% 96%;
+    --nova-glow: 210 100% 50% / 0.1;
+  }
+
+  :root[data-theme="cyberpunk"] {
+    --background: 280 50% 4%;
+    --foreground: 100 100% 90%;
+    --card: 280 40% 9%;
+    --card-foreground: 100 100% 90%;
+    --popover: 280 40% 9%;
+    --popover-foreground: 100 100% 90%;
+    --primary: 320 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 280 35% 14%;
+    --secondary-foreground: 100 100% 90%;
+    --muted: 280 30% 16%;
+    --muted-foreground: 290 30% 65%;
+    --accent: 120 100% 55%;
+    --accent-foreground: 280 50% 4%;
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 320 100% 70% / 0.18;
+    --input: 320 100% 70% / 0.18;
+    --ring: 320 100% 60%;
+    --surface2: 280 38% 13%;
+    --nova-glow: 320 100% 60% / 0.25;
   }
 
   .dark {
