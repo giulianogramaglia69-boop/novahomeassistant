@@ -23,7 +23,7 @@ export interface ChatMessage {
   timestamp: string;
 }
 
-export type TabId = 'dashboard' | 'chat' | 'home' | 'radio' | 'meteo' | 'reminders' | 'timer' | 'calendar' | 'ambiente' | 'news' | 'web' | 'settings';
+export type TabId = 'dashboard' | 'chat' | 'home' | 'radio' | 'meteo' | 'reminders' | 'timer' | 'calendar' | 'ambiente' | 'news' | 'web' | 'messages' | 'shopping' | 'traffic' | 'settings';
 
 export type ProfileName = 'Giuliano' | 'Simone' | 'Ilenia' | 'Admin';
 

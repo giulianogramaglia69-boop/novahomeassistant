@@ -4,6 +4,8 @@ const TABS: { id: TabId; icon: string; label: string }[] = [
   { id: 'dashboard', icon: '🏡', label: 'HOME' },
   { id: 'chat', icon: '💬', label: 'CHAT' },
   { id: 'home', icon: '🏠', label: 'CASA' },
+  { id: 'messages', icon: '✉️', label: 'MSG' },
+  { id: 'shopping', icon: '🛒', label: 'SPESA' },
   { id: 'radio', icon: '📻', label: 'RADIO' },
   { id: 'meteo', icon: '🌤', label: 'METEO' },
   { id: 'reminders', icon: '📝', label: 'NOTE' },
@@ -11,6 +13,7 @@ const TABS: { id: TabId; icon: string; label: string }[] = [
   { id: 'calendar', icon: '📅', label: 'CALENDAR' },
   { id: 'ambiente', icon: '🎵', label: 'AMBIENTE' },
   { id: 'news', icon: '📰', label: 'NEWS' },
+  { id: 'traffic', icon: '🚗', label: 'TRAFFIC' },
   { id: 'web', icon: '🌐', label: 'WEB' },
   { id: 'settings', icon: '⚙️', label: '' },
 ];

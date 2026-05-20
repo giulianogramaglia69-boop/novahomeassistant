@@ -14,6 +14,10 @@ import { useAmbientSounds } from '@/hooks/useAmbientSounds';
 import { useNews } from '@/hooks/useNews';
 import { useTTS } from '@/hooks/useTTS';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useAIMemory } from '@/hooks/useAIMemory';
+import { useMessages } from '@/hooks/useMessages';
+import { useShoppingList } from '@/hooks/useShoppingList';
+import { useTheme } from '@/hooks/useTheme';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -28,6 +32,9 @@ import CalendarPanel from '@/components/nova/CalendarPanel';
 import AmbientePanel from '@/components/nova/AmbientePanel';
 import NewsPanel from '@/components/nova/NewsPanel';
 import WebPanel from '@/components/nova/WebPanel';
+import MessagesPanel from '@/components/nova/MessagesPanel';
+import ShoppingPanel from '@/components/nova/ShoppingPanel';
+import TrafficPanel from '@/components/nova/TrafficPanel';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
 import Screensaver from '@/components/nova/Screensaver';
@@ -52,6 +59,10 @@ const Index = () => {
   const news = useNews();
   const tts = useTTS();
   const notif = useNotifications(pName);
+  const memory = useAIMemory(pName);
+  const msgs = useMessages(pName);
+  const shopping = useShoppingList(pName);
+  useTheme();
   const prevMsgCount = useRef(chat.messages.length);
 
   useEffect(() => {
@@ -147,12 +158,24 @@ const Index = () => {
             }
           } catch { /* ignore */ }
           break;
-        case 'add_note':
+         case 'add_note':
           if (action.payload) notes.add(action.payload);
+          break;
+        case 'remember':
+          try {
+            const p = JSON.parse(action.payload || '{}');
+            if (p.key && p.value) memory.remember(p.key, p.value);
+          } catch { /* ignore */ }
+          break;
+        case 'add_shopping':
+          try {
+            const p = JSON.parse(action.payload || '{}');
+            if (p.item) shopping.add(p.item, p.qty, p.category);
+          } catch { /* ignore */ }
           break;
       }
     }
-  }, [reminders, smart, timers, radio, ambient, calendar, notes]);
+  }, [reminders, smart, timers, radio, ambient, calendar, notes, memory, shopping]);
 
   const sendWithContext = useCallback(async (input: string) => {
     const actions = await chat.sendMessage(input, {
@@ -165,9 +188,12 @@ const Index = () => {
       ambientPlaying: ambient.playing,
       profileName: profile?.name || 'Giuliano',
       notifications: notif.notifications.slice(0, 10),
+      memory: memory.items.map(m => ({ key: m.key, value: m.value })),
+      shopping: shopping.items.slice(0, 30).map(s => ({ item: s.item, qty: s.qty, category: s.category, done: s.done })),
+      unreadMessages: msgs.unreadCount,
     });
     handleToolActions(actions);
-  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications]);
+  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications, memory.items, shopping.items, msgs.unreadCount]);
 
   const handleVoiceResult = useCallback((text: string) => {
     setTab('chat');
@@ -333,6 +359,13 @@ const Index = () => {
           <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />
         )}
         {tab === 'web' && <WebPanel />}
+        {tab === 'messages' && (
+          <MessagesPanel profile={profile} messages={msgs.messages} onSend={msgs.send} onMarkRead={msgs.markRead} />
+        )}
+        {tab === 'shopping' && (
+          <ShoppingPanel items={shopping.items} onAdd={shopping.add} onToggle={shopping.toggle} onRemove={shopping.remove} onClearDone={shopping.clearDone} />
+        )}
+        {tab === 'traffic' && <TrafficPanel />}
         {tab === 'settings' && (
           <SettingsPanel
             onClearChat={chat.clearChat}
@@ -343,6 +376,8 @@ const Index = () => {
             onNotifSettingChange={notif.updateSetting}
             ttsEnabled={tts.enabled}
             onTtsToggle={tts.toggle}
+            memoryItems={memory.items}
+            onForgetMemory={memory.forget}
           />
         )}
       </main>
