@@ -58,7 +58,7 @@ const tools = [
       parameters: {
         type: "object",
         properties: {
-          tab: { type: "string", enum: ["dashboard", "chat", "home", "radio", "meteo", "reminders", "timer", "calendar", "ambiente", "news", "web", "settings"] },
+          tab: { type: "string", enum: ["dashboard", "chat", "home", "radio", "meteo", "reminders", "timer", "calendar", "ambiente", "news", "web", "messages", "shopping", "traffic", "settings"] },
         },
         required: ["tab"],
       },
