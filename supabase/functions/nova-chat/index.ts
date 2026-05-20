@@ -295,6 +295,8 @@ async function executeToolCall(toolName: string, args: any, stToken: string, con
   if (toolName === "play_ambient") return `TOOL_ACTION:PLAY_AMBIENT:${JSON.stringify({ sound: args.sound || '', action: args.action })}`;
   if (toolName === "add_calendar_event") return `TOOL_ACTION:ADD_EVENT:${JSON.stringify(args)}`;
   if (toolName === "add_note") return `TOOL_ACTION:ADD_NOTE:${args.text}`;
+  if (toolName === "remember") return `TOOL_ACTION:REMEMBER:${JSON.stringify({ key: args.key, value: args.value })}`;
+  if (toolName === "add_shopping") return `TOOL_ACTION:ADD_SHOPPING:${JSON.stringify({ item: args.item, qty: args.qty, category: args.category })}`;
 
   return "Tool non riconosciuto.";
 }
@@ -329,6 +331,9 @@ serve(async (req) => {
     const calendarContext = context?.calendarEvents?.length ? `\n\nEventi 7gg:\n${context.calendarEvents.map((e: any) => `- ${e.title} ${e.date} ${e.startTime}-${e.endTime}`).join('\n')}` : '';
     const ambientContext = context?.ambientPlaying ? `\n\nAmbient: ${context.ambientPlaying}` : '';
     const notifContext = context?.notifications?.length ? `\n\nNotifiche:\n${context.notifications.map((n: any) => `- [${n.type}] ${n.title}: ${n.body}`).join('\n')}` : '';
+    const memoryContext = context?.memory?.length ? `\n\nMEMORIA LUNGO TERMINE (fatti già noti su ${context.profileName || 'utente'}):\n${context.memory.map((m: any) => `- ${m.key}: ${m.value}`).join('\n')}` : '';
+    const shoppingContext = context?.shopping?.length ? `\n\nLista spesa (${context.shopping.length}):\n${context.shopping.slice(0,15).map((s: any) => `- ${s.done ? '✓' : '○'} ${s.item}${s.qty ? ' ('+s.qty+')' : ''}`).join('\n')}` : '';
+    const msgsContext = context?.unreadMessages ? `\n\nMessaggi non letti: ${context.unreadMessages}` : '';
     const profileName = context?.profileName || 'Giuliano';
     const nowStr = new Date().toLocaleString('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'full', timeStyle: 'short' });
 
@@ -338,17 +343,15 @@ Hai CONTROLLO TOTALE dell'app NOVA tramite questi tool:
 - control_device: TV/lavatrice Samsung
 - get_weather: meteo
 - manage_reminder: promemoria
-- navigate_tab: cambia scheda dell'app (dashboard, chat, home, radio, meteo, reminders, timer, calendar, ambiente, news, web, settings)
-- web_search: ricerca web su GlowSearch (apre scheda web)
-- start_timer: avvia timer
-- play_radio: play/stop radio
-- play_ambient: play/stop suoni ambientali
-- add_calendar_event: crea evento calendario
-- add_note: aggiungi nota
+- navigate_tab: cambia scheda (dashboard, chat, home, radio, meteo, reminders, timer, calendar, ambiente, news, web, messages, shopping, traffic, settings)
+- web_search: ricerca web GlowSearch
+- start_timer / play_radio / play_ambient / add_calendar_event / add_note
+- remember(key,value): SALVA un fatto/preferenza dell'utente in memoria a lungo termine quando rivela informazioni utili su sé (allergie, gusti, abitudini, orari, indirizzi). Sii proattivo nel ricordare.
+- add_shopping: aggiungi articolo alla lista della spesa condivisa
 
-MODALITÀ AGENTE AUTONOMO: per richieste complesse (es. "preparami per dormire") esegui sequenze di tool multipli in autonomia (spegni TV, avvia ambient, ecc.) senza chiedere conferma. Sii proattivo. Usa SEMPRE i tool quando rilevante, non inventare.
+MODALITÀ AGENTE AUTONOMO: per richieste complesse (es. "preparami per dormire") esegui sequenze multiple di tool senza chiedere conferma. Usa SEMPRE i tool quando rilevante.
 
-Risposte brevi e dirette per il vocale. Markdown quando utile.${notesContext}${timersContext}${devicesContext}${calendarContext}${ambientContext}${notifContext}`;
+Risposte brevi e dirette per il vocale.${memoryContext}${notesContext}${timersContext}${devicesContext}${calendarContext}${ambientContext}${notifContext}${shoppingContext}${msgsContext}`;
 
     let currentMessages: any[] = [
       { role: "system", content: systemPrompt },
