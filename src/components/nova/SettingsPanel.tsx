@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Profile } from '@/lib/types';
+import { useTheme, THEMES, ThemeId } from '@/hooks/useTheme';
+import { MemoryItem } from '@/hooks/useAIMemory';
 
 interface NotifSettings {
   calendar: boolean;
@@ -18,6 +20,8 @@ interface Props {
   onNotifSettingChange: (key: keyof NotifSettings, val: boolean) => void;
   ttsEnabled: boolean;
   onTtsToggle: () => void;
+  memoryItems: MemoryItem[];
+  onForgetMemory: (id: string) => void;
 }
 
 const ST_KEY = 'nova_smartthings_token';
@@ -26,7 +30,9 @@ const SettingsPanel = ({
   onClearChat, onDetectLocation, profile, onLogout,
   notifSettings, onNotifSettingChange,
   ttsEnabled, onTtsToggle,
+  memoryItems, onForgetMemory,
 }: Props) => {
+  const { theme, setTheme } = useTheme();
   const [stToken, setStToken] = useState(() => localStorage.getItem(ST_KEY) || '');
   const [saving, setSaving] = useState(false);
 
