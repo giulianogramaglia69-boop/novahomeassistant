@@ -158,12 +158,24 @@ const Index = () => {
             }
           } catch { /* ignore */ }
           break;
-        case 'add_note':
+         case 'add_note':
           if (action.payload) notes.add(action.payload);
+          break;
+        case 'remember':
+          try {
+            const p = JSON.parse(action.payload || '{}');
+            if (p.key && p.value) memory.remember(p.key, p.value);
+          } catch { /* ignore */ }
+          break;
+        case 'add_shopping':
+          try {
+            const p = JSON.parse(action.payload || '{}');
+            if (p.item) shopping.add(p.item, p.qty, p.category);
+          } catch { /* ignore */ }
           break;
       }
     }
-  }, [reminders, smart, timers, radio, ambient, calendar, notes]);
+  }, [reminders, smart, timers, radio, ambient, calendar, notes, memory, shopping]);
 
   const sendWithContext = useCallback(async (input: string) => {
     const actions = await chat.sendMessage(input, {
@@ -176,9 +188,12 @@ const Index = () => {
       ambientPlaying: ambient.playing,
       profileName: profile?.name || 'Giuliano',
       notifications: notif.notifications.slice(0, 10),
+      memory: memory.items.map(m => ({ key: m.key, value: m.value })),
+      shopping: shopping.items.slice(0, 30).map(s => ({ item: s.item, qty: s.qty, category: s.category, done: s.done })),
+      unreadMessages: msgs.unreadCount,
     });
     handleToolActions(actions);
-  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications]);
+  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications, memory.items, shopping.items, msgs.unreadCount]);
 
   const handleVoiceResult = useCallback((text: string) => {
     setTab('chat');

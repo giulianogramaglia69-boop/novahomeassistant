@@ -63,6 +63,9 @@ export function useChat() {
             ambientPlaying: context?.ambientPlaying || null,
             profileName: context?.profileName || 'Giuliano',
             notifications: context?.notifications || [],
+            memory: context?.memory || [],
+            shopping: context?.shopping || [],
+            unreadMessages: context?.unreadMessages || 0,
           },
         },
       });
@@ -88,6 +91,8 @@ export function useChat() {
           case 'PLAY_AMBIENT': actions.push({ type: 'play_ambient', payload }); break;
           case 'ADD_EVENT': actions.push({ type: 'add_event', payload }); break;
           case 'ADD_NOTE': actions.push({ type: 'add_note', payload }); break;
+          case 'REMEMBER': actions.push({ type: 'remember', payload }); break;
+          case 'ADD_SHOPPING': actions.push({ type: 'add_shopping', payload }); break;
         }
       }
 
