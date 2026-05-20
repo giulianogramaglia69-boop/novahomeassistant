@@ -59,6 +59,10 @@ const Index = () => {
   const news = useNews();
   const tts = useTTS();
   const notif = useNotifications(pName);
+  const memory = useAIMemory(pName);
+  const msgs = useMessages(pName);
+  const shopping = useShoppingList(pName);
+  useTheme();
   const prevMsgCount = useRef(chat.messages.length);
 
   useEffect(() => {
