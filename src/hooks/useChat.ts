@@ -13,12 +13,15 @@ export interface ChatContext {
   ambientPlaying?: string | null;
   profileName?: string;
   notifications?: any[];
+  memory?: { key: string; value: string }[];
+  shopping?: { item: string; qty: string | null; category: string | null; done: boolean }[];
+  unreadMessages?: number;
 }
 
 export interface ChatToolAction {
   type: 'add_reminder' | 'complete_reminder' | 'remove_reminder' | 'refresh_devices'
     | 'navigate' | 'web_search' | 'start_timer' | 'play_radio' | 'play_ambient'
-    | 'add_event' | 'add_note';
+    | 'add_event' | 'add_note' | 'remember' | 'add_shopping';
   payload?: string;
 }
 
