@@ -32,6 +32,30 @@ export type Database = {
         }
         Relationships: []
       }
+      nova_ai_memory: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          profile_name: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          profile_name: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          profile_name?: string
+          value?: string
+        }
+        Relationships: []
+      }
       nova_calendar_events: {
         Row: {
           created_at: string
@@ -62,6 +86,33 @@ export type Database = {
           profile_name?: string
           start_time?: string
           title?: string
+        }
+        Relationships: []
+      }
+      nova_messages: {
+        Row: {
+          content: string
+          created_at: string
+          from_profile: string
+          id: string
+          read: boolean
+          to_profile: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          from_profile: string
+          id?: string
+          read?: boolean
+          to_profile: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          from_profile?: string
+          id?: string
+          read?: boolean
+          to_profile?: string
         }
         Relationships: []
       }
@@ -140,6 +191,36 @@ export type Database = {
           id?: string
           profile_name?: string
           text?: string
+        }
+        Relationships: []
+      }
+      nova_shopping: {
+        Row: {
+          added_by: string
+          category: string | null
+          created_at: string
+          done: boolean
+          id: string
+          item: string
+          qty: string | null
+        }
+        Insert: {
+          added_by: string
+          category?: string | null
+          created_at?: string
+          done?: boolean
+          id?: string
+          item: string
+          qty?: string | null
+        }
+        Update: {
+          added_by?: string
+          category?: string | null
+          created_at?: string
+          done?: boolean
+          id?: string
+          item?: string
+          qty?: string | null
         }
         Relationships: []
       }
