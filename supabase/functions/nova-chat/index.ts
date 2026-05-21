@@ -182,6 +182,42 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "run_sequence",
+      description: "Esegue una sequenza di azioni in ordine. Usalo per richieste complesse multi-step (es. 'preparami serata cinema'). Ogni step è un'azione tra: scene (nome scena home), smart_toggle (deviceId|on|off), navigate (tab), radio (station|stop), ambient (sound|stop), timer (seconds,label), speak (testo extra), delay (seconds).",
+      parameters: {
+        type: "object",
+        properties: {
+          steps: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                type: { type: "string", enum: ["scene","smart_toggle","navigate","radio","ambient","timer","speak","delay"] },
+                payload: { type: "string", description: "JSON-encoded payload for the action" },
+              },
+              required: ["type"],
+            },
+          },
+        },
+        required: ["steps"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "delay",
+      description: "Pausa la sequenza di N secondi (max 30). Usato dentro run_sequence o standalone.",
+      parameters: {
+        type: "object",
+        properties: { seconds: { type: "number" } },
+        required: ["seconds"],
+      },
+    },
+  },
 ];
 
 function findDeviceIdFromContext(context: any, type: string): string | null {
