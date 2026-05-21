@@ -312,6 +312,9 @@ const Index = () => {
             ambientSounds={ambient.sounds}
             ambientPlaying={ambient.playing}
             onAmbientToggle={ambient.toggle}
+            ttsSpeaking={tts.speaking}
+            totalWattage={totalWattage}
+            devicesOn={devicesOn}
           />
         )}
         {tab === 'chat' && (
