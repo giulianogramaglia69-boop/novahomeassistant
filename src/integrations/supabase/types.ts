@@ -89,6 +89,33 @@ export type Database = {
         }
         Relationships: []
       }
+      nova_macros: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          profile_name: string
+          steps: Json
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          profile_name: string
+          steps?: Json
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          profile_name?: string
+          steps?: Json
+        }
+        Relationships: []
+      }
       nova_messages: {
         Row: {
           content: string
@@ -191,6 +218,42 @@ export type Database = {
           id?: string
           profile_name?: string
           text?: string
+        }
+        Relationships: []
+      }
+      nova_routines: {
+        Row: {
+          config: Json
+          created_at: string
+          days: number[]
+          enabled: boolean
+          hour: number
+          id: string
+          key: string
+          minute: number
+          profile_name: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          days?: number[]
+          enabled?: boolean
+          hour?: number
+          id?: string
+          key: string
+          minute?: number
+          profile_name: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          days?: number[]
+          enabled?: boolean
+          hour?: number
+          id?: string
+          key?: string
+          minute?: number
+          profile_name?: string
         }
         Relationships: []
       }
