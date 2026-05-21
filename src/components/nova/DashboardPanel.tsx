@@ -7,6 +7,7 @@ import { CalendarEvent } from '@/hooks/useCalendar';
 import { NewsItem } from '@/hooks/useNews';
 import { AmbientSound } from '@/hooks/useAmbientSounds';
 import GreetingClock from './GreetingClock';
+import JarvisHUD from './JarvisHUD';
 
 interface Props {
   messages: ChatMessage[];
