@@ -7,6 +7,7 @@ import { CalendarEvent } from '@/hooks/useCalendar';
 import { NewsItem } from '@/hooks/useNews';
 import { AmbientSound } from '@/hooks/useAmbientSounds';
 import GreetingClock from './GreetingClock';
+import JarvisHUD from './JarvisHUD';
 
 interface Props {
   messages: ChatMessage[];
@@ -37,6 +38,9 @@ interface Props {
   ambientSounds: AmbientSound[];
   ambientPlaying: string | null;
   onAmbientToggle: (id: string) => void;
+  ttsSpeaking?: boolean;
+  totalWattage?: number;
+  devicesOn?: number;
 }
 
 const DashboardPanel = ({
@@ -51,6 +55,7 @@ const DashboardPanel = ({
   newsItems, newsLoading,
   profile,
   ambientSounds, ambientPlaying, onAmbientToggle,
+  ttsSpeaking = false, totalWattage = 0, devicesOn = 0,
 }: Props) => {
   const [noteInput, setNoteInput] = useState('');
   const [newsIndex, setNewsIndex] = useState(0);
@@ -73,7 +78,22 @@ const DashboardPanel = ({
 
   return (
     <div className="flex-1 overflow-y-auto scrollbar-thin px-3 pb-4 pt-3">
+      {/* JARVIS HUD */}
+      <div
+        className="relative mb-4 rounded-3xl border border-border bg-card/40 backdrop-blur p-4 hud-scanline overflow-hidden cursor-pointer active:scale-[0.99] transition-transform"
+        onClick={voiceState === 'listening' ? onVoiceStop : onVoiceStart}
+      >
+        <JarvisHUD
+          voiceState={voiceState}
+          ttsSpeaking={ttsSpeaking}
+          totalWattage={totalWattage}
+          devicesOn={devicesOn}
+          weatherTemp={weather?.temperature ?? null}
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
+
 
         {/* Row 1: Greeting + Weather */}
         <BentoCard className="col-span-1 min-h-[120px]">

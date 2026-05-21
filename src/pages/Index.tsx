@@ -18,6 +18,7 @@ import { useAIMemory } from '@/hooks/useAIMemory';
 import { useMessages } from '@/hooks/useMessages';
 import { useShoppingList } from '@/hooks/useShoppingList';
 import { useTheme } from '@/hooks/useTheme';
+import { useProactivity } from '@/hooks/useProactivity';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -63,6 +64,16 @@ const Index = () => {
   const msgs = useMessages(pName);
   const shopping = useShoppingList(pName);
   useTheme();
+  const devicesOn = devices.devicesOn;
+  const totalWattage = devices.totalWattage;
+  useProactivity({
+    profileName: pName,
+    weather: weather.weather,
+    events: calendar.events,
+    totalKwh: 0,
+    speak: (t: string) => tts.speak(t),
+    addNotification: () => {},
+  });
   const prevMsgCount = useRef(chat.messages.length);
 
   useEffect(() => {
@@ -173,9 +184,33 @@ const Index = () => {
             if (p.item) shopping.add(p.item, p.qty, p.category);
           } catch { /* ignore */ }
           break;
+        case 'run_sequence':
+          try {
+            const steps = JSON.parse(action.payload || '[]') as { type: string; payload?: string }[];
+            (async () => {
+              for (const s of steps) {
+                try {
+                  const pl = s.payload ? (s.payload.startsWith('{') || s.payload.startsWith('[') ? JSON.parse(s.payload) : s.payload) : null;
+                  if (s.type === 'navigate' && typeof pl === 'string') setTab(pl as TabId);
+                  else if (s.type === 'scene' && typeof pl === 'string') devices.applyScene(pl);
+                  else if (s.type === 'smart_toggle' && typeof pl === 'string') smart.toggleDevice(pl);
+                  else if (s.type === 'radio') { if (pl?.action === 'stop') radio.stop(); else { const st = radio.stations.find(x => x.name.toLowerCase().includes((pl?.station||'').toLowerCase())); if (st) radio.toggle(st.id); } }
+                  else if (s.type === 'ambient') { if (pl?.action === 'stop') ambient.stop?.(); else { const sd = ambient.sounds.find(x => x.name.toLowerCase().includes((pl?.sound||'').toLowerCase())); if (sd) ambient.toggle(sd.id); } }
+                  else if (s.type === 'timer') { const id = timers.add(pl?.label || 'Timer', Math.max(1, Math.round((pl?.seconds || 60) / 60))); timers.start(id); }
+                  else if (s.type === 'speak' && typeof pl === 'string') tts.speak(pl);
+                  else if (s.type === 'delay') await new Promise(r => setTimeout(r, Math.min(30000, (Number(pl)||1)*1000)));
+                } catch { /* skip step */ }
+                await new Promise(r => setTimeout(r, 200));
+              }
+            })();
+          } catch { /* ignore */ }
+          break;
+        case 'delay':
+          // Standalone delay — no-op (only meaningful inside sequences)
+          break;
       }
     }
-  }, [reminders, smart, timers, radio, ambient, calendar, notes, memory, shopping]);
+  }, [reminders, smart, timers, radio, ambient, calendar, notes, memory, shopping, devices, tts]);
 
   const sendWithContext = useCallback(async (input: string) => {
     const actions = await chat.sendMessage(input, {
@@ -277,6 +312,9 @@ const Index = () => {
             ambientSounds={ambient.sounds}
             ambientPlaying={ambient.playing}
             onAmbientToggle={ambient.toggle}
+            ttsSpeaking={tts.speaking}
+            totalWattage={totalWattage}
+            devicesOn={devicesOn}
           />
         )}
         {tab === 'chat' && (

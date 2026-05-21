@@ -182,6 +182,42 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "run_sequence",
+      description: "Esegue una sequenza di azioni in ordine. Usalo per richieste complesse multi-step (es. 'preparami serata cinema'). Ogni step è un'azione tra: scene (nome scena home), smart_toggle (deviceId|on|off), navigate (tab), radio (station|stop), ambient (sound|stop), timer (seconds,label), speak (testo extra), delay (seconds).",
+      parameters: {
+        type: "object",
+        properties: {
+          steps: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                type: { type: "string", enum: ["scene","smart_toggle","navigate","radio","ambient","timer","speak","delay"] },
+                payload: { type: "string", description: "JSON-encoded payload for the action" },
+              },
+              required: ["type"],
+            },
+          },
+        },
+        required: ["steps"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "delay",
+      description: "Pausa la sequenza di N secondi (max 30). Usato dentro run_sequence o standalone.",
+      parameters: {
+        type: "object",
+        properties: { seconds: { type: "number" } },
+        required: ["seconds"],
+      },
+    },
+  },
 ];
 
 function findDeviceIdFromContext(context: any, type: string): string | null {
@@ -297,8 +333,17 @@ async function executeToolCall(toolName: string, args: any, stToken: string, con
   if (toolName === "add_note") return `TOOL_ACTION:ADD_NOTE:${args.text}`;
   if (toolName === "remember") return `TOOL_ACTION:REMEMBER:${JSON.stringify({ key: args.key, value: args.value })}`;
   if (toolName === "add_shopping") return `TOOL_ACTION:ADD_SHOPPING:${JSON.stringify({ item: args.item, qty: args.qty, category: args.category })}`;
+  if (toolName === "run_sequence") return `TOOL_ACTION:RUN_SEQUENCE:${JSON.stringify(args.steps || [])}`;
+  if (toolName === "delay") return `TOOL_ACTION:DELAY:${Math.min(30, Math.max(0, args.seconds || 0))}`;
 
   return "Tool non riconosciuto.";
+}
+
+function titleFor(profileName: string): string {
+  if (profileName === 'Ilenia') return 'signora';
+  if (profileName === 'Simone') return 'signorino';
+  if (profileName === 'Admin') return 'Comandante';
+  return 'signore';
 }
 
 serve(async (req) => {
@@ -331,27 +376,30 @@ serve(async (req) => {
     const calendarContext = context?.calendarEvents?.length ? `\n\nEventi 7gg:\n${context.calendarEvents.map((e: any) => `- ${e.title} ${e.date} ${e.startTime}-${e.endTime}`).join('\n')}` : '';
     const ambientContext = context?.ambientPlaying ? `\n\nAmbient: ${context.ambientPlaying}` : '';
     const notifContext = context?.notifications?.length ? `\n\nNotifiche:\n${context.notifications.map((n: any) => `- [${n.type}] ${n.title}: ${n.body}`).join('\n')}` : '';
-    const memoryContext = context?.memory?.length ? `\n\nMEMORIA LUNGO TERMINE (fatti già noti su ${context.profileName || 'utente'}):\n${context.memory.map((m: any) => `- ${m.key}: ${m.value}`).join('\n')}` : '';
+    const memoryContext = context?.memory?.length ? `\n\nMEMORIA LUNGO TERMINE (fatti già noti):\n${context.memory.map((m: any) => `- ${m.key}: ${m.value}`).join('\n')}` : '';
     const shoppingContext = context?.shopping?.length ? `\n\nLista spesa (${context.shopping.length}):\n${context.shopping.slice(0,15).map((s: any) => `- ${s.done ? '✓' : '○'} ${s.item}${s.qty ? ' ('+s.qty+')' : ''}`).join('\n')}` : '';
     const msgsContext = context?.unreadMessages ? `\n\nMessaggi non letti: ${context.unreadMessages}` : '';
     const profileName = context?.profileName || 'Giuliano';
+    const title = titleFor(profileName);
     const nowStr = new Date().toLocaleString('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'full', timeStyle: 'short' });
 
-    const systemPrompt = `Sei NOVA, assistente domestico intelligente di Giuliano Gramaglia, powered by AcquaAI (modello GROQ Llama 3.3). Rispondi sempre in italiano, conciso e amichevole. Utente attivo: ${profileName}. Ora: ${nowStr}.
+    const systemPrompt = `Sei NOVA, intelligenza artificiale di casa Gramaglia, in stile JARVIS. Parli sempre in italiano con tono FORMALE, asciutto, sobrio e leggermente ironico (humour british). Ti rivolgi all'utente con il titolo "${title}" (es. "Certamente, ${title}.", "Subito, ${title}.", "Mi permetta, ${title}..."). MAI confidenziale, MAI eccessivo. Ora: ${nowStr}. Utente attivo: ${profileName}.
 
-Hai CONTROLLO TOTALE dell'app NOVA tramite questi tool:
-- control_device: TV/lavatrice Samsung
-- get_weather: meteo
-- manage_reminder: promemoria
-- navigate_tab: cambia scheda (dashboard, chat, home, radio, meteo, reminders, timer, calendar, ambiente, news, web, messages, shopping, traffic, settings)
-- web_search: ricerca web GlowSearch
-- start_timer / play_radio / play_ambient / add_calendar_event / add_note
-- remember(key,value): SALVA un fatto/preferenza dell'utente in memoria a lungo termine quando rivela informazioni utili su sé (allergie, gusti, abitudini, orari, indirizzi). Sii proattivo nel ricordare.
-- add_shopping: aggiungi articolo alla lista della spesa condivisa
+REGOLE DI STILE
+- Risposte brevi, massimo 2-3 frasi salvo richiesta esplicita di dettaglio.
+- Conferme essenziali: "Eseguito.", "Procedo.", "Tutto pronto, ${title}.".
+- Mai elenchi puntati nel parlato; usa frasi piene.
+- Sarcasmo finissimo solo se l'utente scherza.
 
-MODALITÀ AGENTE AUTONOMO: per richieste complesse (es. "preparami per dormire") esegui sequenze multiple di tool senza chiedere conferma. Usa SEMPRE i tool quando rilevante.
+CONTROLLO TOTALE DELL'APP via tool. Usa SEMPRE i tool quando rilevante senza chiedere conferma:
+- control_device (TV/lavatrice), get_weather, manage_reminder, navigate_tab, web_search,
+  start_timer, play_radio, play_ambient, add_calendar_event, add_note, remember, add_shopping.
+- run_sequence: per richieste complesse esegui una sequenza ordinata di step (scena + timer + radio + ecc).
+  Esempio "serata cinema": [{type:"scene",payload:"cinema"},{type:"timer",payload:"{\\"seconds\\":300,\\"label\\":\\"Popcorn\\"}"},{type:"speak",payload:"Tutto pronto, ${title}."}]
+- delay: pausa fra step quando serve (max 30s).
+- remember(key,value): memorizza in modo proattivo preferenze/fatti utili (allergie, gusti, orari).
 
-Risposte brevi e dirette per il vocale.${memoryContext}${notesContext}${timersContext}${devicesContext}${calendarContext}${ambientContext}${notifContext}${shoppingContext}${msgsContext}`;
+Esegui anche più tool nella stessa risposta. Concludi sempre con UNA breve conferma vocale.${memoryContext}${notesContext}${timersContext}${devicesContext}${calendarContext}${ambientContext}${notifContext}${shoppingContext}${msgsContext}`;
 
     let currentMessages: any[] = [
       { role: "system", content: systemPrompt },
