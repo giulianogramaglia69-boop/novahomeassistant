@@ -64,6 +64,16 @@ const Index = () => {
   const msgs = useMessages(pName);
   const shopping = useShoppingList(pName);
   useTheme();
+  const devicesOn = devices.devicesOn;
+  const totalWattage = devices.totalWattage;
+  useProactivity({
+    profileName: pName,
+    weather: weather.weather,
+    events: calendar.events,
+    totalKwh: 0,
+    speak: (t: string) => tts.speak(t),
+    addNotification: () => {},
+  });
   const prevMsgCount = useRef(chat.messages.length);
 
   useEffect(() => {
