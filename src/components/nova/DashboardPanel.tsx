@@ -55,6 +55,7 @@ const DashboardPanel = ({
   newsItems, newsLoading,
   profile,
   ambientSounds, ambientPlaying, onAmbientToggle,
+  ttsSpeaking = false, totalWattage = 0, devicesOn = 0,
 }: Props) => {
   const [noteInput, setNoteInput] = useState('');
   const [newsIndex, setNewsIndex] = useState(0);
