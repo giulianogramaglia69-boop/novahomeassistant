@@ -38,6 +38,9 @@ interface Props {
   ambientSounds: AmbientSound[];
   ambientPlaying: string | null;
   onAmbientToggle: (id: string) => void;
+  ttsSpeaking?: boolean;
+  totalWattage?: number;
+  devicesOn?: number;
 }
 
 const DashboardPanel = ({
