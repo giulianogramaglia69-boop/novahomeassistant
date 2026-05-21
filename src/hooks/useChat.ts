@@ -97,6 +97,8 @@ export function useChat() {
           case 'ADD_NOTE': actions.push({ type: 'add_note', payload }); break;
           case 'REMEMBER': actions.push({ type: 'remember', payload }); break;
           case 'ADD_SHOPPING': actions.push({ type: 'add_shopping', payload }); break;
+          case 'RUN_SEQUENCE': actions.push({ type: 'run_sequence', payload }); break;
+          case 'DELAY': actions.push({ type: 'delay', payload }); break;
         }
       }
 
