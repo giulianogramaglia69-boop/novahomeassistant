@@ -101,17 +101,10 @@ const SettingsPanel = ({
           sub="Leggi le risposte ad alta voce"
           enabled={ttsEnabled}
           onToggle={onTtsToggle}
-      {/* ─── AUDIO & VOCE ─── */}
-      <Section title="🔊 Audio & Voce">
-        <ToggleRow
-          label="Text-to-Speech"
-          sub="Leggi le risposte ad alta voce"
-          enabled={ttsEnabled}
-          onToggle={onTtsToggle}
         />
         <ToggleRow
           label="Wake word sempre attiva"
-          sub='Ascolto continuo per "Ehi Nova"'
+          sub={'Ascolto continuo per "Ehi Nova"'}
           enabled={voiceAlwaysOn}
           onToggle={onVoiceAlwaysOnToggle}
         />
@@ -132,6 +125,15 @@ const SettingsPanel = ({
         </div>
         <MacrosManager macros={macros} onAdd={onAddMacro} onRemove={onRemoveMacro} />
       </div>
+
+      {/* ─── NOTIFICHE ─── */}
+      <Section title="🔔 Notifiche">
+        <ToggleRow
+          label="Calendario"
+          sub="Avviso 15 min prima degli eventi"
+          enabled={notifSettings.calendar}
+          onToggle={() => onNotifSettingChange('calendar', !notifSettings.calendar)}
+        />
           label="Calendario"
           sub="Avviso 15 min prima degli eventi"
           enabled={notifSettings.calendar}
