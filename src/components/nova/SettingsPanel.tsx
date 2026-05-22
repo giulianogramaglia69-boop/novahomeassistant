@@ -135,7 +135,6 @@ const SettingsPanel = ({
           onToggle={() => onNotifSettingChange('calendar', !notifSettings.calendar)}
         />
         <ToggleRow
-        <ToggleRow
           label="Timer"
           sub="Notifica al completamento"
           enabled={notifSettings.timer}
