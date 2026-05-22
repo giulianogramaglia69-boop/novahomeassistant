@@ -134,11 +134,7 @@ const SettingsPanel = ({
           enabled={notifSettings.calendar}
           onToggle={() => onNotifSettingChange('calendar', !notifSettings.calendar)}
         />
-          label="Calendario"
-          sub="Avviso 15 min prima degli eventi"
-          enabled={notifSettings.calendar}
-          onToggle={() => onNotifSettingChange('calendar', !notifSettings.calendar)}
-        />
+        <ToggleRow
         <ToggleRow
           label="Timer"
           sub="Notifica al completamento"
