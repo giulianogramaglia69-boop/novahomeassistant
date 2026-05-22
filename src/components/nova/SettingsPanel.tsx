@@ -4,6 +4,10 @@ import { toast } from '@/hooks/use-toast';
 import { Profile } from '@/lib/types';
 import { useTheme, THEMES, ThemeId } from '@/hooks/useTheme';
 import { MemoryItem } from '@/hooks/useAIMemory';
+import { Routine } from '@/hooks/useProactivity';
+import { Macro, MacroStep } from '@/hooks/useMacros';
+import RoutinesSettings from './RoutinesSettings';
+import MacrosManager from './MacrosManager';
 
 interface NotifSettings {
   calendar: boolean;
@@ -22,6 +26,13 @@ interface Props {
   onTtsToggle: () => void;
   memoryItems: MemoryItem[];
   onForgetMemory: (id: string) => void;
+  voiceAlwaysOn: boolean;
+  onVoiceAlwaysOnToggle: () => void;
+  routines: Routine[];
+  onUpdateRoutine: (id: string, patch: Partial<Routine>) => void;
+  macros: Macro[];
+  onAddMacro: (name: string, steps: MacroStep[], icon?: string) => void;
+  onRemoveMacro: (id: string) => void;
 }
 
 const ST_KEY = 'nova_smartthings_token';
