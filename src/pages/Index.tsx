@@ -21,6 +21,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useProactivity } from '@/hooks/useProactivity';
 import { useMacros } from '@/hooks/useMacros';
 import { useEnergyUsage } from '@/hooks/useEnergyUsage';
+import { useVision } from '@/hooks/useVision';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -79,6 +80,11 @@ const Index = () => {
     totalKwh: energy.totalKwh,
     speak: (t: string) => tts.speak(t),
     addNotification: (n) => notif.addNotification({ type: n.type as any, title: n.title, body: n.body }),
+  });
+  const vision = useVision({
+    onPresenceChange: (p) => {
+      if (p) window.dispatchEvent(new CustomEvent('nova-presence'));
+    },
   });
   const prevMsgCount = useRef(chat.messages.length);
 
@@ -255,9 +261,11 @@ const Index = () => {
     };
     const events: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel'];
     events.forEach(ev => window.addEventListener(ev, reset, { passive: true }));
+    window.addEventListener('nova-presence', reset as EventListener);
     reset();
     return () => {
       events.forEach(ev => window.removeEventListener(ev, reset));
+      window.removeEventListener('nova-presence', reset as EventListener);
       if (idleTimer.current) window.clearTimeout(idleTimer.current);
     };
   }, [unlocked]);
@@ -429,6 +437,14 @@ const Index = () => {
             macros={macrosHook.macros}
             onAddMacro={macrosHook.add}
             onRemoveMacro={macrosHook.remove}
+            vision={{
+              enabled: vision.enabled,
+              active: vision.active,
+              present: vision.present,
+              motionLevel: vision.motionLevel,
+              toggle: vision.toggle,
+              videoRef: vision.videoRef,
+            }}
           />
         )}
       </main>
@@ -453,6 +469,13 @@ const Index = () => {
           events={calendar.getUpcomingEvents(5)}
           onDismiss={() => setIdle(false)}
         />
+      )}
+
+      {vision.active && (
+        <div className="fixed top-2 right-2 z-[100] flex items-center gap-1.5 px-2 py-1 rounded-full bg-destructive/20 border border-destructive/40 backdrop-blur-md pointer-events-none">
+          <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
+          <span className="text-[0.5rem] font-mono font-bold text-destructive tracking-wider uppercase">REC</span>
+        </div>
       )}
     </div>
   );
