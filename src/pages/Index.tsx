@@ -21,6 +21,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useProactivity } from '@/hooks/useProactivity';
 import { useMacros } from '@/hooks/useMacros';
 import { useEnergyUsage } from '@/hooks/useEnergyUsage';
+import { useVision } from '@/hooks/useVision';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -79,6 +80,11 @@ const Index = () => {
     totalKwh: energy.totalKwh,
     speak: (t: string) => tts.speak(t),
     addNotification: (n) => notif.addNotification({ type: n.type as any, title: n.title, body: n.body }),
+  });
+  const vision = useVision({
+    onPresenceChange: (p) => {
+      if (p) setIdle(false);
+    },
   });
   const prevMsgCount = useRef(chat.messages.length);
 
