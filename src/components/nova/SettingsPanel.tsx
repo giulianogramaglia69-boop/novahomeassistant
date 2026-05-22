@@ -8,6 +8,7 @@ import { Routine } from '@/hooks/useProactivity';
 import { Macro, MacroStep } from '@/hooks/useMacros';
 import RoutinesSettings from './RoutinesSettings';
 import MacrosManager from './MacrosManager';
+import VisionPanel from './VisionPanel';
 
 interface NotifSettings {
   calendar: boolean;
@@ -33,6 +34,14 @@ interface Props {
   macros: Macro[];
   onAddMacro: (name: string, steps: MacroStep[], icon?: string) => void;
   onRemoveMacro: (id: string) => void;
+  vision: {
+    enabled: boolean;
+    active: boolean;
+    present: boolean;
+    motionLevel: number;
+    toggle: () => void;
+    videoRef: React.RefObject<HTMLVideoElement>;
+  };
 }
 
 const ST_KEY = 'nova_smartthings_token';
@@ -45,6 +54,7 @@ const SettingsPanel = ({
   voiceAlwaysOn, onVoiceAlwaysOnToggle,
   routines, onUpdateRoutine,
   macros, onAddMacro, onRemoveMacro,
+  vision,
 }: Props) => {
   const { theme, setTheme } = useTheme();
   const [stToken, setStToken] = useState(() => localStorage.getItem(ST_KEY) || '');
@@ -124,6 +134,21 @@ const SettingsPanel = ({
           ✨ Macro personali ({macros.length})
         </div>
         <MacrosManager macros={macros} onAdd={onAddMacro} onRemove={onRemoveMacro} />
+      </div>
+
+      {/* ─── VISIONE & PRESENZA ─── */}
+      <div>
+        <div className="font-syne text-[0.6rem] font-bold tracking-[0.18em] text-muted-foreground uppercase mb-2">
+          👁️ Visione &amp; Presenza
+        </div>
+        <VisionPanel
+          enabled={vision.enabled}
+          active={vision.active}
+          present={vision.present}
+          motionLevel={vision.motionLevel}
+          onToggle={vision.toggle}
+          videoRef={vision.videoRef}
+        />
       </div>
 
       {/* ─── NOTIFICHE ─── */}
