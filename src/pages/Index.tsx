@@ -470,6 +470,13 @@ const Index = () => {
           onDismiss={() => setIdle(false)}
         />
       )}
+
+      {vision.active && (
+        <div className="fixed top-2 right-2 z-[100] flex items-center gap-1.5 px-2 py-1 rounded-full bg-destructive/20 border border-destructive/40 backdrop-blur-md pointer-events-none">
+          <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
+          <span className="text-[0.5rem] font-mono font-bold text-destructive tracking-wider uppercase">REC</span>
+        </div>
+      )}
     </div>
   );
 };
