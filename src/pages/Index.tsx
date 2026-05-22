@@ -437,6 +437,14 @@ const Index = () => {
             macros={macrosHook.macros}
             onAddMacro={macrosHook.add}
             onRemoveMacro={macrosHook.remove}
+            vision={{
+              enabled: vision.enabled,
+              active: vision.active,
+              present: vision.present,
+              motionLevel: vision.motionLevel,
+              toggle: vision.toggle,
+              videoRef: vision.videoRef,
+            }}
           />
         )}
       </main>
