@@ -83,7 +83,7 @@ const Index = () => {
   });
   const vision = useVision({
     onPresenceChange: (p) => {
-      if (p) setIdle(false);
+      if (p) window.dispatchEvent(new CustomEvent('nova-presence'));
     },
   });
   const prevMsgCount = useRef(chat.messages.length);
