@@ -19,6 +19,8 @@ import { useMessages } from '@/hooks/useMessages';
 import { useShoppingList } from '@/hooks/useShoppingList';
 import { useTheme } from '@/hooks/useTheme';
 import { useProactivity } from '@/hooks/useProactivity';
+import { useMacros } from '@/hooks/useMacros';
+import { useEnergyUsage } from '@/hooks/useEnergyUsage';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -64,15 +66,19 @@ const Index = () => {
   const msgs = useMessages(pName);
   const shopping = useShoppingList(pName);
   useTheme();
+  const macrosHook = useMacros(pName);
   const devicesOn = devices.devicesOn;
   const totalWattage = devices.totalWattage;
-  useProactivity({
+  const energy = useEnergyUsage(
+    devices.devices.map(d => ({ id: d.id, label: d.name, room: d.room, wattage: d.wattage || 0, on: d.on }))
+  );
+  const proactive = useProactivity({
     profileName: pName,
     weather: weather.weather,
     events: calendar.events,
-    totalKwh: 0,
+    totalKwh: energy.totalKwh,
     speak: (t: string) => tts.speak(t),
-    addNotification: () => {},
+    addNotification: (n) => notif.addNotification({ type: n.type as any, title: n.title, body: n.body }),
   });
   const prevMsgCount = useRef(chat.messages.length);
 
@@ -416,6 +422,13 @@ const Index = () => {
             onTtsToggle={tts.toggle}
             memoryItems={memory.items}
             onForgetMemory={memory.forget}
+            voiceAlwaysOn={voice.alwaysOn}
+            onVoiceAlwaysOnToggle={() => voice.setAlwaysOn(!voice.alwaysOn)}
+            routines={proactive.routines}
+            onUpdateRoutine={proactive.updateRoutine}
+            macros={macrosHook.macros}
+            onAddMacro={macrosHook.add}
+            onRemoveMacro={macrosHook.remove}
           />
         )}
       </main>

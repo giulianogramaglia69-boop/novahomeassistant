@@ -4,6 +4,10 @@ import { toast } from '@/hooks/use-toast';
 import { Profile } from '@/lib/types';
 import { useTheme, THEMES, ThemeId } from '@/hooks/useTheme';
 import { MemoryItem } from '@/hooks/useAIMemory';
+import { Routine } from '@/hooks/useProactivity';
+import { Macro, MacroStep } from '@/hooks/useMacros';
+import RoutinesSettings from './RoutinesSettings';
+import MacrosManager from './MacrosManager';
 
 interface NotifSettings {
   calendar: boolean;
@@ -22,6 +26,13 @@ interface Props {
   onTtsToggle: () => void;
   memoryItems: MemoryItem[];
   onForgetMemory: (id: string) => void;
+  voiceAlwaysOn: boolean;
+  onVoiceAlwaysOnToggle: () => void;
+  routines: Routine[];
+  onUpdateRoutine: (id: string, patch: Partial<Routine>) => void;
+  macros: Macro[];
+  onAddMacro: (name: string, steps: MacroStep[], icon?: string) => void;
+  onRemoveMacro: (id: string) => void;
 }
 
 const ST_KEY = 'nova_smartthings_token';
@@ -31,6 +42,9 @@ const SettingsPanel = ({
   notifSettings, onNotifSettingChange,
   ttsEnabled, onTtsToggle,
   memoryItems, onForgetMemory,
+  voiceAlwaysOn, onVoiceAlwaysOnToggle,
+  routines, onUpdateRoutine,
+  macros, onAddMacro, onRemoveMacro,
 }: Props) => {
   const { theme, setTheme } = useTheme();
   const [stToken, setStToken] = useState(() => localStorage.getItem(ST_KEY) || '');
@@ -88,7 +102,29 @@ const SettingsPanel = ({
           enabled={ttsEnabled}
           onToggle={onTtsToggle}
         />
+        <ToggleRow
+          label="Wake word sempre attiva"
+          sub={'Ascolto continuo per "Ehi Nova"'}
+          enabled={voiceAlwaysOn}
+          onToggle={onVoiceAlwaysOnToggle}
+        />
       </Section>
+
+      {/* ─── ROUTINE PROATTIVE ─── */}
+      <div>
+        <div className="font-syne text-[0.6rem] font-bold tracking-[0.18em] text-muted-foreground uppercase mb-2">
+          🤖 Routine proattive
+        </div>
+        <RoutinesSettings routines={routines} onUpdate={onUpdateRoutine} />
+      </div>
+
+      {/* ─── MACRO PERSONALI ─── */}
+      <div>
+        <div className="font-syne text-[0.6rem] font-bold tracking-[0.18em] text-muted-foreground uppercase mb-2">
+          ✨ Macro personali ({macros.length})
+        </div>
+        <MacrosManager macros={macros} onAdd={onAddMacro} onRemove={onRemoveMacro} />
+      </div>
 
       {/* ─── NOTIFICHE ─── */}
       <Section title="🔔 Notifiche">
