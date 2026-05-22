@@ -261,9 +261,11 @@ const Index = () => {
     };
     const events: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel'];
     events.forEach(ev => window.addEventListener(ev, reset, { passive: true }));
+    window.addEventListener('nova-presence', reset as EventListener);
     reset();
     return () => {
       events.forEach(ev => window.removeEventListener(ev, reset));
+      window.removeEventListener('nova-presence', reset as EventListener);
       if (idleTimer.current) window.clearTimeout(idleTimer.current);
     };
   }, [unlocked]);
