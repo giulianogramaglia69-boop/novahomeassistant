@@ -42,6 +42,9 @@ const SettingsPanel = ({
   notifSettings, onNotifSettingChange,
   ttsEnabled, onTtsToggle,
   memoryItems, onForgetMemory,
+  voiceAlwaysOn, onVoiceAlwaysOnToggle,
+  routines, onUpdateRoutine,
+  macros, onAddMacro, onRemoveMacro,
 }: Props) => {
   const { theme, setTheme } = useTheme();
   const [stToken, setStToken] = useState(() => localStorage.getItem(ST_KEY) || '');
@@ -98,12 +101,37 @@ const SettingsPanel = ({
           sub="Leggi le risposte ad alta voce"
           enabled={ttsEnabled}
           onToggle={onTtsToggle}
+      {/* ─── AUDIO & VOCE ─── */}
+      <Section title="🔊 Audio & Voce">
+        <ToggleRow
+          label="Text-to-Speech"
+          sub="Leggi le risposte ad alta voce"
+          enabled={ttsEnabled}
+          onToggle={onTtsToggle}
+        />
+        <ToggleRow
+          label="Wake word sempre attiva"
+          sub='Ascolto continuo per "Ehi Nova"'
+          enabled={voiceAlwaysOn}
+          onToggle={onVoiceAlwaysOnToggle}
         />
       </Section>
 
-      {/* ─── NOTIFICHE ─── */}
-      <Section title="🔔 Notifiche">
-        <ToggleRow
+      {/* ─── ROUTINE PROATTIVE ─── */}
+      <div>
+        <div className="font-syne text-[0.6rem] font-bold tracking-[0.18em] text-muted-foreground uppercase mb-2">
+          🤖 Routine proattive
+        </div>
+        <RoutinesSettings routines={routines} onUpdate={onUpdateRoutine} />
+      </div>
+
+      {/* ─── MACRO PERSONALI ─── */}
+      <div>
+        <div className="font-syne text-[0.6rem] font-bold tracking-[0.18em] text-muted-foreground uppercase mb-2">
+          ✨ Macro personali ({macros.length})
+        </div>
+        <MacrosManager macros={macros} onAdd={onAddMacro} onRemove={onRemoveMacro} />
+      </div>
           label="Calendario"
           sub="Avviso 15 min prima degli eventi"
           enabled={notifSettings.calendar}
