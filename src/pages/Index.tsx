@@ -293,6 +293,8 @@ const Index = () => {
         unreadCount={notif.unreadCount}
         onMarkRead={notif.markRead}
         onClearNotifications={notif.clearAll}
+        voiceState={voice.state}
+        voiceAlwaysOn={voice.alwaysOn}
       />
       <TabNav active={tab} onChange={setTab} />
       <main className="flex-1 overflow-hidden flex flex-col">
@@ -444,6 +446,7 @@ const Index = () => {
               motionLevel: vision.motionLevel,
               toggle: vision.toggle,
               videoRef: vision.videoRef,
+              profileName: profile.name,
             }}
           />
         )}
