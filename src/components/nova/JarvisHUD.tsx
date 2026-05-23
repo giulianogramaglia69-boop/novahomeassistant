@@ -11,7 +11,7 @@ interface Props {
 
 /**
  * Jarvis-style HUD: animated orb with concentric rings that react to
- * voice (mic input) when listening and to TTS while speaking.
+ * the live microphone level (while listening) and to TTS while speaking.
  */
 const JarvisHUD = ({ voiceState, ttsSpeaking, totalWattage, devicesOn, weatherTemp, onTap }: Props) => {
   const [level, setLevel] = useState(0);
@@ -26,9 +26,58 @@ const JarvisHUD = ({ voiceState, ttsSpeaking, totalWattage, devicesOn, weatherTe
     return () => clearInterval(iv);
   }, []);
 
-  // While speaking, fake an oscillation
+  const stopMic = () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    try { streamRef.current?.getTracks().forEach(t => t.stop()); } catch {}
+    streamRef.current = null;
+    try { audioCtxRef.current?.close(); } catch {}
+    audioCtxRef.current = null;
+    analyserRef.current = null;
+  };
+
+  const micActive = voiceState === 'listening' || voiceState === 'wake';
+
+  // Mic reactivity: attach AnalyserNode to a dedicated stream while listening
   useEffect(() => {
-    if (!ttsSpeaking) return;
+    if (!micActive) { stopMic(); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
+        streamRef.current = stream;
+        const Ctor = (window as any).AudioContext || (window as any).webkitAudioContext;
+        const ctx = new Ctor();
+        audioCtxRef.current = ctx;
+        const src = ctx.createMediaStreamSource(stream);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 512;
+        src.connect(analyser);
+        analyserRef.current = analyser;
+        const buf = new Uint8Array(analyser.frequencyBinCount);
+        const tick = () => {
+          rafRef.current = requestAnimationFrame(tick);
+          analyser.getByteTimeDomainData(buf);
+          let sum = 0;
+          for (let i = 0; i < buf.length; i++) {
+            const v = (buf[i] - 128) / 128;
+            sum += v * v;
+          }
+          const rms = Math.sqrt(sum / buf.length);
+          setLevel(Math.min(1, rms * 4));
+        };
+        rafRef.current = requestAnimationFrame(tick);
+      } catch {
+        /* mic unavailable - fallback to idle pulse */
+      }
+    })();
+    return () => { cancelled = true; stopMic(); };
+  }, [micActive]);
+
+  // While speaking (and mic not active), fake an oscillation
+  useEffect(() => {
+    if (!ttsSpeaking || micActive) return;
     let t = 0;
     const tick = () => {
       t += 0.12;
@@ -37,11 +86,11 @@ const JarvisHUD = ({ voiceState, ttsSpeaking, totalWattage, devicesOn, weatherTe
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [ttsSpeaking]);
+  }, [ttsSpeaking, micActive]);
 
   // Idle gentle pulse
   useEffect(() => {
-    if (ttsSpeaking || voiceState === 'listening' || voiceState === 'wake') return;
+    if (ttsSpeaking || micActive || voiceState === 'processing') return;
     let t = 0;
     const tick = () => {
       t += 0.05;
@@ -50,9 +99,11 @@ const JarvisHUD = ({ voiceState, ttsSpeaking, totalWattage, devicesOn, weatherTe
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [voiceState, ttsSpeaking]);
+  }, [voiceState, ttsSpeaking, micActive]);
 
-  const active = ttsSpeaking || voiceState === 'wake' || voiceState === 'listening' || voiceState === 'processing';
+  useEffect(() => () => stopMic(), []);
+
+  const active = ttsSpeaking || micActive || voiceState === 'processing';
 
   const size = 220;
   const cx = size / 2;

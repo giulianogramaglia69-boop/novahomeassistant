@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Profile } from '@/lib/types';
 import { NovaNotification } from '@/hooks/useNotifications';
+import { VoiceState } from '@/hooks/useVoiceWake';
 import NotificationPanel from './NotificationPanel';
 
 interface Props {
@@ -13,10 +14,22 @@ interface Props {
   unreadCount: number;
   onMarkRead: (id: string) => void;
   onClearNotifications: () => void;
+  voiceState?: VoiceState;
+  voiceAlwaysOn?: boolean;
 }
 
-const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop, profile, notifications, unreadCount, onMarkRead, onClearNotifications }: Props) => {
+const VOICE_LABEL: Record<VoiceState, { text: string; cls: string }> = {
+  idle:       { text: 'IDLE',   cls: 'border-border bg-secondary text-muted-foreground' },
+  wake:       { text: 'WAKE',   cls: 'border-accent/40 bg-accent/15 text-accent' },
+  listening:  { text: 'LISTEN', cls: 'border-primary/40 bg-primary/15 text-primary' },
+  processing: { text: 'THINK',  cls: 'border-accent/40 bg-accent/15 text-accent animate-pulse' },
+  speaking:   { text: 'SPEAK',  cls: 'border-primary/40 bg-primary/15 text-primary' },
+  error:      { text: 'ERR',    cls: 'border-destructive/40 bg-destructive/15 text-destructive' },
+};
+
+const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop, profile, notifications, unreadCount, onMarkRead, onClearNotifications, voiceState = 'idle', voiceAlwaysOn }: Props) => {
   const [showNotif, setShowNotif] = useState(false);
+  const v = VOICE_LABEL[voiceState];
 
   return (
     <>
@@ -39,6 +52,15 @@ const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop, profile, 
         </div>
         <div className="flex gap-2 items-center">
           <span className="text-[0.6rem] text-muted-foreground font-mono mr-1">{profile.emoji} {profile.name}</span>
+
+          {/* Voice state badge */}
+          <div
+            className={`flex items-center gap-1 px-2 py-1 rounded-full border text-[0.55rem] font-mono font-bold tracking-[0.12em] ${v.cls}`}
+            title={`Voce: ${v.text}${voiceAlwaysOn ? ' · sempre attiva' : ''}`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-current" style={{ animation: voiceState !== 'idle' ? 'blink 1.2s infinite' : undefined }} />
+            {v.text}
+          </div>
           
           {/* Notification bell */}
           <button
