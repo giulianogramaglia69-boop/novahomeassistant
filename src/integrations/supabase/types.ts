@@ -89,6 +89,27 @@ export type Database = {
         }
         Relationships: []
       }
+      nova_face_profiles: {
+        Row: {
+          created_at: string
+          descriptor: Json
+          profile_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descriptor: Json
+          profile_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descriptor?: Json
+          profile_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       nova_macros: {
         Row: {
           created_at: string

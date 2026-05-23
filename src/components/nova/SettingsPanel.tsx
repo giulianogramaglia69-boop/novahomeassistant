@@ -41,6 +41,7 @@ interface Props {
     motionLevel: number;
     toggle: () => void;
     videoRef: React.RefObject<HTMLVideoElement>;
+    profileName?: string;
   };
 }
 
@@ -148,6 +149,7 @@ const SettingsPanel = ({
           motionLevel={vision.motionLevel}
           onToggle={vision.toggle}
           videoRef={vision.videoRef}
+          profileName={vision.profileName}
         />
       </div>
 
