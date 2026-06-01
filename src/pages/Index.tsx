@@ -39,6 +39,7 @@ import WebPanel from '@/components/nova/WebPanel';
 import MessagesPanel from '@/components/nova/MessagesPanel';
 import ShoppingPanel from '@/components/nova/ShoppingPanel';
 import TrafficPanel from '@/components/nova/TrafficPanel';
+import FloatingHost from '@/components/nova/FloatingHost';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
 import Screensaver from '@/components/nova/Screensaver';
