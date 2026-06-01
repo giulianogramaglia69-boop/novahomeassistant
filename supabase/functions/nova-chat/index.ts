@@ -218,6 +218,23 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "open_floating",
+      description: "Apre una finestra flottante con un contenuto esterno (mappa, web, video). Se l'utente NON specifica la modalità, lascia mode='ask' così l'app chiede all'utente picture-in-picture o metà schermo. Target validi: 'maps', 'traffico', 'web', 'google', 'youtube', 'meteo' oppure un URL https://. Esempio: 'apri mappe' -> {target:'maps', mode:'ask'}; 'mostrami le mappe in piccolo' -> {target:'maps', mode:'pip'}.",
+      parameters: {
+        type: "object",
+        properties: {
+          target: { type: "string", description: "Chiave preset ('maps','traffico','web','google','youtube','meteo') o URL https://" },
+          mode: { type: "string", enum: ["ask", "pip", "half"], description: "ask = chiedi all'utente, pip = picture-in-picture, half = metà schermo" },
+          url: { type: "string", description: "URL opzionale se diverso dal target" },
+          title: { type: "string", description: "Titolo opzionale finestra" },
+        },
+        required: ["target"],
+      },
+    },
+  },
 ];
 
 function findDeviceIdFromContext(context: any, type: string): string | null {
@@ -335,6 +352,7 @@ async function executeToolCall(toolName: string, args: any, stToken: string, con
   if (toolName === "add_shopping") return `TOOL_ACTION:ADD_SHOPPING:${JSON.stringify({ item: args.item, qty: args.qty, category: args.category })}`;
   if (toolName === "run_sequence") return `TOOL_ACTION:RUN_SEQUENCE:${JSON.stringify(args.steps || [])}`;
   if (toolName === "delay") return `TOOL_ACTION:DELAY:${Math.min(30, Math.max(0, args.seconds || 0))}`;
+  if (toolName === "open_floating") return `TOOL_ACTION:OPEN_FLOATING:${JSON.stringify({ target: args.target, mode: args.mode || 'ask', url: args.url, title: args.title })}`;
 
   return "Tool non riconosciuto.";
 }
@@ -393,7 +411,8 @@ REGOLE DI STILE
 
 CONTROLLO TOTALE DELL'APP via tool. Usa SEMPRE i tool quando rilevante senza chiedere conferma:
 - control_device (TV/lavatrice), get_weather, manage_reminder, navigate_tab, web_search,
-  start_timer, play_radio, play_ambient, add_calendar_event, add_note, remember, add_shopping.
+  start_timer, play_radio, play_ambient, add_calendar_event, add_note, remember, add_shopping, open_floating.
+- open_floating: per "apri mappe", "mostrami il traffico", "apri youtube/google" usa SEMPRE questo tool con mode='ask' (l'app chiederà all'utente PiP o metà schermo). Usa mode='pip' o mode='half' SOLO se l'utente specifica esplicitamente la modalità.
 - run_sequence: per richieste complesse esegui una sequenza ordinata di step (scena + timer + radio + ecc).
   Esempio "serata cinema": [{type:"scene",payload:"cinema"},{type:"timer",payload:"{\\"seconds\\":300,\\"label\\":\\"Popcorn\\"}"},{type:"speak",payload:"Tutto pronto, ${title}."}]
 - delay: pausa fra step quando serve (max 30s).

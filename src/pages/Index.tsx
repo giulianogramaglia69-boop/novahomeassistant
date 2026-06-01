@@ -39,6 +39,7 @@ import WebPanel from '@/components/nova/WebPanel';
 import MessagesPanel from '@/components/nova/MessagesPanel';
 import ShoppingPanel from '@/components/nova/ShoppingPanel';
 import TrafficPanel from '@/components/nova/TrafficPanel';
+import FloatingHost from '@/components/nova/FloatingHost';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
 import Screensaver from '@/components/nova/Screensaver';
@@ -219,6 +220,14 @@ const Index = () => {
           break;
         case 'delay':
           // Standalone delay — no-op (only meaningful inside sequences)
+          break;
+        case 'open_floating':
+          try {
+            const p = JSON.parse(action.payload || '{}');
+            if (p.target || p.url) {
+              window.dispatchEvent(new CustomEvent('nova-open-floating', { detail: p }));
+            }
+          } catch { /* ignore */ }
           break;
       }
     }
@@ -480,6 +489,8 @@ const Index = () => {
           <span className="text-[0.5rem] font-mono font-bold text-destructive tracking-wider uppercase">REC</span>
         </div>
       )}
+
+      <FloatingHost />
     </div>
   );
 };

@@ -22,7 +22,8 @@ export interface ChatToolAction {
   type: 'add_reminder' | 'complete_reminder' | 'remove_reminder' | 'refresh_devices'
     | 'navigate' | 'web_search' | 'start_timer' | 'play_radio' | 'play_ambient'
     | 'add_event' | 'add_note' | 'remember' | 'add_shopping'
-    | 'run_sequence' | 'delay' | 'scene' | 'smart_toggle' | 'speak';
+    | 'run_sequence' | 'delay' | 'scene' | 'smart_toggle' | 'speak'
+    | 'open_floating';
   payload?: string;
 }
 
@@ -99,6 +100,7 @@ export function useChat() {
           case 'ADD_SHOPPING': actions.push({ type: 'add_shopping', payload }); break;
           case 'RUN_SEQUENCE': actions.push({ type: 'run_sequence', payload }); break;
           case 'DELAY': actions.push({ type: 'delay', payload }); break;
+          case 'OPEN_FLOATING': actions.push({ type: 'open_floating', payload }); break;
         }
       }
 
