@@ -218,6 +218,23 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "open_floating",
+      description: "Apre una finestra flottante con un contenuto esterno (mappa, web, video). Se l'utente NON specifica la modalità, lascia mode='ask' così l'app chiede all'utente picture-in-picture o metà schermo. Target validi: 'maps', 'traffico', 'web', 'google', 'youtube', 'meteo' oppure un URL https://. Esempio: 'apri mappe' -> {target:'maps', mode:'ask'}; 'mostrami le mappe in piccolo' -> {target:'maps', mode:'pip'}.",
+      parameters: {
+        type: "object",
+        properties: {
+          target: { type: "string", description: "Chiave preset ('maps','traffico','web','google','youtube','meteo') o URL https://" },
+          mode: { type: "string", enum: ["ask", "pip", "half"], description: "ask = chiedi all'utente, pip = picture-in-picture, half = metà schermo" },
+          url: { type: "string", description: "URL opzionale se diverso dal target" },
+          title: { type: "string", description: "Titolo opzionale finestra" },
+        },
+        required: ["target"],
+      },
+    },
+  },
 ];
 
 function findDeviceIdFromContext(context: any, type: string): string | null {
