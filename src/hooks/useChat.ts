@@ -22,7 +22,8 @@ export interface ChatToolAction {
   type: 'add_reminder' | 'complete_reminder' | 'remove_reminder' | 'refresh_devices'
     | 'navigate' | 'web_search' | 'start_timer' | 'play_radio' | 'play_ambient'
     | 'add_event' | 'add_note' | 'remember' | 'add_shopping'
-    | 'run_sequence' | 'delay' | 'scene' | 'smart_toggle' | 'speak';
+    | 'run_sequence' | 'delay' | 'scene' | 'smart_toggle' | 'speak'
+    | 'open_floating';
   payload?: string;
 }
 
