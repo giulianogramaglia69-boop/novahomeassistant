@@ -221,6 +221,14 @@ const Index = () => {
         case 'delay':
           // Standalone delay — no-op (only meaningful inside sequences)
           break;
+        case 'open_floating':
+          try {
+            const p = JSON.parse(action.payload || '{}');
+            if (p.target || p.url) {
+              window.dispatchEvent(new CustomEvent('nova-open-floating', { detail: p }));
+            }
+          } catch { /* ignore */ }
+          break;
       }
     }
   }, [reminders, smart, timers, radio, ambient, calendar, notes, memory, shopping, devices, tts]);
