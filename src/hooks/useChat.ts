@@ -100,6 +100,7 @@ export function useChat() {
           case 'ADD_SHOPPING': actions.push({ type: 'add_shopping', payload }); break;
           case 'RUN_SEQUENCE': actions.push({ type: 'run_sequence', payload }); break;
           case 'DELAY': actions.push({ type: 'delay', payload }); break;
+          case 'OPEN_FLOATING': actions.push({ type: 'open_floating', payload }); break;
         }
       }
 
