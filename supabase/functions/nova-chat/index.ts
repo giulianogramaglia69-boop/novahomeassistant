@@ -186,7 +186,7 @@ const tools = [
     type: "function",
     function: {
       name: "run_sequence",
-      description: "Esegue una sequenza di azioni in ordine. Usalo per richieste complesse multi-step (es. 'preparami serata cinema'). Ogni step è un'azione tra: scene (nome scena home), smart_toggle (deviceId|on|off), navigate (tab), radio (station|stop), ambient (sound|stop), timer (seconds,label), speak (testo extra), delay (seconds).",
+      description: "Apre una finestra flottante con un contenuto (mappa, web, video). Se l'utente NON specifica la modalità, lascia mode='ask' così l'app chiede picture-in-picture o metà schermo. Target validi: 'maps', 'traffico', 'web', 'google', 'youtube', 'meteo' oppure un URL https://. Esempio: 'apri mappe' -> {target:'maps', mode:'ask'}.",
       parameters: {
         type: "object",
         properties: {
