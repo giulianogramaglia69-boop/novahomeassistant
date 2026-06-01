@@ -15,6 +15,7 @@ export interface UseVoiceResult {
 const WAKE_RE = /\b(ehi\s*nova|hey\s*nova|ok\s*nova|nova)\b/i;
 const COMMAND_WINDOW_MS = 8000;
 const LS_KEY = 'nova_voice_always_on';
+const WATCHDOG_MS = 6000;
 
 function getErrorMessage(error: string): string {
   switch (error) {
@@ -38,8 +39,13 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
   const stopRequestedRef = useRef<boolean>(false);
   const onResultRef = useRef(onResult);
   const ttsSpeakingRef = useRef(false);
+  const alwaysOnRef = useRef(alwaysOn);
+  const lastActivityRef = useRef<number>(Date.now());
+  const watchdogRef = useRef<number | null>(null);
+  const restartBackoffRef = useRef<number>(0);
 
   useEffect(() => { onResultRef.current = onResult; }, [onResult]);
+  useEffect(() => { alwaysOnRef.current = alwaysOn; }, [alwaysOn]);
 
   const setAlwaysOn = useCallback((v: boolean) => {
     localStorage.setItem(LS_KEY, String(v));
@@ -56,7 +62,14 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
   // Listen to TTS state for barge-in
   useEffect(() => {
     const onSpeakStart = () => { ttsSpeakingRef.current = true; setState(s => (s === 'idle' ? 'speaking' : s)); };
-    const onSpeakEnd = () => { ttsSpeakingRef.current = false; setState(s => (s === 'speaking' ? 'idle' : s)); };
+    const onSpeakEnd = () => {
+      ttsSpeakingRef.current = false;
+      setState(s => (s === 'speaking' ? 'idle' : s));
+      // After TTS ends, ensure recognition is alive in always-on mode
+      if (alwaysOnRef.current && !recognitionRef.current && !stopRequestedRef.current) {
+        setTimeout(() => { if (alwaysOnRef.current) startContinuousRef.current?.(); }, 250);
+      }
+    };
     window.addEventListener('nova-tts-start', onSpeakStart);
     window.addEventListener('nova-tts-end', onSpeakEnd);
     return () => {
@@ -69,6 +82,7 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
     stopRequestedRef.current = true;
     clearCommandTimer();
     wakeArmedRef.current = false;
+    if (watchdogRef.current) { window.clearInterval(watchdogRef.current); watchdogRef.current = null; }
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch {}
       recognitionRef.current = null;
@@ -76,6 +90,8 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
     setState('idle');
     setStatusText('');
   }, []);
+
+  const startContinuousRef = useRef<() => Promise<void>>();
 
   const startContinuous = useCallback(async () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -85,7 +101,9 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
       return;
     }
 
-    // Permission
+    if (recognitionRef.current) return; // already running
+
+    // Permission probe (one-shot, releases immediately)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach(t => t.stop());
@@ -94,6 +112,11 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
       toast({ title: 'Microfono', description: msg, variant: 'destructive' });
       setState('error');
       setStatusText(msg);
+      // Don't keep trying if permission denied
+      if (err?.name === 'NotAllowedError') {
+        setAlwaysOnState(false);
+        localStorage.setItem(LS_KEY, 'false');
+      }
       return;
     }
 
@@ -104,11 +127,18 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
     rec.interimResults = true;
     rec.maxAlternatives = 1;
     recognitionRef.current = rec;
+    lastActivityRef.current = Date.now();
 
     setState('idle');
     setStatusText('In ascolto della wake word…');
 
+    rec.onstart = () => { lastActivityRef.current = Date.now(); restartBackoffRef.current = 0; };
+    rec.onaudiostart = () => { lastActivityRef.current = Date.now(); };
+    rec.onspeechstart = () => { lastActivityRef.current = Date.now(); };
+    rec.onsoundstart = () => { lastActivityRef.current = Date.now(); };
+
     rec.onresult = (event: any) => {
+      lastActivityRef.current = Date.now();
       let finalText = '';
       let interimText = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -119,23 +149,19 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
       const raw = (finalText || interimText).trim();
       if (!raw) return;
 
-      // Barge-in: if TTS is speaking and any voice detected -> stop TTS
+      // Barge-in
       if (ttsSpeakingRef.current && raw.length > 1) {
         window.dispatchEvent(new CustomEvent('nova-barge-in'));
       }
 
-      // Wake word detection
       if (!wakeArmedRef.current) {
         if (WAKE_RE.test(raw)) {
           wakeArmedRef.current = true;
           setState('wake');
           setStatusText('Sì, signore?');
-          // Optional acoustic ping
           window.dispatchEvent(new CustomEvent('nova-wake'));
-          // Strip wake word from utterance
           const after = raw.replace(WAKE_RE, '').trim();
           if (after && after.length > 2 && /\s/.test(after)) {
-            // user said wake word + command together
             wakeArmedRef.current = false;
             setState('processing');
             setStatusText('Elaborazione…');
@@ -143,7 +169,6 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
             setTimeout(() => { setState('idle'); setStatusText('In ascolto…'); }, 1200);
             return;
           }
-          // Otherwise wait for the next utterance for COMMAND_WINDOW_MS
           clearCommandTimer();
           commandTimerRef.current = window.setTimeout(() => {
             wakeArmedRef.current = false;
@@ -154,7 +179,6 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
         return;
       }
 
-      // Wake armed -> first final result becomes the command
       if (finalText.trim()) {
         clearCommandTimer();
         wakeArmedRef.current = false;
@@ -170,28 +194,41 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
     rec.onerror = (event: any) => {
       const msg = getErrorMessage(event.error);
       if (msg) setStatusText(msg);
-      // Auto-restart on transient errors
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        stopRequestedRef.current = true;
+        setAlwaysOnState(false);
+        localStorage.setItem(LS_KEY, 'false');
+      }
+      // onend will follow and trigger restart
     };
 
     rec.onend = () => {
       recognitionRef.current = null;
-      if (!stopRequestedRef.current) {
-        // Restart with small debounce
-        setTimeout(() => {
-          if (!stopRequestedRef.current) startContinuous();
-        }, 400);
-      }
+      if (stopRequestedRef.current) return;
+      // Backoff to avoid hot loops on persistent errors
+      restartBackoffRef.current = Math.min(5000, (restartBackoffRef.current || 200) * 1.5);
+      const delay = restartBackoffRef.current;
+      setTimeout(() => {
+        if (!stopRequestedRef.current && alwaysOnRef.current) startContinuousRef.current?.();
+      }, delay);
     };
 
-    try { rec.start(); }
-    catch (err: any) {
-      // Already started somewhere
-      setTimeout(() => { if (!stopRequestedRef.current) startContinuous(); }, 600);
+    try {
+      rec.start();
+    } catch (err: any) {
+      // "already started" or NotAllowedError on restart
+      recognitionRef.current = null;
+      if (err?.name === 'NotAllowedError') {
+        toast({ title: 'Microfono', description: 'Riavvia l\'ascolto toccando lo schermo.', variant: 'destructive' });
+        return;
+      }
+      setTimeout(() => { if (!stopRequestedRef.current && alwaysOnRef.current) startContinuousRef.current?.(); }, 800);
     }
   }, []);
 
+  startContinuousRef.current = startContinuous;
+
   const startListening = useCallback(() => {
-    // Manual one-shot trigger: arm wake state and start continuous if not already
     wakeArmedRef.current = true;
     setState('wake');
     setStatusText('Sì, signore?');
@@ -199,19 +236,61 @@ export function useVoiceWake(onResult: (text: string) => void): UseVoiceResult {
     commandTimerRef.current = window.setTimeout(() => {
       wakeArmedRef.current = false;
       setState('idle');
-      setStatusText(alwaysOn ? 'In ascolto…' : '');
+      setStatusText(alwaysOnRef.current ? 'In ascolto…' : '');
     }, COMMAND_WINDOW_MS);
     if (!recognitionRef.current) startContinuous();
-  }, [startContinuous, alwaysOn]);
+  }, [startContinuous]);
 
-  // Auto-start when always-on toggled on
+  // Toggle always-on
   useEffect(() => {
-    if (alwaysOn && !recognitionRef.current) {
-      startContinuous();
-    } else if (!alwaysOn && recognitionRef.current) {
+    if (alwaysOn) {
+      stopRequestedRef.current = false;
+      if (!recognitionRef.current) startContinuous();
+    } else {
       stopListening();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alwaysOn]);
+
+  // Watchdog: if recognition is silent / dead for too long while always-on, restart it
+  useEffect(() => {
+    if (!alwaysOn) return;
+    watchdogRef.current = window.setInterval(() => {
+      if (stopRequestedRef.current) return;
+      const silent = Date.now() - lastActivityRef.current > WATCHDOG_MS;
+      const dead = !recognitionRef.current;
+      if ((dead || silent) && !ttsSpeakingRef.current) {
+        if (recognitionRef.current) {
+          try { recognitionRef.current.abort(); } catch {}
+          recognitionRef.current = null;
+        }
+        startContinuousRef.current?.();
+        lastActivityRef.current = Date.now();
+      }
+    }, 3000);
+    return () => { if (watchdogRef.current) { window.clearInterval(watchdogRef.current); watchdogRef.current = null; } };
+  }, [alwaysOn]);
+
+  // Restart on visibility / focus changes (browsers kill SR when tab hides)
+  useEffect(() => {
+    if (!alwaysOn) return;
+    const kick = () => {
+      if (document.visibilityState === 'visible' && alwaysOnRef.current && !stopRequestedRef.current) {
+        if (recognitionRef.current) {
+          try { recognitionRef.current.abort(); } catch {}
+          recognitionRef.current = null;
+        }
+        setTimeout(() => startContinuousRef.current?.(), 300);
+      }
+    };
+    document.addEventListener('visibilitychange', kick);
+    window.addEventListener('focus', kick);
+    window.addEventListener('pageshow', kick);
+    return () => {
+      document.removeEventListener('visibilitychange', kick);
+      window.removeEventListener('focus', kick);
+      window.removeEventListener('pageshow', kick);
+    };
   }, [alwaysOn]);
 
   // Cleanup on unmount
