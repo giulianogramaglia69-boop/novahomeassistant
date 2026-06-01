@@ -335,6 +335,7 @@ async function executeToolCall(toolName: string, args: any, stToken: string, con
   if (toolName === "add_shopping") return `TOOL_ACTION:ADD_SHOPPING:${JSON.stringify({ item: args.item, qty: args.qty, category: args.category })}`;
   if (toolName === "run_sequence") return `TOOL_ACTION:RUN_SEQUENCE:${JSON.stringify(args.steps || [])}`;
   if (toolName === "delay") return `TOOL_ACTION:DELAY:${Math.min(30, Math.max(0, args.seconds || 0))}`;
+  if (toolName === "open_floating") return `TOOL_ACTION:OPEN_FLOATING:${JSON.stringify({ target: args.target, mode: args.mode || 'ask', url: args.url, title: args.title })}`;
 
   return "Tool non riconosciuto.";
 }
