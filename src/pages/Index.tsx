@@ -489,6 +489,8 @@ const Index = () => {
           <span className="text-[0.5rem] font-mono font-bold text-destructive tracking-wider uppercase">REC</span>
         </div>
       )}
+
+      <FloatingHost />
     </div>
   );
 };
