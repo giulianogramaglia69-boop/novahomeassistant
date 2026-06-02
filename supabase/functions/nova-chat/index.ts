@@ -369,8 +369,8 @@ serve(async (req) => {
 
   try {
     const { messages, context } = await req.json();
-    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
-    if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY non configurata");
+    const AI_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!AI_KEY) throw new Error("LOVABLE_API_KEY non configurata");
 
     let ST_TOKEN = "";
     try {
