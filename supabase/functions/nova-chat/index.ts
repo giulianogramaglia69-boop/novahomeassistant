@@ -222,13 +222,13 @@ const tools = [
     type: "function",
     function: {
       name: "open_floating",
-      description: "Apre una finestra flottante con un contenuto esterno (mappa, web, video). Se l'utente NON specifica la modalità, lascia mode='ask' così l'app chiede all'utente picture-in-picture o metà schermo. Target validi: 'maps', 'traffico', 'web', 'google', 'youtube', 'meteo' oppure un URL https://. Esempio: 'apri mappe' -> {target:'maps', mode:'ask'}; 'mostrami le mappe in piccolo' -> {target:'maps', mode:'pip'}.",
+      description: "Apre una finestra flottante sopra l'app con QUALSIASI contenuto: un pannello interno di NOVA oppure un sito esterno. Usa SEMPRE questo tool per richieste tipo 'apri ...', 'mostrami ...', 'apri google.com', 'apri la chat in modalità multi'. Se l'utente NON specifica la modalità, lascia mode='ask' (l'app mostrerà un selettore PiP / Metà schermo / Multi). Target validi: (1) pannelli interni — 'dashboard','chat','home','radio','meteo','reminders','timer','calendar','ambiente','news','web','messages','shopping','traffic','settings' (puoi anche prefissare con 'panel:'); (2) preset web — 'maps','traffico','google','youtube','windy'; (3) un URL completo 'https://...' o un dominio nudo come 'google.com', 'wikipedia.org/wiki/Roma'. Esempi: 'apri mappe' -> {target:'maps',mode:'ask'}; 'apri la chat in modalità multi' -> {target:'chat',mode:'multi'}; 'apri google.com a metà schermo' -> {target:'google.com',mode:'half'}; 'mostrami il meteo in pip' -> {target:'meteo',mode:'pip'}.",
       parameters: {
         type: "object",
         properties: {
-          target: { type: "string", description: "Chiave preset ('maps','traffico','web','google','youtube','meteo') o URL https://" },
-          mode: { type: "string", enum: ["ask", "pip", "half"], description: "ask = chiedi all'utente, pip = picture-in-picture, half = metà schermo" },
-          url: { type: "string", description: "URL opzionale se diverso dal target" },
+          target: { type: "string", description: "ID pannello interno, preset web, URL completo o dominio nudo" },
+          mode: { type: "string", enum: ["ask", "pip", "half", "multi"], description: "ask = chiedi all'utente; pip = picture-in-picture trascinabile; half = metà schermo laterale; multi = tile compatto sovrapponibile per affiancare più finestre" },
+          url: { type: "string", description: "URL opzionale (override) se target è una etichetta" },
           title: { type: "string", description: "Titolo opzionale finestra" },
         },
         required: ["target"],
