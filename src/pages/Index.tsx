@@ -290,6 +290,172 @@ const Index = () => {
     return <PinLock onUnlock={(p) => { setProfile(p); setUnlocked(true); }} />;
   }
 
+  const renderTab = (t: TabId) => {
+    switch (t) {
+      case 'dashboard':
+        return (
+          <DashboardPanel
+            messages={chat.messages}
+            isLoading={chat.isLoading}
+            onSend={sendWithContext}
+            smartDevices={smart.devices}
+            smartLoading={smart.loading}
+            onSmartToggle={smart.toggleDevice}
+            stations={radio.stations}
+            playing={radio.playing}
+            onRadioToggle={radio.toggle}
+            notes={notes.notes}
+            onAddNote={notes.add}
+            onRemoveNote={notes.remove}
+            onNavigate={setTab}
+            timers={timers.timers}
+            onTimerNavigate={() => setTab('timer')}
+            onTimerStart={timers.start}
+            onTimerPause={timers.pause}
+            weather={weather.weather}
+            upcomingEvents={calendar.getUpcomingEvents(3)}
+            voiceState={voice.state}
+            onVoiceStart={voice.startListening}
+            onVoiceStop={voice.stopListening}
+            newsItems={news.items}
+            newsLoading={news.loading}
+            profile={profile}
+            ambientSounds={ambient.sounds}
+            ambientPlaying={ambient.playing}
+            onAmbientToggle={ambient.toggle}
+            ttsSpeaking={tts.speaking}
+            totalWattage={totalWattage}
+            devicesOn={devicesOn}
+          />
+        );
+      case 'chat':
+        return (
+          <ChatPanel
+            messages={chat.messages}
+            isLoading={chat.isLoading}
+            onSend={sendWithContext}
+            voiceState={voice.state}
+            voiceStatusText={voice.statusText}
+            onVoiceStart={voice.startListening}
+            onVoiceStop={voice.stopListening}
+          />
+        );
+      case 'home':
+        return (
+          <HomePanel
+            devices={devices.devices}
+            devicesOn={devices.devicesOn}
+            totalWattage={devices.totalWattage}
+            onToggle={devices.toggle}
+            onValueChange={devices.setValue}
+            onScene={devices.applyScene}
+            smartDevices={smart.devices}
+            smartLoading={smart.loading}
+            smartError={smart.error}
+            onSmartToggle={smart.toggleDevice}
+            onSmartFetch={smart.fetchDevices}
+            onSmartCommand={smart.sendCommand}
+          />
+        );
+      case 'radio':
+        return (
+          <RadioPanel
+            stations={radio.stations}
+            playing={radio.playing}
+            loading={radio.loading}
+            volume={radio.volume}
+            onToggle={radio.toggle}
+            onVolumeChange={radio.changeVolume}
+          />
+        );
+      case 'meteo':
+        return <MeteoPanel weather={weather.weather} loading={weather.loading} />;
+      case 'reminders':
+        return (
+          <NotesPanel
+            notes={notes.notes}
+            onAdd={notes.add}
+            onRemove={notes.remove}
+            onEdit={notes.edit}
+          />
+        );
+      case 'timer':
+        return (
+          <TimerPanel
+            timers={timers.timers}
+            onAdd={timers.add}
+            onStart={timers.start}
+            onPause={timers.pause}
+            onReset={timers.reset}
+            onRemove={timers.remove}
+          />
+        );
+      case 'calendar':
+        return (
+          <CalendarPanel
+            events={calendar.events}
+            onAdd={calendar.addEvent}
+            onUpdate={calendar.updateEvent}
+            onRemove={calendar.removeEvent}
+            getEventsForDate={calendar.getEventsForDate}
+          />
+        );
+      case 'ambiente':
+        return (
+          <AmbientePanel
+            sounds={ambient.sounds}
+            playing={ambient.playing}
+            volume={ambient.volume}
+            onToggle={ambient.toggle}
+            onVolumeChange={ambient.changeVolume}
+          />
+        );
+      case 'news':
+        return <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />;
+      case 'web':
+        return <WebPanel />;
+      case 'messages':
+        return <MessagesPanel profile={profile} messages={msgs.messages} onSend={msgs.send} onMarkRead={msgs.markRead} />;
+      case 'shopping':
+        return <ShoppingPanel items={shopping.items} onAdd={shopping.add} onToggle={shopping.toggle} onRemove={shopping.remove} onClearDone={shopping.clearDone} />;
+      case 'traffic':
+        return <TrafficPanel />;
+      case 'settings':
+        return (
+          <SettingsPanel
+            onClearChat={chat.clearChat}
+            onDetectLocation={weather.detectLocation}
+            profile={profile}
+            onLogout={handleLogout}
+            notifSettings={notif.settings}
+            onNotifSettingChange={notif.updateSetting}
+            ttsEnabled={tts.enabled}
+            onTtsToggle={tts.toggle}
+            memoryItems={memory.items}
+            onForgetMemory={memory.forget}
+            voiceAlwaysOn={voice.alwaysOn}
+            onVoiceAlwaysOnToggle={() => voice.setAlwaysOn(!voice.alwaysOn)}
+            routines={proactive.routines}
+            onUpdateRoutine={proactive.updateRoutine}
+            macros={macrosHook.macros}
+            onAddMacro={macrosHook.add}
+            onRemoveMacro={macrosHook.remove}
+            vision={{
+              enabled: vision.enabled,
+              active: vision.active,
+              present: vision.present,
+              motionLevel: vision.motionLevel,
+              toggle: vision.toggle,
+              videoRef: vision.videoRef,
+              profileName: profile.name,
+            }}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="flex flex-col h-dvh relative z-[1]">
       <NovaHeader
