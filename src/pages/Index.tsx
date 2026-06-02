@@ -505,7 +505,7 @@ const Index = () => {
         </div>
       )}
 
-      <FloatingHost />
+      <FloatingHost renderPanel={renderTab} />
     </div>
   );
 };
