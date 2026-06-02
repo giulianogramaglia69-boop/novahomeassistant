@@ -290,24 +290,10 @@ const Index = () => {
     return <PinLock onUnlock={(p) => { setProfile(p); setUnlocked(true); }} />;
   }
 
-  return (
-    <div className="flex flex-col h-dvh relative z-[1]">
-      <NovaHeader
-        ttsEnabled={tts.enabled}
-        ttsSpeaking={tts.speaking}
-        onTtsToggle={tts.toggle}
-        onTtsStop={tts.stop}
-        profile={profile}
-        notifications={notif.notifications}
-        unreadCount={notif.unreadCount}
-        onMarkRead={notif.markRead}
-        onClearNotifications={notif.clearAll}
-        voiceState={voice.state}
-        voiceAlwaysOn={voice.alwaysOn}
-      />
-      <TabNav active={tab} onChange={setTab} />
-      <main className="flex-1 overflow-hidden flex flex-col">
-        {tab === 'dashboard' && (
+  const renderTab = (t: TabId) => {
+    switch (t) {
+      case 'dashboard':
+        return (
           <DashboardPanel
             messages={chat.messages}
             isLoading={chat.isLoading}
@@ -341,8 +327,9 @@ const Index = () => {
             totalWattage={totalWattage}
             devicesOn={devicesOn}
           />
-        )}
-        {tab === 'chat' && (
+        );
+      case 'chat':
+        return (
           <ChatPanel
             messages={chat.messages}
             isLoading={chat.isLoading}
@@ -352,8 +339,9 @@ const Index = () => {
             onVoiceStart={voice.startListening}
             onVoiceStop={voice.stopListening}
           />
-        )}
-        {tab === 'home' && (
+        );
+      case 'home':
+        return (
           <HomePanel
             devices={devices.devices}
             devicesOn={devices.devicesOn}
@@ -368,8 +356,9 @@ const Index = () => {
             onSmartFetch={smart.fetchDevices}
             onSmartCommand={smart.sendCommand}
           />
-        )}
-        {tab === 'radio' && (
+        );
+      case 'radio':
+        return (
           <RadioPanel
             stations={radio.stations}
             playing={radio.playing}
@@ -378,19 +367,20 @@ const Index = () => {
             onToggle={radio.toggle}
             onVolumeChange={radio.changeVolume}
           />
-        )}
-        {tab === 'meteo' && (
-          <MeteoPanel weather={weather.weather} loading={weather.loading} />
-        )}
-        {tab === 'reminders' && (
+        );
+      case 'meteo':
+        return <MeteoPanel weather={weather.weather} loading={weather.loading} />;
+      case 'reminders':
+        return (
           <NotesPanel
             notes={notes.notes}
             onAdd={notes.add}
             onRemove={notes.remove}
             onEdit={notes.edit}
           />
-        )}
-        {tab === 'timer' && (
+        );
+      case 'timer':
+        return (
           <TimerPanel
             timers={timers.timers}
             onAdd={timers.add}
@@ -399,8 +389,9 @@ const Index = () => {
             onReset={timers.reset}
             onRemove={timers.remove}
           />
-        )}
-        {tab === 'calendar' && (
+        );
+      case 'calendar':
+        return (
           <CalendarPanel
             events={calendar.events}
             onAdd={calendar.addEvent}
@@ -408,8 +399,9 @@ const Index = () => {
             onRemove={calendar.removeEvent}
             getEventsForDate={calendar.getEventsForDate}
           />
-        )}
-        {tab === 'ambiente' && (
+        );
+      case 'ambiente':
+        return (
           <AmbientePanel
             sounds={ambient.sounds}
             playing={ambient.playing}
@@ -417,19 +409,19 @@ const Index = () => {
             onToggle={ambient.toggle}
             onVolumeChange={ambient.changeVolume}
           />
-        )}
-        {tab === 'news' && (
-          <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />
-        )}
-        {tab === 'web' && <WebPanel />}
-        {tab === 'messages' && (
-          <MessagesPanel profile={profile} messages={msgs.messages} onSend={msgs.send} onMarkRead={msgs.markRead} />
-        )}
-        {tab === 'shopping' && (
-          <ShoppingPanel items={shopping.items} onAdd={shopping.add} onToggle={shopping.toggle} onRemove={shopping.remove} onClearDone={shopping.clearDone} />
-        )}
-        {tab === 'traffic' && <TrafficPanel />}
-        {tab === 'settings' && (
+        );
+      case 'news':
+        return <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />;
+      case 'web':
+        return <WebPanel />;
+      case 'messages':
+        return <MessagesPanel profile={profile} messages={msgs.messages} onSend={msgs.send} onMarkRead={msgs.markRead} />;
+      case 'shopping':
+        return <ShoppingPanel items={shopping.items} onAdd={shopping.add} onToggle={shopping.toggle} onRemove={shopping.remove} onClearDone={shopping.clearDone} />;
+      case 'traffic':
+        return <TrafficPanel />;
+      case 'settings':
+        return (
           <SettingsPanel
             onClearChat={chat.clearChat}
             onDetectLocation={weather.detectLocation}
@@ -458,7 +450,30 @@ const Index = () => {
               profileName: profile.name,
             }}
           />
-        )}
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-dvh relative z-[1]">
+      <NovaHeader
+        ttsEnabled={tts.enabled}
+        ttsSpeaking={tts.speaking}
+        onTtsToggle={tts.toggle}
+        onTtsStop={tts.stop}
+        profile={profile}
+        notifications={notif.notifications}
+        unreadCount={notif.unreadCount}
+        onMarkRead={notif.markRead}
+        onClearNotifications={notif.clearAll}
+        voiceState={voice.state}
+        voiceAlwaysOn={voice.alwaysOn}
+      />
+      <TabNav active={tab} onChange={setTab} />
+      <main className="flex-1 overflow-hidden flex flex-col">
+        {renderTab(tab)}
       </main>
 
       {voice.statusText && (
@@ -490,7 +505,7 @@ const Index = () => {
         </div>
       )}
 
-      <FloatingHost />
+      <FloatingHost renderPanel={renderTab} />
     </div>
   );
 };

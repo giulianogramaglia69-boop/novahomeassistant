@@ -222,13 +222,13 @@ const tools = [
     type: "function",
     function: {
       name: "open_floating",
-      description: "Apre una finestra flottante con un contenuto esterno (mappa, web, video). Se l'utente NON specifica la modalità, lascia mode='ask' così l'app chiede all'utente picture-in-picture o metà schermo. Target validi: 'maps', 'traffico', 'web', 'google', 'youtube', 'meteo' oppure un URL https://. Esempio: 'apri mappe' -> {target:'maps', mode:'ask'}; 'mostrami le mappe in piccolo' -> {target:'maps', mode:'pip'}.",
+      description: "Apre una finestra flottante sopra l'app con QUALSIASI contenuto: un pannello interno di NOVA oppure un sito esterno. Usa SEMPRE questo tool per richieste tipo 'apri ...', 'mostrami ...', 'apri google.com', 'apri la chat in modalità multi'. Se l'utente NON specifica la modalità, lascia mode='ask' (l'app mostrerà un selettore PiP / Metà schermo / Multi). Target validi: (1) pannelli interni — 'dashboard','chat','home','radio','meteo','reminders','timer','calendar','ambiente','news','web','messages','shopping','traffic','settings' (puoi anche prefissare con 'panel:'); (2) preset web — 'maps','traffico','google','youtube','windy'; (3) un URL completo 'https://...' o un dominio nudo come 'google.com', 'wikipedia.org/wiki/Roma'. Esempi: 'apri mappe' -> {target:'maps',mode:'ask'}; 'apri la chat in modalità multi' -> {target:'chat',mode:'multi'}; 'apri google.com a metà schermo' -> {target:'google.com',mode:'half'}; 'mostrami il meteo in pip' -> {target:'meteo',mode:'pip'}.",
       parameters: {
         type: "object",
         properties: {
-          target: { type: "string", description: "Chiave preset ('maps','traffico','web','google','youtube','meteo') o URL https://" },
-          mode: { type: "string", enum: ["ask", "pip", "half"], description: "ask = chiedi all'utente, pip = picture-in-picture, half = metà schermo" },
-          url: { type: "string", description: "URL opzionale se diverso dal target" },
+          target: { type: "string", description: "ID pannello interno, preset web, URL completo o dominio nudo" },
+          mode: { type: "string", enum: ["ask", "pip", "half", "multi"], description: "ask = chiedi all'utente; pip = picture-in-picture trascinabile; half = metà schermo laterale; multi = tile compatto sovrapponibile per affiancare più finestre" },
+          url: { type: "string", description: "URL opzionale (override) se target è una etichetta" },
           title: { type: "string", description: "Titolo opzionale finestra" },
         },
         required: ["target"],
@@ -412,7 +412,7 @@ REGOLE DI STILE
 CONTROLLO TOTALE DELL'APP via tool. Usa SEMPRE i tool quando rilevante senza chiedere conferma:
 - control_device (TV/lavatrice), get_weather, manage_reminder, navigate_tab, web_search,
   start_timer, play_radio, play_ambient, add_calendar_event, add_note, remember, add_shopping, open_floating.
-- open_floating: per "apri mappe", "mostrami il traffico", "apri youtube/google" usa SEMPRE questo tool con mode='ask' (l'app chiederà all'utente PiP o metà schermo). Usa mode='pip' o mode='half' SOLO se l'utente specifica esplicitamente la modalità.
+- open_floating: per QUALSIASI "apri X" / "mostrami X" usa SEMPRE questo tool. Funziona sia per pannelli interni di NOVA (chat, meteo, home, calendar, timer, news, shopping, ecc.) sia per siti esterni ('apri google.com', 'apri youtube', 'apri wikipedia.org'). Se l'utente non specifica la modalità (pip/half/multi) lascia mode='ask'. Se invece dice "in pip / a metà schermo / in modalità multi / affiancato" usa il valore corrispondente. NON usare navigate_tab quando l'utente chiede esplicitamente di "aprire" qualcosa: usa open_floating.
 - run_sequence: per richieste complesse esegui una sequenza ordinata di step (scena + timer + radio + ecc).
   Esempio "serata cinema": [{type:"scene",payload:"cinema"},{type:"timer",payload:"{\\"seconds\\":300,\\"label\\":\\"Popcorn\\"}"},{type:"speak",payload:"Tutto pronto, ${title}."}]
 - delay: pausa fra step quando serve (max 30s).
