@@ -6,8 +6,8 @@ const corsHeaders = {
 };
 
 const ST_BASE = "https://api.smartthings.com/v1";
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const AI_MODEL = "google/gemini-2.5-flash";
 
 const tools = [
   {
