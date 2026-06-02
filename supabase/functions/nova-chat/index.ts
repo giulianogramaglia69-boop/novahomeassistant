@@ -429,30 +429,34 @@ Esegui anche più tool nella stessa risposta. Concludi sempre con UNA breve conf
     let maxIterations = 6;
 
     while (maxIterations-- > 0) {
-      const response = await fetch(GROQ_URL, {
+      const response = await fetch(AI_URL, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${GROQ_API_KEY}`,
+          Authorization: `Bearer ${AI_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: GROQ_MODEL,
+          model: AI_MODEL,
           messages: currentMessages,
           tools,
           tool_choice: "auto",
-          temperature: 0.7,
         }),
       });
 
       if (!response.ok) {
         const t = await response.text();
-        console.error("GROQ error:", response.status, t);
+        console.error("AI gateway error:", response.status, t);
         if (response.status === 429) {
-          return new Response(JSON.stringify({ error: "Troppi messaggi, riprova." }), {
+          return new Response(JSON.stringify({ error: "Troppi messaggi, riprova tra poco." }), {
             status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        return new Response(JSON.stringify({ error: `Errore GROQ: ${response.status}` }), {
+        if (response.status === 402) {
+          return new Response(JSON.stringify({ error: "Crediti AI esauriti. Aggiungi crediti nel workspace." }), {
+            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({ error: `Errore AI: ${response.status}` }), {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
