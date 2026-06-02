@@ -6,8 +6,8 @@ const corsHeaders = {
 };
 
 const ST_BASE = "https://api.smartthings.com/v1";
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const AI_MODEL = "google/gemini-2.5-flash";
 
 const tools = [
   {
@@ -369,8 +369,8 @@ serve(async (req) => {
 
   try {
     const { messages, context } = await req.json();
-    const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
-    if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY non configurata");
+    const AI_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!AI_KEY) throw new Error("LOVABLE_API_KEY non configurata");
 
     let ST_TOKEN = "";
     try {
@@ -429,30 +429,34 @@ Esegui anche più tool nella stessa risposta. Concludi sempre con UNA breve conf
     let maxIterations = 6;
 
     while (maxIterations-- > 0) {
-      const response = await fetch(GROQ_URL, {
+      const response = await fetch(AI_URL, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${GROQ_API_KEY}`,
+          Authorization: `Bearer ${AI_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: GROQ_MODEL,
+          model: AI_MODEL,
           messages: currentMessages,
           tools,
           tool_choice: "auto",
-          temperature: 0.7,
         }),
       });
 
       if (!response.ok) {
         const t = await response.text();
-        console.error("GROQ error:", response.status, t);
+        console.error("AI gateway error:", response.status, t);
         if (response.status === 429) {
-          return new Response(JSON.stringify({ error: "Troppi messaggi, riprova." }), {
+          return new Response(JSON.stringify({ error: "Troppi messaggi, riprova tra poco." }), {
             status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        return new Response(JSON.stringify({ error: `Errore GROQ: ${response.status}` }), {
+        if (response.status === 402) {
+          return new Response(JSON.stringify({ error: "Crediti AI esauriti. Aggiungi crediti nel workspace." }), {
+            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({ error: `Errore AI: ${response.status}` }), {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
