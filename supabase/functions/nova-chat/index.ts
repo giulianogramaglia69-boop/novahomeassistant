@@ -7,7 +7,7 @@ const corsHeaders = {
 
 const ST_BASE = "https://api.smartthings.com/v1";
 const AI_URL = "https://api.groq.com/openai/v1/chat/completions";
-const AI_MODEL = "llama-3.3-70b-versatile";
+const AI_MODEL = "openai/gpt-oss-20b";
 
 const tools = [
   {
