@@ -20,9 +20,6 @@ export interface ChatContext {
   habits?: { top: { key: string; total: number }[]; nowHourHabit: string | null };
 }
 
-// dummy guard to keep diff small below
-declare const __end__: unknown;
-type _Old = {
 
 export interface ChatToolAction {
   type: 'add_reminder' | 'complete_reminder' | 'remove_reminder' | 'refresh_devices'
