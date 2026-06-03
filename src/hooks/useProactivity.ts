@@ -21,6 +21,7 @@ const DEFAULT_ROUTINES: Omit<Routine, 'id' | 'profile_name'>[] = [
   { key: 'pre_event', enabled: true, hour: 0, minute: 0, days: [0,1,2,3,4,5,6], config: { leadMinutes: 15 } },
   { key: 'weather_alert', enabled: true, hour: 0, minute: 0, days: [0,1,2,3,4,5,6], config: {} },
   { key: 'high_energy', enabled: true, hour: 0, minute: 0, days: [0,1,2,3,4,5,6], config: { thresholdKwh: 6 } },
+  { key: 'habit_suggest', enabled: true, hour: 0, minute: 0, days: [0,1,2,3,4,5,6], config: {} },
 ];
 
 interface ProactivityCtx {
@@ -30,6 +31,8 @@ interface ProactivityCtx {
   totalKwh: number;
   speak: (text: string) => void;
   addNotification: (n: { type: string; title: string; body: string }) => void;
+  /** Returns the consolidated habit for the current hour, if any. */
+  habitForHour?: (hour: number) => { key: string; perHour: number[]; total: number } | null;
 }
 
 const RUN_LS = 'nova_proactive_runs';
@@ -165,6 +168,18 @@ export function useProactivity(ctx: ProactivityCtx) {
             c.speak(msg);
             c.addNotification({ type: 'routine', title: 'Consumi elevati', body: msg });
             markRun('high_energy');
+          }
+        }
+
+        // Habit suggestion: at the top of each hour, propose the consolidated habit for this slot (once per slot per day)
+        if (r.key === 'habit_suggest' && c.habitForHour && mm === 0) {
+          const slotKey = `habit_${hh}`;
+          const habit = c.habitForHour(hh);
+          if (habit && !ranWithin(slotKey, 18 * 3600_000)) {
+            const msg = `${address()}, di solito a quest'ora richiede "${habit.key}". Gradisce che proceda?`;
+            c.speak(msg);
+            c.addNotification({ type: 'routine', title: 'Suggerimento abituale', body: msg });
+            markRun(slotKey);
           }
         }
       }

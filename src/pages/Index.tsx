@@ -22,6 +22,7 @@ import { useProactivity } from '@/hooks/useProactivity';
 import { useMacros } from '@/hooks/useMacros';
 import { useEnergyUsage } from '@/hooks/useEnergyUsage';
 import { useVision } from '@/hooks/useVision';
+import { useHabits, partOfDay } from '@/hooks/useHabits';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
@@ -74,6 +75,7 @@ const Index = () => {
   const energy = useEnergyUsage(
     devices.devices.map(d => ({ id: d.id, label: d.name, room: d.room, wattage: d.wattage || 0, on: d.on }))
   );
+  const habits = useHabits(pName);
   const proactive = useProactivity({
     profileName: pName,
     weather: weather.weather,
@@ -81,6 +83,7 @@ const Index = () => {
     totalKwh: energy.totalKwh,
     speak: (t: string) => tts.speak(t),
     addNotification: (n) => notif.addNotification({ type: n.type as any, title: n.title, body: n.body }),
+    habitForHour: habits.habitForHour,
   });
   const vision = useVision({
     onPresenceChange: (p) => {
@@ -234,6 +237,7 @@ const Index = () => {
   }, [reminders, smart, timers, radio, ambient, calendar, notes, memory, shopping, devices, tts]);
 
   const sendWithContext = useCallback(async (input: string) => {
+    habits.log(input);
     const actions = await chat.sendMessage(input, {
       weather: weather.weather,
       reminders: reminders.reminders,
@@ -247,9 +251,19 @@ const Index = () => {
       memory: memory.items.map(m => ({ key: m.key, value: m.value })),
       shopping: shopping.items.slice(0, 30).map(s => ({ item: s.item, qty: s.qty, category: s.category, done: s.done })),
       unreadMessages: msgs.unreadCount,
+      ambient: {
+        partOfDay: partOfDay(),
+        isWeekend: [0, 6].includes(new Date().getDay()),
+        presence: vision.present,
+        visionEnabled: vision.enabled,
+      },
+      habits: {
+        top: habits.topHabits(8).map(h => ({ key: h.key, total: h.total })),
+        nowHourHabit: habits.habitForHour(new Date().getHours())?.key || null,
+      },
     });
     handleToolActions(actions);
-  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications, memory.items, shopping.items, msgs.unreadCount]);
+  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications, memory.items, shopping.items, msgs.unreadCount, habits, vision.present, vision.enabled]);
 
   const handleVoiceResult = useCallback((text: string) => {
     setTab('chat');

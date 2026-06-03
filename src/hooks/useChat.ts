@@ -16,7 +16,10 @@ export interface ChatContext {
   memory?: { key: string; value: string }[];
   shopping?: { item: string; qty: string | null; category: string | null; done: boolean }[];
   unreadMessages?: number;
+  ambient?: { partOfDay: string; isWeekend: boolean; presence: boolean; visionEnabled: boolean };
+  habits?: { top: { key: string; total: number }[]; nowHourHabit: string | null };
 }
+
 
 export interface ChatToolAction {
   type: 'add_reminder' | 'complete_reminder' | 'remove_reminder' | 'refresh_devices'
@@ -71,6 +74,8 @@ export function useChat() {
             memory: context?.memory || [],
             shopping: context?.shopping || [],
             unreadMessages: context?.unreadMessages || 0,
+            ambient: context?.ambient || null,
+            habits: context?.habits || null,
           },
         },
       });
