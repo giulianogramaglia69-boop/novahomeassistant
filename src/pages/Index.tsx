@@ -237,6 +237,7 @@ const Index = () => {
   }, [reminders, smart, timers, radio, ambient, calendar, notes, memory, shopping, devices, tts]);
 
   const sendWithContext = useCallback(async (input: string) => {
+    habits.log(input);
     const actions = await chat.sendMessage(input, {
       weather: weather.weather,
       reminders: reminders.reminders,
@@ -250,9 +251,19 @@ const Index = () => {
       memory: memory.items.map(m => ({ key: m.key, value: m.value })),
       shopping: shopping.items.slice(0, 30).map(s => ({ item: s.item, qty: s.qty, category: s.category, done: s.done })),
       unreadMessages: msgs.unreadCount,
+      ambient: {
+        partOfDay: partOfDay(),
+        isWeekend: [0, 6].includes(new Date().getDay()),
+        presence: vision.present,
+        visionEnabled: vision.enabled,
+      },
+      habits: {
+        top: habits.topHabits(8).map(h => ({ key: h.key, total: h.total })),
+        nowHourHabit: habits.habitForHour(new Date().getHours())?.key || null,
+      },
     });
     handleToolActions(actions);
-  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications, memory.items, shopping.items, msgs.unreadCount]);
+  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications, memory.items, shopping.items, msgs.unreadCount, habits, vision.present, vision.enabled]);
 
   const handleVoiceResult = useCallback((text: string) => {
     setTab('chat');
