@@ -21,6 +21,7 @@ const DEFAULT_ROUTINES: Omit<Routine, 'id' | 'profile_name'>[] = [
   { key: 'pre_event', enabled: true, hour: 0, minute: 0, days: [0,1,2,3,4,5,6], config: { leadMinutes: 15 } },
   { key: 'weather_alert', enabled: true, hour: 0, minute: 0, days: [0,1,2,3,4,5,6], config: {} },
   { key: 'high_energy', enabled: true, hour: 0, minute: 0, days: [0,1,2,3,4,5,6], config: { thresholdKwh: 6 } },
+  { key: 'habit_suggest', enabled: true, hour: 0, minute: 0, days: [0,1,2,3,4,5,6], config: {} },
 ];
 
 interface ProactivityCtx {
@@ -30,6 +31,8 @@ interface ProactivityCtx {
   totalKwh: number;
   speak: (text: string) => void;
   addNotification: (n: { type: string; title: string; body: string }) => void;
+  /** Returns the consolidated habit for the current hour, if any. */
+  habitForHour?: (hour: number) => { key: string; perHour: number[]; total: number } | null;
 }
 
 const RUN_LS = 'nova_proactive_runs';
