@@ -22,6 +22,7 @@ import { useProactivity } from '@/hooks/useProactivity';
 import { useMacros } from '@/hooks/useMacros';
 import { useEnergyUsage } from '@/hooks/useEnergyUsage';
 import { useVision } from '@/hooks/useVision';
+import { useHabits, partOfDay } from '@/hooks/useHabits';
 import NovaHeader from '@/components/nova/NovaHeader';
 import TabNav from '@/components/nova/TabNav';
 import DashboardPanel from '@/components/nova/DashboardPanel';
