@@ -422,7 +422,7 @@ CONTROLLO TOTALE DELL'APP via tool. Usa SEMPRE i tool quando rilevante senza chi
 - delay: pausa fra step quando serve (max 30s).
 - remember(key,value): memorizza in modo proattivo preferenze/fatti utili (allergie, gusti, orari).
 
-Esegui anche più tool nella stessa risposta. Concludi sempre con UNA breve conferma vocale.${memoryContext}${notesContext}${timersContext}${devicesContext}${calendarContext}${ambientContext}${notifContext}${shoppingContext}${msgsContext}`;
+Esegui anche più tool nella stessa risposta. Concludi sempre con UNA breve conferma vocale.${ambientCtx}${habitsCtx}${memoryContext}${notesContext}${timersContext}${devicesContext}${calendarContext}${ambientContext}${notifContext}${shoppingContext}${msgsContext}`;
 
     let currentMessages: any[] = [
       { role: "system", content: systemPrompt },
