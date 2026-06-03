@@ -74,6 +74,8 @@ export function useChat() {
             memory: context?.memory || [],
             shopping: context?.shopping || [],
             unreadMessages: context?.unreadMessages || 0,
+            ambient: context?.ambient || null,
+            habits: context?.habits || null,
           },
         },
       });
