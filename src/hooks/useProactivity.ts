@@ -170,6 +170,18 @@ export function useProactivity(ctx: ProactivityCtx) {
             markRun('high_energy');
           }
         }
+
+        // Habit suggestion: at the top of each hour, propose the consolidated habit for this slot (once per slot per day)
+        if (r.key === 'habit_suggest' && c.habitForHour && mm === 0) {
+          const slotKey = `habit_${hh}`;
+          const habit = c.habitForHour(hh);
+          if (habit && !ranWithin(slotKey, 18 * 3600_000)) {
+            const msg = `${address()}, di solito a quest'ora richiede "${habit.key}". Gradisce che proceda?`;
+            c.speak(msg);
+            c.addNotification({ type: 'routine', title: 'Suggerimento abituale', body: msg });
+            markRun(slotKey);
+          }
+        }
       }
     };
 
