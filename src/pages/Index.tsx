@@ -75,6 +75,7 @@ const Index = () => {
   const energy = useEnergyUsage(
     devices.devices.map(d => ({ id: d.id, label: d.name, room: d.room, wattage: d.wattage || 0, on: d.on }))
   );
+  const habits = useHabits(pName);
   const proactive = useProactivity({
     profileName: pName,
     weather: weather.weather,
@@ -82,6 +83,7 @@ const Index = () => {
     totalKwh: energy.totalKwh,
     speak: (t: string) => tts.speak(t),
     addNotification: (n) => notif.addNotification({ type: n.type as any, title: n.title, body: n.body }),
+    habitForHour: habits.habitForHour,
   });
   const vision = useVision({
     onPresenceChange: (p) => {
