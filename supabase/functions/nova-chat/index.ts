@@ -440,6 +440,7 @@ Esegui anche più tool nella stessa risposta. Concludi sempre con UNA breve conf
           messages: currentMessages,
           tools,
           tool_choice: "auto",
+          temperature: 0.6,
         }),
       });
 
