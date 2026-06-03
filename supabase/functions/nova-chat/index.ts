@@ -397,6 +397,10 @@ serve(async (req) => {
     const memoryContext = context?.memory?.length ? `\n\nMEMORIA LUNGO TERMINE (fatti già noti):\n${context.memory.map((m: any) => `- ${m.key}: ${m.value}`).join('\n')}` : '';
     const shoppingContext = context?.shopping?.length ? `\n\nLista spesa (${context.shopping.length}):\n${context.shopping.slice(0,15).map((s: any) => `- ${s.done ? '✓' : '○'} ${s.item}${s.qty ? ' ('+s.qty+')' : ''}`).join('\n')}` : '';
     const msgsContext = context?.unreadMessages ? `\n\nMessaggi non letti: ${context.unreadMessages}` : '';
+    const amb = context?.ambient;
+    const ambientCtx = amb ? `\n\nCONTESTO AMBIENTALE: ${amb.partOfDay}${amb.isWeekend ? ', weekend' : ', giorno feriale'}${amb.visionEnabled ? (amb.presence ? ', utente presente davanti alla camera' : ', utente assente') : ''}.` : '';
+    const hab = context?.habits;
+    const habitsCtx = hab && (hab.top?.length || hab.nowHourHabit) ? `\n\nABITUDINI APPRESE${hab.nowHourHabit ? ` (a quest'ora di solito: "${hab.nowHourHabit}")` : ''}:\n${(hab.top || []).map((h: any) => `- ${h.key} (×${h.total})`).join('\n')}\nUsa queste abitudini per anticipare desideri (proattività moderata): puoi proporle ma non eseguirle senza conferma.` : '';
     const profileName = context?.profileName || 'Giuliano';
     const title = titleFor(profileName);
     const nowStr = new Date().toLocaleString('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'full', timeStyle: 'short' });
