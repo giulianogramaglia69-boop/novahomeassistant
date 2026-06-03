@@ -6,8 +6,8 @@ const corsHeaders = {
 };
 
 const ST_BASE = "https://api.smartthings.com/v1";
-const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const AI_MODEL = "google/gemini-2.5-flash";
+const AI_URL = "https://api.groq.com/openai/v1/chat/completions";
+const AI_MODEL = "llama-3.3-70b-versatile";
 
 const tools = [
   {
@@ -369,8 +369,8 @@ serve(async (req) => {
 
   try {
     const { messages, context } = await req.json();
-    const AI_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!AI_KEY) throw new Error("LOVABLE_API_KEY non configurata");
+    const AI_KEY = Deno.env.get("GROQ_API_KEY");
+    if (!AI_KEY) throw new Error("GROQ_API_KEY non configurata");
 
     let ST_TOKEN = "";
     try {
@@ -440,6 +440,7 @@ Esegui anche più tool nella stessa risposta. Concludi sempre con UNA breve conf
           messages: currentMessages,
           tools,
           tool_choice: "auto",
+          temperature: 0.6,
         }),
       });
 
