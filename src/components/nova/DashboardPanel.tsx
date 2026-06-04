@@ -80,9 +80,10 @@ const DashboardPanel = ({
     <div className="flex-1 overflow-y-auto scrollbar-thin px-3 pb-4 pt-3">
       {/* JARVIS HUD */}
       <div
-        className="relative mb-4 rounded-3xl border border-border bg-card/40 backdrop-blur p-4 hud-scanline overflow-hidden cursor-pointer active:scale-[0.99] transition-transform"
+        className="relative mb-4 rounded-3xl hud-card hud-corners p-4 hud-scanline overflow-hidden cursor-pointer active:scale-[0.99] transition-transform"
         onClick={voiceState === 'listening' ? onVoiceStop : onVoiceStart}
       >
+        <div className="absolute top-3 right-3 chip-hud z-10">NOVA · ONLINE</div>
         <JarvisHUD
           voiceState={voiceState}
           ttsSpeaking={ttsSpeaking}
