@@ -80,9 +80,10 @@ const DashboardPanel = ({
     <div className="flex-1 overflow-y-auto scrollbar-thin px-3 pb-4 pt-3">
       {/* JARVIS HUD */}
       <div
-        className="relative mb-4 rounded-3xl border border-border bg-card/40 backdrop-blur p-4 hud-scanline overflow-hidden cursor-pointer active:scale-[0.99] transition-transform"
+        className="relative mb-4 rounded-3xl hud-card hud-corners p-4 hud-scanline overflow-hidden cursor-pointer active:scale-[0.99] transition-transform"
         onClick={voiceState === 'listening' ? onVoiceStop : onVoiceStart}
       >
+        <div className="absolute top-3 right-3 chip-hud z-10">NOVA · ONLINE</div>
         <JarvisHUD
           voiceState={voiceState}
           ttsSpeaking={ttsSpeaking}
@@ -337,17 +338,17 @@ interface BentoCardProps {
 
 const BentoCard = ({ children, className = '', headerTitle, headerIcon, onMore, onClick }: BentoCardProps) => (
   <div
-    className={`bg-card/80 border border-border rounded-2xl p-3.5 flex flex-col ${onClick ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''} ${className}`}
+    className={`hud-card hud-corners rounded-2xl p-3.5 flex flex-col ${onClick ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''} ${className}`}
     onClick={onClick}
   >
     {headerTitle && (
       <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-1.5">
           {headerIcon && <span className="text-[0.8rem]">{headerIcon}</span>}
-          <span className="font-syne text-[0.65rem] font-bold tracking-[0.12em] uppercase">{headerTitle}</span>
+          <span className="font-syne text-[0.65rem] font-bold tracking-[0.14em] uppercase gradient-text">{headerTitle}</span>
         </div>
         {onMore && (
-          <button onClick={(e) => { e.stopPropagation(); onMore(); }} className="text-[0.55rem] text-primary font-syne font-semibold tracking-wider hover:underline">
+          <button onClick={(e) => { e.stopPropagation(); onMore(); }} className="text-[0.55rem] text-primary font-syne font-semibold tracking-[0.18em] hover:text-glow-soft transition-all">
             APRI →
           </button>
         )}

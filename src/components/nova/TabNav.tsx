@@ -24,21 +24,28 @@ interface Props {
 }
 
 const TabNav = ({ active, onChange }: Props) => (
-  <div className="relative z-10 flex border-b border-border bg-background/60 backdrop-blur-[10px] shrink-0 overflow-x-auto scrollbar-none px-4">
-    {TABS.map(tab => (
-      <button
-        key={tab.id}
-        onClick={() => onChange(tab.id)}
-        className={`shrink-0 px-3.5 py-3 font-syne text-[0.68rem] font-semibold tracking-[0.1em] border-b-2 transition-all flex items-center gap-1.5 ${
-          active === tab.id
-            ? 'text-primary border-primary'
-            : 'text-muted-foreground border-transparent hover:text-foreground'
-        }`}
-      >
-        <span>{tab.icon}</span>
-        {tab.label}
-      </button>
-    ))}
+  <div className="relative z-10 flex border-b border-primary/20 bg-background/70 backdrop-blur-[14px] shrink-0 overflow-x-auto scrollbar-none px-3">
+    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent pointer-events-none" />
+    {TABS.map(tab => {
+      const isActive = active === tab.id;
+      return (
+        <button
+          key={tab.id}
+          onClick={() => onChange(tab.id)}
+          className={`relative shrink-0 px-3.5 py-3 font-syne text-[0.68rem] font-semibold tracking-[0.14em] transition-all flex items-center gap-1.5 ${
+            isActive
+              ? 'text-primary text-glow-soft'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <span className={isActive ? 'drop-shadow-[0_0_6px_hsl(var(--primary))]' : ''}>{tab.icon}</span>
+          {tab.label}
+          {isActive && (
+            <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full bg-gradient-to-r from-primary via-accent to-primary shadow-[0_0_12px_hsl(var(--primary))]" />
+          )}
+        </button>
+      );
+    })}
   </div>
 );
 
