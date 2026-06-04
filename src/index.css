@@ -159,19 +159,73 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
+
+  .hud-frame { position: relative; }
+  .hud-frame::before,
+  .hud-frame::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid hsl(var(--primary) / 0.7);
+    pointer-events: none;
+  }
+  .hud-frame::before { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+  .hud-frame::after  { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+  .glow-primary {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.25) inset,
+      0 0 24px hsl(var(--primary) / 0.25),
+      0 0 60px hsl(var(--primary) / 0.12);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 18px hsl(var(--primary) / 0.55), 0 0 2px hsl(var(--accent) / 0.4);
+  }
+
+  .gradient-text {
+    background: linear-gradient(120deg, hsl(var(--foreground)) 0%, hsl(var(--accent)) 60%, hsl(var(--primary)) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }
 
-/* Ambient background */
+/* Ambient HUD background — nebula + grid + scanline */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(ellipse 60% 40% at 20% 10%, hsl(215 100% 61% / 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 80% 80%, hsl(168 100% 45% / 0.06) 0%, transparent 60%);
+    radial-gradient(ellipse 70% 50% at 15% 10%, hsl(var(--primary) / 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 45% at 85% 85%, hsl(var(--accent) / 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, hsl(var(--primary) / 0.06) 0%, transparent 70%);
   pointer-events: none;
+  animation: nebula-drift 22s ease-in-out infinite alternate;
 }
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(hsl(var(--primary) / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--primary) / 0.05) 1px, transparent 1px);
+  background-size: 48px 48px, 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 80%);
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+@keyframes nebula-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(2%, -2%, 0) scale(1.06); }
+}
+
 
 /* Pulse orb animation */
 @keyframes pulse-orb {

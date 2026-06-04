@@ -96,18 +96,36 @@ const PinLock = ({ onUnlock }: Props) => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-dvh bg-background select-none">
+    <div className="relative flex flex-col items-center justify-center h-dvh bg-background select-none overflow-hidden">
+      {/* Orbital rings */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div
+          className="absolute w-[520px] h-[520px] rounded-full border border-primary/15"
+          style={{ animation: 'hud-spin 28s linear infinite' }}
+        >
+          <span className="absolute -top-1 left-1/2 w-2 h-2 -translate-x-1/2 rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary))]" />
+        </div>
+        <div
+          className="absolute w-[360px] h-[360px] rounded-full border border-accent/20"
+          style={{ animation: 'hud-spin-rev 18s linear infinite' }}
+        >
+          <span className="absolute top-1/2 -right-1 w-1.5 h-1.5 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_10px_hsl(var(--accent))]" />
+        </div>
+        <div className="absolute w-[240px] h-[240px] rounded-full border border-primary/10" />
+      </div>
+
+      {/* Core orb */}
       <div
-        className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-6"
+        className="relative w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-6 glow-primary"
         style={{ animation: 'pulse-orb 3s ease-in-out infinite' }}
       >
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
         </svg>
       </div>
 
-      <h1 className="font-syne font-extrabold text-xl tracking-[0.15em] text-foreground mb-1">NOVA</h1>
-      <p className="text-muted-foreground text-xs mb-8">Inserisci il PIN per accedere</p>
+      <h1 className="font-syne font-extrabold text-3xl tracking-[0.28em] gradient-text text-glow mb-1.5">NOVA</h1>
+      <p className="text-muted-foreground text-[0.65rem] tracking-[0.25em] uppercase mb-7">// Inserisci il PIN</p>
 
       <div className={`flex gap-3 mb-8 ${shake ? 'animate-shake' : ''}`}>
         {Array.from({ length: 6 }).map((_, i) => (
@@ -116,8 +134,8 @@ const PinLock = ({ onUnlock }: Props) => {
             className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-200 ${
               i < pin.length
                 ? error
-                  ? 'bg-destructive border-destructive'
-                  : 'bg-primary border-primary'
+                  ? 'bg-destructive border-destructive shadow-[0_0_12px_hsl(var(--destructive))]'
+                  : 'bg-primary border-primary shadow-[0_0_14px_hsl(var(--primary))]'
                 : 'border-muted-foreground/40 bg-transparent'
             }`}
           />
@@ -139,7 +157,7 @@ const PinLock = ({ onUnlock }: Props) => {
         autoFocus
       />
 
-      <div className="grid grid-cols-3 gap-3 w-[260px]">
+      <div className="hud-frame grid grid-cols-3 gap-3 w-[260px] p-3 rounded-2xl bg-card/40 backdrop-blur-md border border-border">
         {['1','2','3','4','5','6','7','8','9','','0','⌫'].map((key) => (
           <button
             key={key || 'empty'}
@@ -149,11 +167,11 @@ const PinLock = ({ onUnlock }: Props) => {
               inputRef.current?.focus();
             }}
             disabled={!key}
-            className={`h-14 rounded-2xl text-lg font-syne font-bold transition-all active:scale-95 ${
+            className={`h-14 rounded-xl text-lg font-syne font-bold transition-all active:scale-95 ${
               !key ? 'invisible' :
               key === '⌫'
-                ? 'bg-secondary text-muted-foreground hover:bg-muted'
-                : 'bg-card border border-border text-foreground hover:bg-secondary active:bg-muted'
+                ? 'bg-secondary/70 text-muted-foreground hover:bg-muted'
+                : 'bg-gradient-to-br from-card to-secondary/40 border border-primary/20 text-foreground hover:border-primary/50 hover:shadow-[0_0_18px_hsl(var(--primary)/0.25)]'
             }`}
           >
             {key}
@@ -162,7 +180,7 @@ const PinLock = ({ onUnlock }: Props) => {
       </div>
 
       {error && (
-        <p className="text-destructive text-xs mt-4 font-mono">PIN errato</p>
+        <p className="text-destructive text-xs mt-4 font-mono tracking-widest animate-pulse">// PIN ERRATO</p>
       )}
     </div>
   );
