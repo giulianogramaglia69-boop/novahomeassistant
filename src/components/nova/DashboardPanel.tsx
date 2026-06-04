@@ -337,17 +337,17 @@ interface BentoCardProps {
 
 const BentoCard = ({ children, className = '', headerTitle, headerIcon, onMore, onClick }: BentoCardProps) => (
   <div
-    className={`bg-card/80 border border-border rounded-2xl p-3.5 flex flex-col ${onClick ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''} ${className}`}
+    className={`hud-card hud-corners rounded-2xl p-3.5 flex flex-col ${onClick ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''} ${className}`}
     onClick={onClick}
   >
     {headerTitle && (
       <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-1.5">
           {headerIcon && <span className="text-[0.8rem]">{headerIcon}</span>}
-          <span className="font-syne text-[0.65rem] font-bold tracking-[0.12em] uppercase">{headerTitle}</span>
+          <span className="font-syne text-[0.65rem] font-bold tracking-[0.14em] uppercase gradient-text">{headerTitle}</span>
         </div>
         {onMore && (
-          <button onClick={(e) => { e.stopPropagation(); onMore(); }} className="text-[0.55rem] text-primary font-syne font-semibold tracking-wider hover:underline">
+          <button onClick={(e) => { e.stopPropagation(); onMore(); }} className="text-[0.55rem] text-primary font-syne font-semibold tracking-[0.18em] hover:text-glow-soft transition-all">
             APRI →
           </button>
         )}
