@@ -34,21 +34,25 @@ const ChatPanel = ({ messages, isLoading, onSend, voiceState, voiceStatusText, o
 
   return (
     <div className="flex flex-col h-full">
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 scrollbar-thin">
+      <div className="flex items-center justify-between px-4 pt-3 pb-2 shrink-0">
+        <span className="chip-hud">CHAT · LIVE</span>
+        <span className="font-syne text-[0.55rem] tracking-[0.22em] uppercase text-muted-foreground">{messages.length} MSG</span>
+      </div>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 pt-2 flex flex-col gap-3.5 scrollbar-thin">
         {messages.map(msg => (
           <div key={msg.id} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`} style={{ animation: 'msg-in 0.3s ease' }}>
-            <div className={`w-[30px] h-[30px] rounded-full flex items-center justify-center shrink-0 text-[0.75rem] ${
+            <div className={`w-[32px] h-[32px] rounded-full flex items-center justify-center shrink-0 text-[0.75rem] ${
               msg.role === 'assistant'
-                ? 'bg-gradient-to-br from-primary to-accent'
-                : 'bg-secondary border border-border'
+                ? 'bg-gradient-to-br from-primary to-accent glow-primary'
+                : 'bg-secondary border border-primary/25'
             }`}>
               {msg.role === 'assistant' ? '🤖' : '👤'}
             </div>
             <div className="max-w-[78%]">
-              <div className={`px-3.5 py-2.5 text-[0.8rem] leading-relaxed break-words ${
+              <div className={`px-3.5 py-2.5 text-[0.8rem] leading-relaxed break-words backdrop-blur-md ${
                 msg.role === 'assistant'
-                  ? 'bg-card border border-border rounded-[4px_14px_14px_14px]'
-                  : 'bg-gradient-to-br from-primary/20 to-accent/10 border border-primary/25 rounded-[14px_4px_14px_14px] text-right'
+                  ? 'hud-card rounded-[4px_16px_16px_16px]'
+                  : 'bg-gradient-to-br from-primary/25 to-accent/15 border border-primary/30 rounded-[16px_4px_16px_16px] text-right shadow-[0_0_18px_-6px_hsl(var(--primary)/0.6)]'
               }`}>
                 {msg.role === 'assistant' ? (
                   <div className="prose prose-invert prose-sm max-w-none [&_p]:m-0 [&_ul]:m-0 [&_ol]:m-0">
