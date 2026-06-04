@@ -68,12 +68,12 @@ const ChatPanel = ({ messages, isLoading, onSend, voiceState, voiceStatusText, o
         ))}
         {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
           <div className="flex gap-2.5">
-            <div className="w-[30px] h-[30px] rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0 text-[0.75rem]">🤖</div>
-            <div className="flex gap-[5px] px-3.5 py-3 bg-card border border-border rounded-[4px_14px_14px_14px] w-fit">
+            <div className="w-[32px] h-[32px] rounded-full bg-gradient-to-br from-primary to-accent glow-primary flex items-center justify-center shrink-0 text-[0.75rem]">🤖</div>
+            <div className="flex gap-[5px] px-3.5 py-3 hud-card rounded-[4px_16px_16px_16px] w-fit">
               {[0, 1, 2].map(i => (
                 <span
                   key={i}
-                  className="w-[7px] h-[7px] rounded-full bg-primary"
+                  className="w-[7px] h-[7px] rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary))]"
                   style={{ animation: `typing 1.2s ease-in-out infinite ${i * 0.2}s` }}
                 />
               ))}
@@ -82,14 +82,15 @@ const ChatPanel = ({ messages, isLoading, onSend, voiceState, voiceStatusText, o
         )}
       </div>
 
-      <div className="p-3 px-4 border-t border-border bg-background/85 backdrop-blur-[20px] flex gap-2.5 items-end shrink-0">
+      <div className="relative p-3 px-4 border-t border-primary/20 bg-background/70 backdrop-blur-[20px] flex gap-2.5 items-end shrink-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-2/3 bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
         {/* Mic button */}
         <button
           onClick={isActive ? onVoiceStop : onVoiceStart}
-          className={`w-[42px] h-[42px] rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95 ${
+          className={`w-[44px] h-[44px] rounded-full flex items-center justify-center shrink-0 transition-all active:scale-95 ${
             isActive
               ? 'bg-destructive/20 border-2 border-destructive text-destructive animate-pulse'
-              : 'bg-card border border-border text-muted-foreground hover:border-primary/40 hover:text-primary'
+              : 'hud-card text-muted-foreground hover:text-primary'
           }`}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -103,12 +104,12 @@ const ChatPanel = ({ messages, isLoading, onSend, voiceState, voiceStatusText, o
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
           placeholder="Scrivi un messaggio..."
           rows={1}
-          className="flex-1 bg-card border border-border rounded-[14px] px-3.5 py-2.5 text-foreground font-mono text-[0.78rem] resize-none max-h-[120px] leading-relaxed outline-none transition-colors focus:border-primary/40 placeholder:text-muted-foreground"
+          className="flex-1 hud-card rounded-[16px] px-3.5 py-2.5 text-foreground font-mono text-[0.78rem] resize-none max-h-[120px] leading-relaxed outline-none transition-all focus:shadow-[0_0_24px_-6px_hsl(var(--primary)/0.6)] placeholder:text-muted-foreground"
         />
         <button
           onClick={handleSend}
           disabled={!input.trim() || isLoading}
-          className="w-[42px] h-[42px] rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0 shadow-[0_0_15px_hsl(215_100%_61%/0.3)] transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+          className="w-[44px] h-[44px] rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shrink-0 glow-primary transition-transform hover:scale-105 active:scale-95 disabled:opacity-40 disabled:saturate-50"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
