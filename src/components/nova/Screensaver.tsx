@@ -15,8 +15,28 @@ const Screensaver = ({ weather, events, onDismiss }: Props) => {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    const iv = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(iv);
+    let timeoutId: number;
+    const tick = () => {
+      setNow(new Date());
+      // Self-correcting: schedule next tick aligned to the next second boundary
+      const delay = 1000 - (Date.now() % 1000);
+      timeoutId = window.setTimeout(tick, delay);
+    };
+    tick();
+    const forceUpdate = () => {
+      setNow(new Date());
+      window.clearTimeout(timeoutId);
+      tick();
+    };
+    document.addEventListener('visibilitychange', forceUpdate);
+    window.addEventListener('focus', forceUpdate);
+    window.addEventListener('pageshow', forceUpdate);
+    return () => {
+      window.clearTimeout(timeoutId);
+      document.removeEventListener('visibilitychange', forceUpdate);
+      window.removeEventListener('focus', forceUpdate);
+      window.removeEventListener('pageshow', forceUpdate);
+    };
   }, []);
 
   const hh = now.getHours().toString().padStart(2, '0');
