@@ -21,8 +21,27 @@ const JarvisHUD = ({ voiceState, ttsSpeaking, totalWattage, devicesOn, weatherTe
   const [time, setTime] = useState(() => new Date());
 
   useEffect(() => {
-    const iv = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(iv);
+    let timeoutId: number;
+    const tick = () => {
+      setTime(new Date());
+      const delay = 1000 - (Date.now() % 1000);
+      timeoutId = window.setTimeout(tick, delay);
+    };
+    tick();
+    const forceUpdate = () => {
+      setTime(new Date());
+      window.clearTimeout(timeoutId);
+      tick();
+    };
+    document.addEventListener('visibilitychange', forceUpdate);
+    window.addEventListener('focus', forceUpdate);
+    window.addEventListener('pageshow', forceUpdate);
+    return () => {
+      window.clearTimeout(timeoutId);
+      document.removeEventListener('visibilitychange', forceUpdate);
+      window.removeEventListener('focus', forceUpdate);
+      window.removeEventListener('pageshow', forceUpdate);
+    };
   }, []);
 
   const micActive = voiceState === 'listening' || voiceState === 'wake';

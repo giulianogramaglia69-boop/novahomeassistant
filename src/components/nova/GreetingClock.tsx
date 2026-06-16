@@ -16,8 +16,27 @@ const GreetingClock = ({ compact = false, profile }: { compact?: boolean; profil
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
+    let timeoutId: number;
+    const tick = () => {
+      setNow(new Date());
+      const delay = 1000 - (Date.now() % 1000);
+      timeoutId = window.setTimeout(tick, delay);
+    };
+    tick();
+    const forceUpdate = () => {
+      setNow(new Date());
+      window.clearTimeout(timeoutId);
+      tick();
+    };
+    document.addEventListener('visibilitychange', forceUpdate);
+    window.addEventListener('focus', forceUpdate);
+    window.addEventListener('pageshow', forceUpdate);
+    return () => {
+      window.clearTimeout(timeoutId);
+      document.removeEventListener('visibilitychange', forceUpdate);
+      window.removeEventListener('focus', forceUpdate);
+      window.removeEventListener('pageshow', forceUpdate);
+    };
   }, []);
 
   const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
