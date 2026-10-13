@@ -44,6 +44,10 @@ import FloatingHost from '@/components/nova/FloatingHost';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
 import Screensaver from '@/components/nova/Screensaver';
+import FamilyPanel from '@/components/nova/FamilyPanel';
+import MirrorMode from '@/components/nova/MirrorMode';
+import { useAnnouncements } from '@/hooks/useNovaItems';
+import { usePresenceSim } from '@/hooks/usePresenceSim';
 
 const IDLE_MS = 5 * 60 * 1000;
 
@@ -274,6 +278,9 @@ const Index = () => {
 
   // Idle screensaver
   const [idle, setIdle] = useState(false);
+  const [mirror, setMirror] = useState(false);
+  useAnnouncements(pName, tts.speak);
+  const presence = usePresenceSim(smart.devices, smart.toggleDevice);
   const idleTimer = useRef<number | null>(null);
   useEffect(() => {
     if (!unlocked) return;
@@ -465,6 +472,8 @@ const Index = () => {
             }}
           />
         );
+      case 'family':
+        return <FamilyPanel profileName={profile.name} onAddShopping={(i) => shopping.add(i)} presence={presence} deviceCount={smart.devices.length} />;
       default:
         return null;
     }
@@ -484,6 +493,7 @@ const Index = () => {
         onClearNotifications={notif.clearAll}
         voiceState={voice.state}
         voiceAlwaysOn={voice.alwaysOn}
+        onMirror={() => setMirror(true)}
       />
       <TabNav active={tab} onChange={setTab} />
       <main className="flex-1 overflow-hidden flex flex-col">
@@ -510,6 +520,10 @@ const Index = () => {
           events={calendar.getUpcomingEvents(5)}
           onDismiss={() => setIdle(false)}
         />
+      )}
+
+      {mirror && (
+        <MirrorMode weather={weather.weather} events={calendar.getUpcomingEvents(3)} onClose={() => setMirror(false)} />
       )}
 
       {vision.active && (
