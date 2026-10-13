@@ -6,6 +6,7 @@ const TABS: { id: TabId; icon: string; label: string }[] = [
   { id: 'home', icon: '🏠', label: 'CASA' },
   { id: 'messages', icon: '✉️', label: 'MSG' },
   { id: 'shopping', icon: '🛒', label: 'SPESA' },
+  { id: 'family', icon: '👨‍👩‍👧', label: 'FAMIGLIA' },
   { id: 'radio', icon: '📻', label: 'RADIO' },
   { id: 'meteo', icon: '🌤', label: 'METEO' },
   { id: 'reminders', icon: '📝', label: 'NOTE' },

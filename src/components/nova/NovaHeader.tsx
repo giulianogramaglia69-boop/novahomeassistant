@@ -16,6 +16,7 @@ interface Props {
   onClearNotifications: () => void;
   voiceState?: VoiceState;
   voiceAlwaysOn?: boolean;
+  onMirror?: () => void;
 }
 
 const VOICE_LABEL: Record<VoiceState, { text: string; cls: string }> = {
@@ -27,7 +28,12 @@ const VOICE_LABEL: Record<VoiceState, { text: string; cls: string }> = {
   error:      { text: 'ERR',    cls: 'border-destructive/40 bg-destructive/15 text-destructive' },
 };
 
-const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop, profile, notifications, unreadCount, onMarkRead, onClearNotifications, voiceState = 'idle', voiceAlwaysOn }: Props) => {
+const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop, profile, notifications, unreadCount, onMarkRead, onClearNotifications, voiceState = 'idle', voiceAlwaysOn, onMirror }: Props) => {
+  const toggleFs = () => {
+    const d: any = document;
+    if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen)?.call(d);
+    else { const el: any = document.documentElement; (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el); }
+  };
   const [showNotif, setShowNotif] = useState(false);
   const v = VOICE_LABEL[voiceState];
 
@@ -62,6 +68,8 @@ const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop, profile, 
             {v.text}
           </div>
           
+          <button onClick={toggleFs} title="Schermo intero" className="w-8 h-8 rounded-full flex items-center justify-center text-[0.85rem] border border-border bg-secondary transition-all active:scale-90 hover:border-primary/30">⛶</button>
+          {onMirror && <button onClick={onMirror} title="Modalità specchio" className="w-8 h-8 rounded-full flex items-center justify-center text-[0.85rem] border border-border bg-secondary transition-all active:scale-90 hover:border-primary/30">🪞</button>}
           {/* Notification bell */}
           <button
             onClick={() => setShowNotif(prev => !prev)}
