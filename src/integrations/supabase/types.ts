@@ -110,6 +110,30 @@ export type Database = {
         }
         Relationships: []
       }
+      nova_items: {
+        Row: {
+          created_at: string
+          created_by: string
+          data: Json
+          id: string
+          kind: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          data?: Json
+          id?: string
+          kind: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          data?: Json
+          id?: string
+          kind?: string
+        }
+        Relationships: []
+      }
       nova_macros: {
         Row: {
           created_at: string
