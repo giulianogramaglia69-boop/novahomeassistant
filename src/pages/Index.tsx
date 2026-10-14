@@ -46,6 +46,7 @@ import PinLock from '@/components/nova/PinLock';
 import Screensaver from '@/components/nova/Screensaver';
 import FamilyPanel from '@/components/nova/FamilyPanel';
 import MirrorMode from '@/components/nova/MirrorMode';
+import DesktopMode from '@/components/nova/DesktopMode';
 import { useAnnouncements } from '@/hooks/useNovaItems';
 import { usePresenceSim } from '@/hooks/usePresenceSim';
 
@@ -122,6 +123,7 @@ const Index = () => {
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
     for (const action of actions) {
+      window.dispatchEvent(new CustomEvent('nova-agent-action', { detail: action }));
       switch (action.type) {
         case 'add_reminder':
           if (action.payload) reminders.add(action.payload);
@@ -269,16 +271,28 @@ const Index = () => {
     handleToolActions(actions);
   }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications, memory.items, shopping.items, msgs.unreadCount, habits, vision.present, vision.enabled]);
 
+  const [mirror, setMirror] = useState(false);
+  const [desktop, setDesktop] = useState(false);
+
   const handleVoiceResult = useCallback((text: string) => {
-    setTab('chat');
+    const t = text.toLowerCase();
+    const d: any = document;
+    const isFs = !!(d.fullscreenElement || d.webkitFullscreenElement);
+    if (/esci.*schermo intero/.test(t)) { if (isFs) (d.exitFullscreen || d.webkitExitFullscreen)?.call(d); return; }
+    if (/schermo intero/.test(t)) { const el: any = document.documentElement; if (!isFs) (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el); return; }
+    if (/(chiudi|esci).*specchio/.test(t)) { setMirror(false); return; }
+    if (/specchio/.test(t)) { setMirror(true); return; }
+    if (/(chiudi|esci).*desktop/.test(t)) { setDesktop(false); return; }
+    if (/(modalit[aà]|apri) desktop/.test(t)) { setDesktop(true); return; }
+    window.dispatchEvent(new CustomEvent('nova-agent-user', { detail: text }));
+    if (!desktop) setTab('chat');
     sendWithContext(text);
-  }, [sendWithContext]);
+  }, [sendWithContext, desktop]);
 
   const voice = useVoiceWake(handleVoiceResult);
 
   // Idle screensaver
   const [idle, setIdle] = useState(false);
-  const [mirror, setMirror] = useState(false);
   useAnnouncements(pName, tts.speak);
   const presence = usePresenceSim(smart.devices, smart.toggleDevice);
   const idleTimer = useRef<number | null>(null);
@@ -494,6 +508,7 @@ const Index = () => {
         voiceState={voice.state}
         voiceAlwaysOn={voice.alwaysOn}
         onMirror={() => setMirror(true)}
+        onDesktop={() => setDesktop(true)}
       />
       <TabNav active={tab} onChange={setTab} />
       <main className="flex-1 overflow-hidden flex flex-col">
@@ -519,6 +534,24 @@ const Index = () => {
           weather={weather.weather}
           events={calendar.getUpcomingEvents(5)}
           onDismiss={() => setIdle(false)}
+        />
+      )}
+
+      {desktop && (
+        <DesktopMode
+          onExit={() => setDesktop(false)}
+          renderPanel={renderTab}
+          chat={
+            <ChatPanel
+              messages={chat.messages}
+              isLoading={chat.isLoading}
+              onSend={(m) => { window.dispatchEvent(new CustomEvent('nova-agent-user', { detail: m })); sendWithContext(m); }}
+              voiceState={voice.state}
+              voiceStatusText={voice.statusText}
+              onVoiceStart={voice.startListening}
+              onVoiceStop={voice.stopListening}
+            />
+          }
         />
       )}
 
