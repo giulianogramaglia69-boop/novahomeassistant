@@ -122,6 +122,7 @@ const Index = () => {
 
   const handleToolActions = useCallback((actions: ChatToolAction[]) => {
     for (const action of actions) {
+      window.dispatchEvent(new CustomEvent('nova-agent-action', { detail: action }));
       switch (action.type) {
         case 'add_reminder':
           if (action.payload) reminders.add(action.payload);
