@@ -46,6 +46,7 @@ import PinLock from '@/components/nova/PinLock';
 import Screensaver from '@/components/nova/Screensaver';
 import FamilyPanel from '@/components/nova/FamilyPanel';
 import MirrorMode from '@/components/nova/MirrorMode';
+import DesktopMode from '@/components/nova/DesktopMode';
 import { useAnnouncements } from '@/hooks/useNovaItems';
 import { usePresenceSim } from '@/hooks/usePresenceSim';
 
@@ -507,6 +508,7 @@ const Index = () => {
         voiceState={voice.state}
         voiceAlwaysOn={voice.alwaysOn}
         onMirror={() => setMirror(true)}
+        onDesktop={() => setDesktop(true)}
       />
       <TabNav active={tab} onChange={setTab} />
       <main className="flex-1 overflow-hidden flex flex-col">
