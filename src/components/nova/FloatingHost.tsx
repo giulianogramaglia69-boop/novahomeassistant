@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback, ReactNode } from 'react';
 import { TabId } from '@/lib/types';
+import { toEmbeddable, googleSearch, GOOGLE_HOME } from '@/lib/webEmbed';
 
 type Mode = 'pip' | 'half' | 'multi';
 type Kind = 'web' | 'panel';
@@ -34,8 +35,9 @@ const WEB_TARGETS: Record<string, { title: string; src: string }> = {
   mappe: { title: '🗺️ Google Maps', src: 'https://maps.google.com/maps?q=Agrigento&t=m&z=12&output=embed' },
   traffic: { title: '🚗 Traffico Live', src: 'https://maps.google.com/maps?q=Agrigento&t=m&layer=t&z=12&output=embed' },
   traffico: { title: '🚗 Traffico Live', src: 'https://maps.google.com/maps?q=Agrigento&t=m&layer=t&z=12&output=embed' },
-  google: { title: '🌐 Google', src: 'https://www.google.com/webhp?igu=1' },
-  youtube: { title: '▶️ YouTube', src: 'https://www.youtube.com' },
+  google: { title: '🌐 Google', src: GOOGLE_HOME },
+  youtube: { title: '▶️ YouTube', src: 'https://www.youtube.com/embed?listType=search&list=music' },
+  spotify: { title: '🎧 Spotify', src: 'https://open.spotify.com/embed/playlist/37i9dQZEVXbIQnj7RRhdSX' },
   windy: { title: '🌤️ Windy', src: 'https://www.windy.com/?37.310,13.585,9' },
 };
 
@@ -51,6 +53,7 @@ const PANEL_TITLES: Partial<Record<TabId, string>> = {
   ambiente: '🌊 Ambiente',
   news: '📰 News',
   web: '🌐 Web',
+  spotify: '🎧 Spotify',
   messages: '✉️ Messaggi',
   shopping: '🛒 Spesa',
   traffic: '🚗 Traffico',
@@ -71,7 +74,7 @@ function resolveTarget(target: string, customUrl?: string, customTitle?: string)
   { kind: Kind; title: string; src?: string; panelId?: TabId } {
   if (customUrl) {
     const u = normalizeDomain(customUrl) || customUrl;
-    return { kind: 'web', title: customTitle || u, src: u };
+    return { kind: 'web', title: customTitle || u, src: toEmbeddable(u) };
   }
   const key = target.toLowerCase().trim();
   // Panel?
@@ -86,9 +89,9 @@ function resolveTarget(target: string, customUrl?: string, customTitle?: string)
   if (WEB_TARGETS[key]) return { kind: 'web', ...WEB_TARGETS[key] };
   // URL or bare domain
   const url = normalizeDomain(target);
-  if (url) return { kind: 'web', title: customTitle || target, src: url };
-  // fallback web search
-  return { kind: 'web', title: `🔎 ${target}`, src: `https://glowsearch.lovable.app/?q=${encodeURIComponent(target)}` };
+  if (url) return { kind: 'web', title: customTitle || target, src: toEmbeddable(url) };
+  // fallback web search (Google)
+  return { kind: 'web', title: `🔎 ${target}`, src: googleSearch(target) };
 }
 
 interface Props {

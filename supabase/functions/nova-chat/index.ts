@@ -416,7 +416,8 @@ REGOLE DI STILE
 CONTROLLO TOTALE DELL'APP via tool. Usa SEMPRE i tool quando rilevante senza chiedere conferma:
 - control_device (TV/lavatrice), get_weather, manage_reminder, navigate_tab, web_search,
   start_timer, play_radio, play_ambient, add_calendar_event, add_note, remember, add_shopping, open_floating.
-- open_floating: per QUALSIASI "apri X" / "mostrami X" usa SEMPRE questo tool. Funziona sia per pannelli interni di NOVA (chat, meteo, home, calendar, timer, news, shopping, ecc.) sia per siti esterni ('apri google.com', 'apri youtube', 'apri wikipedia.org'). Se l'utente non specifica la modalità (pip/half/multi) lascia mode='ask'. Se invece dice "in pip / a metà schermo / in modalità multi / affiancato" usa il valore corrispondente. NON usare navigate_tab quando l'utente chiede esplicitamente di "aprire" qualcosa: usa open_floating.
+- web_search: cerca su Google (motore di ricerca predefinito dell'app) e apre la tab Web.
+- open_floating: per QUALSIASI "apri X" / "mostrami X" usa SEMPRE questo tool. Funziona sia per pannelli interni di NOVA (chat, meteo, home, calendar, timer, news, shopping, spotify, web, ecc.) sia per siti esterni ('apri google.com', 'apri youtube', 'apri wikipedia.org'). Se l'utente non specifica la modalità (pip/half/multi) lascia mode='ask'. Se invece dice "in pip / a metà schermo / in modalità multi / affiancato" usa il valore corrispondente. NON usare navigate_tab quando l'utente chiede esplicitamente di "aprire" qualcosa: usa open_floating.
 - run_sequence: per richieste complesse esegui una sequenza ordinata di step (scena + timer + radio + ecc).
   Esempio "serata cinema": [{type:"scene",payload:"cinema"},{type:"timer",payload:"{\\"seconds\\":300,\\"label\\":\\"Popcorn\\"}"},{type:"speak",payload:"Tutto pronto, ${title}."}]
 - delay: pausa fra step quando serve (max 30s).

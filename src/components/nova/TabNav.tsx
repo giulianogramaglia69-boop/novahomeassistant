@@ -16,6 +16,7 @@ const TABS: { id: TabId; icon: string; label: string }[] = [
   { id: 'news', icon: '📰', label: 'NEWS' },
   { id: 'traffic', icon: '🚗', label: 'TRAFFIC' },
   { id: 'web', icon: '🌐', label: 'WEB' },
+  { id: 'spotify', icon: '🎧', label: 'SPOTIFY' },
   { id: 'settings', icon: '⚙️', label: '' },
 ];
 
