@@ -37,6 +37,8 @@ import CalendarPanel from '@/components/nova/CalendarPanel';
 import AmbientePanel from '@/components/nova/AmbientePanel';
 import NewsPanel from '@/components/nova/NewsPanel';
 import WebPanel from '@/components/nova/WebPanel';
+import SpotifyPanel from '@/components/nova/SpotifyPanel';
+import { googleSearch } from '@/lib/webEmbed';
 import MessagesPanel from '@/components/nova/MessagesPanel';
 import ShoppingPanel from '@/components/nova/ShoppingPanel';
 import TrafficPanel from '@/components/nova/TrafficPanel';
@@ -151,7 +153,7 @@ const Index = () => {
         case 'web_search':
           if (action.payload) {
             const q = encodeURIComponent(action.payload);
-            window.dispatchEvent(new CustomEvent('nova-web-go', { detail: `https://glowsearch.lovable.app/?q=${q}` }));
+            window.dispatchEvent(new CustomEvent('nova-web-go', { detail: googleSearch(action.payload) }));
             setTab('web');
           }
           break;
@@ -449,6 +451,8 @@ const Index = () => {
         return <NewsPanel items={news.items} loading={news.loading} error={news.error} onRefresh={news.refresh} />;
       case 'web':
         return <WebPanel />;
+      case 'spotify':
+        return <SpotifyPanel />;
       case 'messages':
         return <MessagesPanel profile={profile} messages={msgs.messages} onSend={msgs.send} onMarkRead={msgs.markRead} />;
       case 'shopping':
