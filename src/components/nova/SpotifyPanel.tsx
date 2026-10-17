@@ -8,6 +8,12 @@ const PRESETS = [
   { label: 'Rock Classics', uri: 'playlist/37i9dQZF1DWXRqgorJj26U' },
 ];
 
+const KID_YUGI_PRESETS = [
+  { label: '🎤 Artista', uri: 'artist/0EUR8jz8L936AEbV2Spkca' },
+  { label: 'Anche gli Eroi Muoiono', uri: 'album/5QGyZ7xyZX8vrwI4DB6pvV' },
+  { label: 'I Nomi del Diavolo', uri: 'album/1WeHoP0y9QcQqgpa5xgMAh' },
+];
+
 function parse(input: string): string | null {
   const m = input.match(/(playlist|album|track|artist|show|episode)[/:]([A-Za-z0-9]+)/);
   return m ? `${m[1]}/${m[2]}` : null;
