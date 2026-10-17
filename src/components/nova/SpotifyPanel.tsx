@@ -8,6 +8,12 @@ const PRESETS = [
   { label: 'Rock Classics', uri: 'playlist/37i9dQZF1DWXRqgorJj26U' },
 ];
 
+const KID_YUGI_PRESETS = [
+  { label: '🎤 Artista', uri: 'artist/0EUR8jz8L936AEbV2Spkca' },
+  { label: 'Anche gli Eroi Muoiono', uri: 'album/5QGyZ7xyZX8vrwI4DB6pvV' },
+  { label: 'I Nomi del Diavolo', uri: 'album/1WeHoP0y9QcQqgpa5xgMAh' },
+];
+
 function parse(input: string): string | null {
   const m = input.match(/(playlist|album|track|artist|show|episode)[/:]([A-Za-z0-9]+)/);
   return m ? `${m[1]}/${m[2]}` : null;
@@ -32,13 +38,27 @@ const SpotifyPanel = () => {
         <button onClick={() => { const p = parse(input); if (p) { select(p); setInput(''); } }}
           className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground font-semibold">Carica</button>
       </div>
-      <div className="flex flex-wrap gap-2">
-        {PRESETS.map(p => (
-          <button key={p.uri} onClick={() => select(p.uri)}
-            className={`px-3 py-1.5 rounded-full text-xs font-mono border transition ${uri === p.uri ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground hover:text-foreground'}`}>
-            {p.label}
-          </button>
-        ))}
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap gap-2">
+          {PRESETS.map(p => (
+            <button key={p.uri} onClick={() => select(p.uri)}
+              className={`px-3 py-1.5 rounded-full text-xs font-mono border transition ${uri === p.uri ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground hover:text-foreground'}`}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[0.6rem] font-syne font-bold tracking-[0.2em] text-primary">KID YUGI</span>
+          <div className="h-px flex-1 bg-primary/30" />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {KID_YUGI_PRESETS.map(p => (
+            <button key={p.uri} onClick={() => select(p.uri)}
+              className={`px-3 py-1.5 rounded-full text-xs font-mono border transition ${uri === p.uri ? 'border-primary bg-primary/15 text-primary' : 'border-border text-muted-foreground hover:text-foreground'}`}>
+              {p.label}
+            </button>
+          ))}
+        </div>
       </div>
       <iframe key={uri} title="Spotify" src={`https://open.spotify.com/embed/${uri}?theme=0`}
         className="w-full flex-1 min-h-[380px] rounded-xl border-0"
