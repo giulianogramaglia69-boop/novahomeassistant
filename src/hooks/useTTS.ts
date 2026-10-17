@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { playSpeakBlip } from '@/lib/chime';
 
 const LS_KEY = 'nova_tts_enabled';
 
@@ -55,6 +56,7 @@ export function useTTS() {
     synth.cancel();
     const clean = text.replace(/[*_#`~>\[\]()!|]/g, '').replace(/\n+/g, '. ').trim();
     if (!clean) return;
+    playSpeakBlip();
     const utter = new SpeechSynthesisUtterance(clean);
     utter.lang = 'it-IT';
     utter.rate = 1.0;
