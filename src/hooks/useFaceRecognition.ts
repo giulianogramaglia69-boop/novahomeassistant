@@ -50,6 +50,15 @@ export function useFaceRecognition(videoRef: React.RefObject<HTMLVideoElement>) 
 
   useEffect(() => { fetchProfiles(); }, [fetchProfiles]);
 
+  // I profili vengono caricati anche prima del login (come anon, quindi
+  // vuoti dopo la stretta RLS): ricarica quando la famiglia accede.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') fetchProfiles();
+    });
+    return () => subscription.unsubscribe();
+  }, [fetchProfiles]);
+
   const ensureLoaded = useCallback(async () => {
     if (faRef.current) return faRef.current;
     setLoading(true);

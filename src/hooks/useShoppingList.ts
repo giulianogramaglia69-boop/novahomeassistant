@@ -16,6 +16,15 @@ export function useShoppingList(profileName?: string) {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  // La lista viene caricata anche prima del login (come anon, quindi
+  // vuota dopo la stretta RLS): ricarica quando la famiglia accede.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') fetchAll();
+    });
+    return () => subscription.unsubscribe();
+  }, [fetchAll]);
+
   useEffect(() => {
     const ch = supabase.channel('nova-shopping')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'nova_shopping' }, () => fetchAll())

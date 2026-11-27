@@ -24,6 +24,15 @@ export function useNovaItems<T = Record<string, any>>(kind: NovaItemKind, profil
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  // Gli item vengono caricati anche prima del login (come anon, quindi
+  // vuoti dopo la stretta RLS): ricarica quando la famiglia accede.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') fetchAll();
+    });
+    return () => subscription.unsubscribe();
+  }, [fetchAll]);
+
   useEffect(() => {
     const ch = supabase.channel(`nova-items-${kind}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'nova_items', filter: `kind=eq.${kind}` }, () => fetchAll())

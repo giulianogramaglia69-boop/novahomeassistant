@@ -45,6 +45,8 @@ import TrafficPanel from '@/components/nova/TrafficPanel';
 import FloatingHost from '@/components/nova/FloatingHost';
 import SettingsPanel from '@/components/nova/SettingsPanel';
 import PinLock from '@/components/nova/PinLock';
+import FamilyLogin from '@/components/nova/FamilyLogin';
+import { supabase } from '@/integrations/supabase/client';
 import Screensaver from '@/components/nova/Screensaver';
 import FamilyPanel from '@/components/nova/FamilyPanel';
 import MirrorMode from '@/components/nova/MirrorMode';
@@ -57,6 +59,17 @@ const IDLE_MS = 5 * 60 * 1000;
 const Index = () => {
   const [unlocked, setUnlocked] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
+  // Accesso famiglia (Supabase Auth): finché non c'è sessione l'app resta
+  // sulla schermata di login, PRIMA del PIN. La sessione persiste
+  // (persistSession: true) e sopravvive ai reload.
+  const [authed, setAuthed] = useState<boolean | null>(null);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setAuthed(!!data.session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthed(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
   const [tab, setTab] = useState<TabId>('dashboard');
   const chat = useChat();
   const devices = useDevices();
@@ -322,6 +335,18 @@ const Index = () => {
     setTab('dashboard');
     tts.stop();
   }, [tts]);
+
+  if (authed === null) {
+    return (
+      <div className="flex flex-col items-center justify-center h-dvh bg-background select-none">
+        <p className="text-muted-foreground text-[0.65rem] tracking-[0.25em] uppercase">Caricamento…</p>
+      </div>
+    );
+  }
+
+  if (!authed) {
+    return <FamilyLogin />;
+  }
 
   if (!unlocked || !profile) {
     return <PinLock onUnlock={(p) => { setProfile(p); setUnlocked(true); }} />;
