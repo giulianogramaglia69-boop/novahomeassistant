@@ -241,9 +241,12 @@ export async function fetchBridgeDevice(
 }
 
 /** Azioni supportate dal ponte: status, volume_set, volume_up, volume_down,
- *  play, pause, launch_app. Il ponte risponde {ok, result} oppure
- *  {ok:false, error} — gli errori di dispositivo (es. Chromecast che non
- *  risponde all'handshake) sono onesti e vanno mostrati, non nascosti. */
+ *  play, pause, launch_app; per la TV Samsung anche power, mute, channel_up,
+ *  channel_down, source (params.source: tv|HDMI1|HDMI2), key (params.key:
+ *  KEY_UP/KEY_DOWN/KEY_LEFT/KEY_RIGHT/KEY_ENTER/KEY_RETURN/KEY_HOME/...).
+ *  Il ponte risponde {ok, result} oppure {ok:false, error} — gli errori di
+ *  dispositivo (es. Chromecast che non risponde all'handshake, TV spenta)
+ *  sono onesti e vanno mostrati, non nascosti. */
 export async function sendBridgeAction(
   config: BridgeConfig,
   id: string,
@@ -319,6 +322,20 @@ export function bridgeTypeIcon(type: BridgeDeviceType): string {
 
 export function hasCapability(device: BridgeDevice, cap: string): boolean {
   return Array.isArray(device.capabilities) && device.capabilities.includes(cap);
+}
+
+/** La TV Samsung del ponte (id atteso `samsung-tv`), o null se non c'è. */
+export function findBridgeTv(devices: BridgeDevice[]): BridgeDevice | null {
+  return devices.find(d => d.type === 'tv') ?? null;
+}
+
+/** true se la TV è davvero raggiungibile: in rete, con IP e stato live ok. */
+export function isBridgeTvOnline(tv: BridgeDevice | null): boolean {
+  if (!tv) return false;
+  if (tv.pending || !tv.ip) return false;
+  if (tv.status !== 'online') return false;
+  if (tv.live && tv.live.online === false) return false;
+  return true;
 }
 
 /** Nota in italiano sullo stato live di un dispositivo. */

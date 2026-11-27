@@ -407,21 +407,7 @@ const Index = () => {
         );
       case 'home':
         return (
-          <HomePanel
-            devices={devices.devices}
-            devicesOn={devices.devicesOn}
-            totalWattage={devices.totalWattage}
-            onToggle={devices.toggle}
-            onValueChange={devices.setValue}
-            onScene={devices.applyScene}
-            smartDevices={smart.devices}
-            smartLoading={smart.loading}
-            smartError={smart.error}
-            onSmartToggle={smart.toggleDevice}
-            onSmartFetch={smart.fetchDevices}
-            onSmartCommand={smart.sendCommand}
-            bridge={bridge}
-          />
+          <HomePanel bridge={bridge} />
         );
       case 'radio':
         return (

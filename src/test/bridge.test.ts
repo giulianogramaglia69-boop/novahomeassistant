@@ -5,7 +5,9 @@ import {
   bridgeLiveNote,
   bridgeTypeLabel,
   fetchBridgeDevices,
+  findBridgeTv,
   getBridgeConfig,
+  isBridgeTvOnline,
   isLoopbackUrl,
   saveBridgeConfig,
   sendBridgeAction,
@@ -123,5 +125,29 @@ describe('helper', () => {
         capabilities: ['identify'],
       }),
     ).toMatch(/pairing/i);
+  });
+
+  it('findBridgeTv trova la TV per type, isBridgeTvOnline solo se raggiungibile', () => {
+    const tvOnline = {
+      id: 'samsung-tv', name: 'TV Samsung', type: 'tv' as const,
+      ip: '192.168.11.100', status: 'online' as const, capabilities: [],
+      live: { online: true },
+    };
+    const tvOffline = { ...tvOnline, live: { online: false, error: 'tv offline' } };
+    const tvPending = {
+      ...tvOnline, ip: null, status: 'unknown' as const, pending: true,
+      live: undefined,
+    };
+    const printer = {
+      id: 'printer', name: 'Stampante', type: 'printer' as const,
+      ip: '192.168.11.242', status: 'online' as const, capabilities: [],
+    };
+    expect(findBridgeTv([printer, tvOnline])).toBe(tvOnline);
+    expect(findBridgeTv([printer])).toBeNull();
+    expect(findBridgeTv([])).toBeNull();
+    expect(isBridgeTvOnline(tvOnline)).toBe(true);
+    expect(isBridgeTvOnline(tvOffline)).toBe(false);
+    expect(isBridgeTvOnline(tvPending)).toBe(false);
+    expect(isBridgeTvOnline(null)).toBe(false);
   });
 });
