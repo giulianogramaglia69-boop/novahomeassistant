@@ -6,6 +6,7 @@ import { useReminders } from '@/hooks/useReminders';
 import { useNotes } from '@/hooks/useNotes';
 import { useWeather } from '@/hooks/useWeather';
 import { useSmartThings } from '@/hooks/useSmartThings';
+import { useBridgeDevices } from '@/hooks/useBridgeDevices';
 import { useVoiceWake } from '@/hooks/useVoiceWake';
 import { useRadio } from '@/hooks/useRadio';
 import { useTimers } from '@/hooks/useTimers';
@@ -78,6 +79,7 @@ const Index = () => {
   const notes = useNotes(pName);
   const weather = useWeather();
   const smart = useSmartThings();
+  const bridge = useBridgeDevices();
   const radio = useRadio();
   const timers = useTimers();
   const calendar = useCalendar(pName);
@@ -159,6 +161,7 @@ const Index = () => {
           break;
         case 'refresh_devices':
           smart.fetchDevices();
+          bridge.refresh();
           break;
         case 'navigate':
           if (action.payload) setTab(action.payload as TabId);
@@ -255,7 +258,7 @@ const Index = () => {
           break;
       }
     }
-  }, [reminders, smart, timers, radio, ambient, calendar, notes, memory, shopping, devices, tts]);
+  }, [reminders, smart, bridge, timers, radio, ambient, calendar, notes, memory, shopping, devices, tts]);
 
   const sendWithContext = useCallback(async (input: string) => {
     habits.log(input);
@@ -417,6 +420,7 @@ const Index = () => {
             onSmartToggle={smart.toggleDevice}
             onSmartFetch={smart.fetchDevices}
             onSmartCommand={smart.sendCommand}
+            bridge={bridge}
           />
         );
       case 'radio':
@@ -501,6 +505,9 @@ const Index = () => {
             onVoiceAlwaysOnToggle={() => voice.setAlwaysOn(!voice.alwaysOn)}
             routines={proactive.routines}
             onUpdateRoutine={proactive.updateRoutine}
+            bridgeConfig={bridge.config}
+            onSaveBridgeConfig={bridge.saveConfig}
+            onTestBridge={() => bridge.refresh()}
             macros={macrosHook.macros}
             onAddMacro={macrosHook.add}
             onRemoveMacro={macrosHook.remove}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Profile } from '@/lib/types';
+import { BridgeConfig, BRIDGE_DEFAULT_URL, BRIDGE_URL_HINTS } from '@/lib/bridge';
 import { useTheme, THEMES, ThemeId } from '@/hooks/useTheme';
 import { MemoryItem } from '@/hooks/useAIMemory';
 import { Routine } from '@/hooks/useProactivity';
@@ -31,6 +32,9 @@ interface Props {
   onVoiceAlwaysOnToggle: () => void;
   routines: Routine[];
   onUpdateRoutine: (id: string, patch: Partial<Routine>) => void;
+  bridgeConfig: BridgeConfig;
+  onSaveBridgeConfig: (config: BridgeConfig) => void;
+  onTestBridge: () => void;
   macros: Macro[];
   onAddMacro: (name: string, steps: MacroStep[], icon?: string) => void;
   onRemoveMacro: (id: string) => void;
@@ -54,12 +58,33 @@ const SettingsPanel = ({
   memoryItems, onForgetMemory,
   voiceAlwaysOn, onVoiceAlwaysOnToggle,
   routines, onUpdateRoutine,
+  bridgeConfig, onSaveBridgeConfig, onTestBridge,
   macros, onAddMacro, onRemoveMacro,
   vision,
 }: Props) => {
   const { theme, setTheme } = useTheme();
   const [stToken, setStToken] = useState(() => localStorage.getItem(ST_KEY) || '');
   const [saving, setSaving] = useState(false);
+  // Ponte Nova Bridge (tablet): URL + token restano solo in localStorage
+  // di questo dispositivo — mai nel codice (il repo è pubblico).
+  const [bridgeUrl, setBridgeUrl] = useState(bridgeConfig.url || BRIDGE_DEFAULT_URL);
+  const [bridgeToken, setBridgeToken] = useState(bridgeConfig.token || '');
+  const [bridgeSaving, setBridgeSaving] = useState(false);
+
+  const handleSaveBridge = () => {
+    if (!bridgeUrl.trim() || !bridgeToken.trim()) {
+      toast({ title: 'Servono URL e token', description: 'Compila entrambi i campi del ponte.' });
+      return;
+    }
+    setBridgeSaving(true);
+    try {
+      onSaveBridgeConfig({ url: bridgeUrl.trim(), token: bridgeToken.trim() });
+      toast({ title: 'Ponte salvato ✓', description: 'I dispositivi reali si aggiornano in Casa.' });
+      onTestBridge();
+    } finally {
+      setBridgeSaving(false);
+    }
+  };
 
   const handleSaveToken = async () => {
     if (!stToken.trim()) return;
@@ -255,6 +280,42 @@ const SettingsPanel = ({
               />
               <Btn onClick={handleSaveToken} disabled={!stToken.trim() || saving}>
                 {saving ? '...' : 'Salva'}
+              </Btn>
+            </div>
+          </div>
+          <div>
+            <div className="mb-2">
+              <div className="text-[0.75rem] text-foreground">Ponte Nova — URL</div>
+              <div className="text-[0.6rem] text-muted-foreground mt-0.5">
+                Sul tablet usa {BRIDGE_URL_HINTS.tablet} (funziona anche se l’app è in HTTPS).
+                In LAN: {BRIDGE_URL_HINTS.lan}. Da fuori casa serve l’URL https di Tailscale Serve.
+              </div>
+            </div>
+            <input
+              type="text"
+              inputMode="url"
+              value={bridgeUrl}
+              onChange={e => setBridgeUrl(e.target.value)}
+              placeholder={BRIDGE_DEFAULT_URL}
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-foreground font-mono text-[0.65rem] outline-none focus:border-primary/40 placeholder:text-muted-foreground min-w-0"
+            />
+            <div className="mb-2 mt-3">
+              <div className="text-[0.75rem] text-foreground">Ponte Nova — Token</div>
+              <div className="text-[0.6rem] text-muted-foreground mt-0.5">
+                È in ~/nova-bridge/token.txt sul tablet. Resta solo su questo dispositivo.
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="password"
+                value={bridgeToken}
+                onChange={e => setBridgeToken(e.target.value)}
+                placeholder="Incolla il token del ponte..."
+                autoComplete="off"
+                className="flex-1 bg-secondary border border-border rounded-lg px-3 py-2 text-foreground font-mono text-[0.65rem] outline-none focus:border-primary/40 placeholder:text-muted-foreground min-w-0"
+              />
+              <Btn onClick={handleSaveBridge} disabled={!bridgeUrl.trim() || !bridgeToken.trim() || bridgeSaving}>
+                {bridgeSaving ? '...' : 'Salva'}
               </Btn>
             </div>
           </div>
