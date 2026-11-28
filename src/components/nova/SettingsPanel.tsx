@@ -47,6 +47,8 @@ interface Props {
     videoRef: React.RefObject<HTMLVideoElement>;
     profileName?: string;
   };
+  nightModeEnabled: boolean;
+  onNightModeToggle: () => void;
 }
 
 const ST_KEY = 'nova_smartthings_token';
@@ -61,6 +63,7 @@ const SettingsPanel = ({
   bridgeConfig, onSaveBridgeConfig, onTestBridge,
   macros, onAddMacro, onRemoveMacro,
   vision,
+  nightModeEnabled, onNightModeToggle,
 }: Props) => {
   const { theme, setTheme } = useTheme();
   const [stToken, setStToken] = useState(() => localStorage.getItem(ST_KEY) || '');
@@ -143,6 +146,12 @@ const SettingsPanel = ({
           sub={'Ascolto continuo per "Ehi Nova"'}
           enabled={voiceAlwaysOn}
           onToggle={onVoiceAlwaysOnToggle}
+        />
+        <ToggleRow
+          label="🌙 Modalità notte"
+          sub="Orologio grande e UI extra-dim; mette in pausa i suoni ambientali"
+          enabled={nightModeEnabled}
+          onToggle={onNightModeToggle}
         />
       </Section>
 

@@ -16,6 +16,7 @@ import { useNews } from '@/hooks/useNews';
 import { useTTS } from '@/hooks/useTTS';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useAIMemory } from '@/hooks/useAIMemory';
+import { useNightMode } from '@/hooks/useNightMode';
 import { useMessages } from '@/hooks/useMessages';
 import { useShoppingList } from '@/hooks/useShoppingList';
 import { useTheme } from '@/hooks/useTheme';
@@ -49,11 +50,15 @@ import PinLock from '@/components/nova/PinLock';
 import FamilyLogin from '@/components/nova/FamilyLogin';
 import { supabase } from '@/integrations/supabase/client';
 import Screensaver from '@/components/nova/Screensaver';
+import NightMode from '@/components/nova/NightMode';
 import FamilyPanel from '@/components/nova/FamilyPanel';
 import MirrorMode from '@/components/nova/MirrorMode';
 import DesktopMode from '@/components/nova/DesktopMode';
 import { useAnnouncements } from '@/hooks/useNovaItems';
 import { usePresenceSim } from '@/hooks/usePresenceSim';
+import { parseVoiceCommand, describeVoiceCommand, VoiceCommand } from '@/lib/voiceCommands';
+import { parseRememberRequest } from '@/lib/profileMemory';
+import { findBridgeTv, isBridgeTvOnline, BridgeError } from '@/lib/bridge';
 
 const IDLE_MS = 5 * 60 * 1000;
 
@@ -91,6 +96,13 @@ const Index = () => {
   const msgs = useMessages(pName);
   const shopping = useShoppingList(pName);
   useTheme();
+  const nightMode = useNightMode();
+  // Modalità notte: mette in pausa i suoni ambientali quando si attiva.
+  // Alla chiusura non si riprendono da soli (l'utente li riavvia se vuole).
+  useEffect(() => {
+    if (nightMode.enabled) ambient.stop?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nightMode.enabled]);
   const macrosHook = useMacros(pName);
   const devicesOn = devices.devicesOn;
   const totalWattage = devices.totalWattage;
@@ -113,6 +125,9 @@ const Index = () => {
     },
   });
   const prevMsgCount = useRef(chat.messages.length);
+  // Comando vocale in attesa di conferma (solo accensione/spegnimento TV:
+  // l'azione ponte 'power' è un toggle, quindi si conferma prima).
+  const pendingVoiceCmd = useRef<VoiceCommand | null>(null);
 
   useEffect(() => {
     notif.checkTimers(timers.timers);
@@ -260,7 +275,96 @@ const Index = () => {
     }
   }, [reminders, smart, bridge, timers, radio, ambient, calendar, notes, memory, shopping, devices, tts]);
 
+  // ── Comandi locali (voce/testo) che agiscono davvero ──────────────
+  // Intercettati PRIMA della chat AI: il controllo TV via SmartThings
+  // dell'edge function è morto (TV non più su SmartThings), quello reale
+  // passa dal ponte Nova Bridge. Solo accensione/spegnimento chiede
+  // conferma in chat (l'azione ponte 'power' è un toggle); gli altri
+  // comandi eseguono subito. "ricorda che..." salva nella memoria del
+  // profilo attivo senza passare dall'AI (deterministico).
+  const runVoiceCommand = useCallback(async (cmd: VoiceCommand) => {
+    if (!bridge.configured) {
+      chat.pushAssistant('Ponte non configurato — inserisci URL e token nelle Impostazioni (profilo Admin).');
+      return;
+    }
+    const targetId = cmd.target === 'tv'
+      ? findBridgeTv(bridge.devices)?.id ?? null
+      : bridge.devices.find(d => d.type === 'chromecast')?.id ?? null;
+    if (!targetId) {
+      chat.pushAssistant(cmd.target === 'tv'
+        ? 'TV non trovata — accendila e premi Scansiona in Casa.'
+        : 'Chromecast non trovato — controlla che sia acceso e premi Scansiona in Casa.');
+      return;
+    }
+    // Accensione/spegnimento: ricontrolla lo stato live al momento
+    // dell'esecuzione (la TV può essere cambiata dal telecomando fisico
+    // mentre si aspettava la conferma).
+    if (cmd.kind === 'power') {
+      const online = isBridgeTvOnline(findBridgeTv(bridge.devices));
+      if (cmd.want === 'on' && online) { chat.pushAssistant('La TV è già accesa.'); return; }
+      if (cmd.want === 'off' && !online) { chat.pushAssistant('La TV è già spenta.'); return; }
+    }
+    let action = cmd.kind;
+    let params: Record<string, unknown> = {};
+    if (cmd.kind === 'volume_up' || cmd.kind === 'volume_down') params = { step: 0.05 };
+    else if (cmd.kind === 'launch_app') params = { app_id: cmd.app };
+    else if (cmd.kind === 'source') params = { source: cmd.source };
+    try {
+      await bridge.sendAction(targetId, action, params);
+      chat.pushAssistant(`${describeVoiceCommand(cmd)} — fatto.`);
+    } catch (e) {
+      chat.pushAssistant(`Non sono riuscito: ${e instanceof BridgeError ? e.message : 'azione non riuscita — riprova.'}`);
+    }
+  }, [bridge, chat]);
+
+  const handleVoiceCommand = useCallback((cmd: VoiceCommand) => {
+    if (cmd.kind === 'power') {
+      const tv = findBridgeTv(bridge.devices);
+      const online = isBridgeTvOnline(tv);
+      if (cmd.want === 'on' && online) { chat.pushAssistant('La TV è già accesa.'); return; }
+      if (cmd.want === 'off' && !online) { chat.pushAssistant('La TV è già spenta.'); return; }
+      pendingVoiceCmd.current = cmd;
+      const desc = describeVoiceCommand(cmd);
+      chat.pushAssistant(`Vuoi davvero ${desc.charAt(0).toLowerCase() + desc.slice(1)}? Rispondi sì per confermare o no per annullare.`);
+      return;
+    }
+    void runVoiceCommand(cmd);
+  }, [bridge.devices, chat, runVoiceCommand]);
+
+  /** true se l'input è stato gestito localmente (niente chiamata all'AI). */
+  const tryHandleLocalCommand = useCallback(async (input: string): Promise<boolean> => {
+    const trimmed = input.trim();
+    const pending = pendingVoiceCmd.current;
+    if (pending) {
+      if (/^(sì|si|ok|okay|conferma|va bene|certo|fai pure|procedi|esegui)\b/i.test(trimmed)) {
+        pendingVoiceCmd.current = null;
+        await runVoiceCommand(pending);
+        return true;
+      }
+      if (/^(no|annulla|lascia|non farlo|fermo|basta)\b/i.test(trimmed)) {
+        pendingVoiceCmd.current = null;
+        chat.pushAssistant('Ok, annullato.');
+        return true;
+      }
+      // Altro testo: si cancella la conferma in sospeso e si continua.
+      pendingVoiceCmd.current = null;
+    }
+    const rem = parseRememberRequest(trimmed);
+    if (rem) {
+      await memory.remember(rem.key, rem.value);
+      chat.pushAssistant(`Ricordato: ${rem.value}`);
+      return true;
+    }
+    const cmd = parseVoiceCommand(trimmed);
+    if (cmd) {
+      handleVoiceCommand(cmd);
+      return true;
+    }
+    return false;
+  }, [chat, memory, runVoiceCommand, handleVoiceCommand]);
+
   const sendWithContext = useCallback(async (input: string) => {
+    if (await tryHandleLocalCommand(input)) return;
     habits.log(input);
     const actions = await chat.sendMessage(input, {
       weather: weather.weather,
@@ -287,7 +391,7 @@ const Index = () => {
       },
     });
     handleToolActions(actions);
-  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications, memory.items, shopping.items, msgs.unreadCount, habits, vision.present, vision.enabled]);
+  }, [chat, weather.weather, reminders.reminders, notes.notes, timers.timers, smart.devices, calendar, ambient.playing, profile, handleToolActions, notif.notifications, memory.items, shopping.items, msgs.unreadCount, habits, vision.present, vision.enabled, tryHandleLocalCommand]);
 
   const [mirror, setMirror] = useState(false);
   const [desktop, setDesktop] = useState(false);
@@ -407,7 +511,14 @@ const Index = () => {
         );
       case 'home':
         return (
-          <HomePanel bridge={bridge} />
+          <HomePanel
+            bridge={bridge}
+            profileName={profile.name}
+            reminders={reminders.reminders}
+            shoppingItems={shopping.items}
+            upcomingEvents={calendar.getUpcomingEvents(5)}
+            onNavigate={setTab}
+          />
         );
       case 'radio':
         return (
@@ -494,6 +605,8 @@ const Index = () => {
             bridgeConfig={bridge.config}
             onSaveBridgeConfig={bridge.saveConfig}
             onTestBridge={() => bridge.refresh()}
+            nightModeEnabled={nightMode.enabled}
+            onNightModeToggle={nightMode.toggle}
             macros={macrosHook.macros}
             onAddMacro={macrosHook.add}
             onRemoveMacro={macrosHook.remove}
@@ -529,6 +642,8 @@ const Index = () => {
         onClearNotifications={notif.clearAll}
         voiceState={voice.state}
         voiceAlwaysOn={voice.alwaysOn}
+        nightModeEnabled={nightMode.enabled}
+        onNightModeToggle={nightMode.toggle}
         onMirror={() => setMirror(true)}
         onDesktop={() => setDesktop(true)}
       />
@@ -551,11 +666,27 @@ const Index = () => {
         </div>
       )}
 
-      {idle && (
+      {idle && !nightMode.enabled && (
         <Screensaver
           weather={weather.weather}
           events={calendar.getUpcomingEvents(5)}
           onDismiss={() => setIdle(false)}
+        />
+      )}
+
+      {nightMode.enabled && (
+        <NightMode
+          weather={weather.weather}
+          notifications={notif.notifications}
+          unreadCount={notif.unreadCount}
+          greeting={(() => {
+            const h = new Date().getHours();
+            if (h >= 22 || h < 6) return 'Buonanotte';
+            if (h < 12) return 'Buongiorno';
+            if (h < 18) return 'Buon pomeriggio';
+            return 'Buonasera';
+          })()}
+          onClose={() => nightMode.setEnabled(false)}
         />
       )}
 

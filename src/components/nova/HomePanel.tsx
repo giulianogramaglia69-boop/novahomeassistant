@@ -1,4 +1,8 @@
 import { BridgeDevicesHook } from '@/hooks/useBridgeDevices';
+import { CalendarEvent } from '@/hooks/useCalendar';
+import { ShoppingItem } from '@/hooks/useShoppingList';
+import { Reminder, TabId } from '@/lib/types';
+import HomeSummary from './HomeSummary';
 import {
   bridgeTypeIcon,
   bridgeTypeLabel,
@@ -11,16 +15,34 @@ import TvRemote from './TvRemote';
 interface Props {
   /** Dispositivi reali dal ponte Nova Bridge (tablet). */
   bridge: BridgeDevicesHook;
+  /** Profilo attivo (serve alla bacheca famiglia nel riepilogo). */
+  profileName: string;
+  reminders: Reminder[];
+  shoppingItems: ShoppingItem[];
+  upcomingEvents: CalendarEvent[];
+  onNavigate?: (tab: TabId) => void;
 }
 
 /** Pagina Casa: solo ciò che è reale — i dispositivi del ponte Nova
  *  Bridge e il telecomando della TV Samsung. Niente scene, stanze finte
  *  o consumi stimati: quelli non comandano nulla di vero. */
-const HomePanel = ({ bridge }: Props) => {
+const HomePanel = ({ bridge, profileName, reminders, shoppingItems, upcomingEvents, onNavigate }: Props) => {
   const tv = findBridgeTv(bridge.devices);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 scrollbar-thin">
+      {/* ─── RIEPILOGO OGGI ─── */}
+      <HomeSummary
+        profileName={profileName}
+        reminders={reminders}
+        shoppingItems={shoppingItems}
+        upcomingEvents={upcomingEvents}
+        bridgeDevices={bridge.devices}
+        bridgeConfigured={bridge.configured}
+        bridgeError={bridge.error?.message ?? null}
+        onNavigate={onNavigate}
+      />
+
       {/* ─── DISPOSITIVI REALI · PONTE NOVA ─── */}
       <div>
         <div className="flex items-center justify-between mb-2">

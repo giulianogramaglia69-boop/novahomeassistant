@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNovaItems } from '@/hooks/useNovaItems';
+import { useSpeechInput, type UseSpeechInputResult } from '@/hooks/useSpeechInput';
 
 type Sub = 'board' | 'expenses' | 'pantry' | 'parcels' | 'announce' | 'security';
 
@@ -25,15 +26,34 @@ const input = 'flex-1 min-w-0 rounded-lg bg-secondary border border-border px-3 
 const btn = 'rounded-lg px-3 py-2 text-xs font-mono font-bold tracking-wider bg-primary/15 border border-primary/40 text-primary active:scale-95';
 const card = 'hud-card rounded-xl border border-border bg-card/70 p-3';
 
+/** Pulsante microfono per dettare il testo di un input (non salva da solo). */
+const MicButton = ({ speech, onText }: { speech: UseSpeechInputResult; onText: (t: string) => void }) => (
+  <button
+    type="button"
+    disabled={!speech.supported}
+    title={speech.supported ? 'Detta con la voce' : 'Riconoscimento vocale non supportato da questo browser'}
+    onClick={() => (speech.listening ? speech.stop() : speech.start(onText))}
+    className={`shrink-0 rounded-lg px-3 py-2 text-xs font-mono font-bold tracking-wider border active:scale-95 disabled:opacity-40 ${
+      speech.listening
+        ? 'bg-destructive/20 border-destructive/60 text-destructive'
+        : 'bg-primary/15 border-primary/40 text-primary'
+    }`}
+  >
+    {speech.listening ? '🎤 In ascolto…' : '🎤'}
+  </button>
+);
+
 const Board = ({ profileName }: { profileName: string }) => {
   const { items, add, remove } = useNovaItems<{ text: string; color: string }>('postit', profileName);
   const [text, setText] = useState('');
   const [color, setColor] = useState(COLORS[0]);
+  const speech = useSpeechInput();
   return (
     <div className="space-y-3">
       <div className="flex gap-2">
         <input className={input} value={text} onChange={e => setText(e.target.value)} placeholder="Scrivi un post-it…"
           onKeyDown={e => { if (e.key === 'Enter' && text.trim()) { add({ text, color }); setText(''); } }} />
+        <MicButton speech={speech} onText={setText} />
         <div className="flex gap-1 items-center">
           {COLORS.map(c => (
             <button key={c} onClick={() => setColor(c)} className={`w-6 h-6 rounded-full border-2 ${color === c ? 'border-foreground' : 'border-transparent'}`} style={{ background: `hsl(var(--${c}))` }} />
@@ -41,6 +61,7 @@ const Board = ({ profileName }: { profileName: string }) => {
         </div>
         <button className={btn} onClick={() => { if (text.trim()) { add({ text, color }); setText(''); } }}>+</button>
       </div>
+      {speech.error && <p className="text-[0.65rem] text-destructive font-mono">{speech.error}</p>}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {items.map((it, i) => (
           <div key={it.id} className="relative rounded-lg p-3 min-h-[110px] shadow-lg border"
@@ -134,6 +155,7 @@ const Pantry = ({ profileName, onAddShopping }: { profileName: string; onAddShop
   const [name, setName] = useState('');
   const [qty, setQty] = useState('1');
   const [expiry, setExpiry] = useState('');
+  const speech = useSpeechInput();
   const today = new Date().toISOString().slice(0, 10);
   const soon = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
   const setQ = (id: string, d: any, q: number) => {
@@ -143,10 +165,12 @@ const Pantry = ({ profileName, onAddShopping }: { profileName: string; onAddShop
     <div className="space-y-3">
       <div className="flex gap-2 flex-wrap">
         <input className={input} value={name} onChange={e => setName(e.target.value)} placeholder="Prodotto" />
+        <MicButton speech={speech} onText={setName} />
         <input className={`${input} max-w-[70px]`} value={qty} onChange={e => setQty(e.target.value)} inputMode="numeric" />
         <input type="date" className={`${input} max-w-[160px]`} value={expiry} onChange={e => setExpiry(e.target.value)} />
         <button className={btn} onClick={() => { if (name.trim()) { add({ name, qty: parseInt(qty) || 1, expiry: expiry || undefined }); setName(''); setQty('1'); setExpiry(''); } }}>+</button>
       </div>
+      {speech.error && <p className="text-[0.65rem] text-destructive font-mono">{speech.error}</p>}
       <p className="text-[0.6rem] font-mono text-muted-foreground">Quando un prodotto arriva a zero viene aggiunto alla lista della spesa.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {items.map(it => {

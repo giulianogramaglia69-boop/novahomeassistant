@@ -147,5 +147,16 @@ export function useChat() {
     }]);
   }, []);
 
-  return { messages, isLoading, sendMessage, clearChat };
+  /** Aggiunge un messaggio dell'assistente senza chiamare l'AI: usato per
+   *  conferme ed errori dei comandi locali (voce, "ricorda che..."). */
+  const pushAssistant = useCallback((content: string) => {
+    setMessages(prev => [...prev, {
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      content,
+      timestamp: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+    }]);
+  }, []);
+
+  return { messages, isLoading, sendMessage, clearChat, pushAssistant };
 }

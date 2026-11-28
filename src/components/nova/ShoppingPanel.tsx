@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ShoppingItem } from '@/hooks/useShoppingList';
+import { useSpeechInput } from '@/hooks/useSpeechInput';
 
 const CATEGORIES = ['Frutta/Verdura', 'Carne/Pesce', 'Latticini', 'Pane/Pasta', 'Bevande', 'Surgelati', 'Igiene', 'Casa', 'Altro'];
 
@@ -15,6 +16,7 @@ const ShoppingPanel = ({ items, onAdd, onToggle, onRemove, onClearDone }: Props)
   const [item, setItem] = useState('');
   const [qty, setQty] = useState('');
   const [cat, setCat] = useState('Altro');
+  const speech = useSpeechInput();
 
   const add = () => {
     if (!item.trim()) return;
@@ -38,9 +40,23 @@ const ShoppingPanel = ({ items, onAdd, onToggle, onRemove, onClearDone }: Props)
         <div className="flex gap-2">
           <input value={item} onChange={e => setItem(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()}
             placeholder="Articolo…" className="flex-1 bg-secondary border border-border rounded-lg px-3 py-2 text-[0.8rem] outline-none focus:border-primary/40" />
+          <button
+            type="button"
+            disabled={!speech.supported}
+            title={speech.supported ? 'Detta con la voce' : 'Riconoscimento vocale non supportato da questo browser'}
+            onClick={() => (speech.listening ? speech.stop() : speech.start(setItem))}
+            className={`shrink-0 rounded-lg px-3 py-2 text-xs font-mono font-bold border active:scale-95 disabled:opacity-40 ${
+              speech.listening
+                ? 'bg-destructive/20 border-destructive/60 text-destructive'
+                : 'bg-primary/15 border-primary/40 text-primary'
+            }`}
+          >
+            {speech.listening ? '🎤 In ascolto…' : '🎤'}
+          </button>
           <input value={qty} onChange={e => setQty(e.target.value)}
             placeholder="Q.tà" className="w-20 bg-secondary border border-border rounded-lg px-2 py-2 text-[0.8rem] outline-none focus:border-primary/40" />
         </div>
+        {speech.error && <p className="text-[0.65rem] text-destructive font-mono">{speech.error}</p>}
         <div className="flex gap-2">
           <select value={cat} onChange={e => setCat(e.target.value)}
             className="flex-1 bg-secondary border border-border rounded-lg px-2 py-2 text-[0.75rem] outline-none">

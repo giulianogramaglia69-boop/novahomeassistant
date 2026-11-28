@@ -18,6 +18,8 @@ interface Props {
   voiceAlwaysOn?: boolean;
   onMirror?: () => void;
   onDesktop?: () => void;
+  nightModeEnabled: boolean;
+  onNightModeToggle: () => void;
 }
 
 const VOICE_LABEL: Record<VoiceState, { text: string; cls: string }> = {
@@ -29,7 +31,7 @@ const VOICE_LABEL: Record<VoiceState, { text: string; cls: string }> = {
   error:      { text: 'ERR',    cls: 'border-destructive/40 bg-destructive/15 text-destructive' },
 };
 
-const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop, profile, notifications, unreadCount, onMarkRead, onClearNotifications, voiceState = 'idle', voiceAlwaysOn, onMirror, onDesktop }: Props) => {
+const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop, profile, notifications, unreadCount, onMarkRead, onClearNotifications, voiceState = 'idle', voiceAlwaysOn, onMirror, onDesktop, nightModeEnabled, onNightModeToggle }: Props) => {
   const toggleFs = () => {
     const d: any = document;
     if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen)?.call(d);
@@ -72,6 +74,17 @@ const NovaHeader = ({ ttsEnabled, ttsSpeaking, onTtsToggle, onTtsStop, profile, 
           <button onClick={toggleFs} title="Schermo intero" className="w-8 h-8 rounded-full flex items-center justify-center text-[0.85rem] border border-border bg-secondary transition-all active:scale-90 hover:border-primary/30">⛶</button>
           {onDesktop && <button onClick={onDesktop} title="Desktop Mode" className="w-8 h-8 rounded-full flex items-center justify-center text-[0.85rem] border border-border bg-secondary transition-all active:scale-90 hover:border-primary/30">🖥️</button>}
           {onMirror && <button onClick={onMirror} title="Modalità specchio" className="w-8 h-8 rounded-full flex items-center justify-center text-[0.85rem] border border-border bg-secondary transition-all active:scale-90 hover:border-primary/30">🪞</button>}
+          <button
+            onClick={onNightModeToggle}
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-[0.85rem] border transition-all active:scale-90 hover:border-primary/30 ${
+              nightModeEnabled
+                ? 'bg-primary/15 border-primary/40 text-primary'
+                : 'border-border bg-secondary'
+            }`}
+            title={nightModeEnabled ? 'Esci dalla modalità notte' : 'Modalità notte'}
+          >
+            🌙
+          </button>
           {/* Notification bell */}
           <button
             onClick={() => setShowNotif(prev => !prev)}
